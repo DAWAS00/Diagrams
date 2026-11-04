@@ -2,6 +2,8 @@
 
 Updated 2026-11-05 after syncing GitHub commit `17c20ea` and running the local Windows checks. **M0 remains incomplete: 3 of 5 tasks done.**
 
+**UI-first scope revision:** added 18 UI tasks, an eight-milestone/57-task tracker, a [full specification](UI-DESIGN-AND-INTEGRATION.md) and [interactive final design](UI-DESIGN.html). These are planned, not implemented. Existing Windows verification remains unchanged.
+
 ## Where we are
 
 | Task | Current status | Evidence / remaining work |
@@ -61,7 +63,11 @@ Linux recorded 31 Rust tests; Windows now passes 30 (29 integration + 1 doc test
 3. Apply the planned light default and text sizing with a dark-theme choice, then review longer labels and smaller windows.
 4. Complete R0-05: update ADR-001 using the full results and decide whether the GUI foundation passes.
 
-### B. M1 — model, commands and storage (starts after R0-05)
+### B. UX — full native presentation before domain implementation
+
+Start UI-01 tokens and UI-02 typography now; complete UI-03–UI-11 surfaces, states, accessible focus paths and notation capability definitions. UI-12 requires these and R0-05. Keep unimplemented application actions disabled; presentation fixtures are clearly labeled.
+
+### C. M1 — model, commands and storage (starts after UI-12)
 All headless: no window needed, so it can be tested fully in this environment.
 1. **R1-01** Typed IDs and document records (classes, members, relations, diagrams, views); invalid geometry is rejected.
 2. **R1-02** Validation: references, ownership, associations, inheritance cycles.
@@ -74,9 +80,9 @@ All headless: no window needed, so it can be tested fully in this environment.
 
 R1-01 → R1-02 → R1-03 → R1-04 is one chain; R1-05/R1-06 can run in parallel with R1-03/R1-04.
 
-### C. After M1
-- **M2** (8 tasks): the full class-editing workflow on the real model — add, connect, edit members, multiple views, delete safely.
-- **M3** (7 tasks): reliability, recovery, SVG export, usability checks and the Windows distribution test for **v0.1**.
+### D. After M1
+- **M2** (13 tasks, including five UI bindings): the full class-editing workflow on the real model — add, connect, edit members, multiple views, delete safely.
+- **M3** (8 tasks, including final UI review): reliability, recovery, SVG export, usability checks and the Windows distribution test for **v0.1**.
 - **M4–M6**: flowchart and use case, specialised editors, then separately scoped proposals.
 
 ## How to keep this page current

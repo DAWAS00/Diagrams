@@ -1,5 +1,7 @@
 # 03 — A simpler GUI
 
+**Detailed design baseline (2026-11-05):** use [UI-DESIGN-AND-INTEGRATION.md](UI-DESIGN-AND-INTEGRATION.md) and [UI-DESIGN.html](UI-DESIGN.html) for the complete UI specification and proposed final design. This file remains the shorter workflow overview; GUI-CONCEPT.html is the earlier exploration.
+
 ## Interaction direction
 
 Build around the current document and selection. Use a compact toolbar instead of exposing unrelated product areas. Keep simple edits inline and detailed fields in a persistent inspector. This is a proposed improvement to validate with users, not a measured result yet.

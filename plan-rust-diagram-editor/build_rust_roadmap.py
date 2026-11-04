@@ -61,9 +61,9 @@ HTML = r'''<!doctype html>
 <h1>Build the dependable editor first.</h1>
 <p>Windows desktop, offline projects, reusable model objects and a simpler diagram workspace. Start with a complete class-modeling workflow; expand notation only after its foundation works.</p>
 <p class="notice" id="state"></p>
-<nav aria-label="Planning documents"><a href="PROGRESS-AND-NEXT-STEPS.md">Progress and next steps</a><a href="RUST-ROADMAP.md">Detailed roadmap</a><a href="RUST-ENGINEERING.md">Rust engineering rules</a><a href="rust-backlog.csv">CSV backlog</a><a href="GUI-CONCEPT.html">Workspace concept</a><a href="comparison/COMPARISON.html">Visual Paradigm comparison</a></nav>
+<nav aria-label="Planning documents"><a href="PROGRESS-AND-NEXT-STEPS.md">Progress and next steps</a><a href="RUST-ROADMAP.md">Detailed roadmap</a><a href="RUST-ENGINEERING.md">Rust engineering rules</a><a href="rust-backlog.csv">CSV backlog</a><a href="UI-DESIGN.html">Final UI preview</a><a href="UI-DESIGN-AND-INTEGRATION.md">UI specification</a><a href="comparison/COMPARISON.html">Visual Paradigm comparison</a></nav>
 <div class="metrics" id="metrics"></div>
-<h2>Seven milestones, gated by evidence</h2><p class="muted">M0 → M1 → M2 → M3 (v0.1) → M4 → M5 → M6. These are dependency stages, not time estimates. M6 contains proposals requiring separate scope decisions.</p>
+<h2>Milestones, gated by evidence</h2><p class="muted">M0 → UX design → M1 → M2 → M3 (v0.1) → M4 → M5 → M6. These are dependency stages, not time estimates. M6 contains proposals requiring separate scope decisions.</p>
 <section class="stages" id="stages" aria-label="Milestones"></section>
 <h2 id="backlog">Implementation backlog</h2>
 <div class="filters"><label>Search tasks<input id="search" type="search" placeholder="Try undo, SQLite, Arabic…"></label><label>Milestone<select id="milestone"><option value="">All milestones</option></select></label><label>Status<select id="status"><option value="">All statuses</option></select></label><button class="reset" id="reset" type="button">Reset filters</button></div>
@@ -74,7 +74,7 @@ HTML = r'''<!doctype html>
 'use strict';
 const data=JSON.parse(document.getElementById('roadmap-data').textContent);
 const $=id=>document.getElementById(id), statusOf=t=>t.status||data.default_task_status;
-const label=s=>s.replaceAll('_',' '), firstRelease=new Set(['M0','M1','M2','M3']);
+const label=s=>s.replaceAll('_',' '), firstRelease=new Set(['M0','UX','M1','M2','M3']);
 const element=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
 const done=data.tasks.filter(t=>statusOf(t)==='done').length;
 $('state').textContent=`Application state: ${label(data.application_state)}. ${done} of ${data.tasks.length} tasks complete. Plan dated ${data.date}. This dashboard is a planning artifact; it is not the Rust application.`;

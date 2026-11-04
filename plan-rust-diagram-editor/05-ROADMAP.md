@@ -19,6 +19,10 @@ Tasks:
 
 Exit gate: native debug/release build launches repeatedly on this computer; tested text/DPI/keyboard behavior is acceptable; no renderer startup failures are concealed. Record limitations. If the framework cannot meet essential text/accessibility needs with bounded work, revisit ADR-001 before writing the editor around it.
 
+## UX — UI design and native presentation
+
+New priority: complete UI-01–UI-12 before M1, with design exploration starting alongside remaining M0 checks. Use [the complete specification](UI-DESIGN-AND-INTEGRATION.md) and [interactive design](UI-DESIGN.html). UI-13–UI-17 connect the presentation to real behavior in M2; UI-18 is part of M3 release review. All new tasks are pending.
+
 ## M1 — Trustworthy model and persistence
 
 - Typed IDs, class/member/relation model, diagrams and separate views.
