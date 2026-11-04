@@ -1,0 +1,800 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"evidence_id\":\"ev_3c3f507d4c5134d87ca76e26fc08d3a92976bf94e72430409bbb3b72867d03dc\",\"subject\":{\"name\":\"ui-research.vpp\",\"digest\":{\"sha256\":\"ae712cfcc32bce8b1891be3b2d5807494ce61d585bbfad498417db14c697843a\"},\"local_path\":\"D:\\\\REA visual\\\\research\\\\visual-paradigm\\\\ce-evidence\\\\ui-research.vpp\",\"format\":\"file\",\"architecture\":null},\"provider\":{\"id\":\"sqlite\",\"name\":\"REA SQLite database inspector\",\"version\":\"SQLite 3.53.0\"},\"analysis_profile\":null,\"predicate_type\":\"rea.analysis\",\"operation\":\"inspect_sqlite_database\",\"parameters\":{\"path\":\"D:\\\\REA visual\\\\research\\\\visual-paradigm\\\\ce-evidence\\\\ui-research.vpp\",\"table\":\"DIAGRAM\",\"columns\":[\"ID\",\"DIAGRAM_TYPE\",\"NAME\"],\"schema_scope\":\"database\",\"row_limit\":20},\"raw_result\":null,\"normalized_result\":{\"artifact\":{\"path\":\"D:\\\\REA visual\\\\research\\\\visual-paradigm\\\\ce-evidence\\\\ui-research.vpp\",\"sha256\":\"ae712cfcc32bce8b1891be3b2d5807494ce61d585bbfad498417db14c697843a\",\"bytes\":696320},\"wal\":null,\"engine\":{\"name\":\"SQLite\",\"version\":\"3.53.0\"},\"database_encoding\":\"UTF-8\",\"schema\":{\"scope\":\"database\",\"completeness\":\"complete\",\"tables\":[{\"name\":\"PROJECT_INFO\",\"sql\":\"CREATE TABLE PROJECT_INFO (ID char(16) NOT NULL, NAME varchar(255) NOT NULL, DB_VERSION char(8) NOT NULL, PROJECT_VERSION char(8) NOT NULL, PROJECT_PATCH_NO integer(10) NOT NULL, PROJECT_BUILD varchar(12) NOT NULL, TEAMWORK boolean NOT NULL, DEFINITION blob NOT NULL, ROOT_MODEL_ELEMENTS_DEFINITION text, DIAGRAMS_DEFINITION text)\",\"root_page\":2,\"kind\":\"table\",\"without_rowid\":false,\"strict\":false,\"column_count\":10,\"columns_completeness\":\"complete\",\"columns\":[{\"cid\":0,\"name\":\"ID\",\"declared_type\":\"char(16)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":1,\"name\":\"NAME\",\"declared_type\":\"varchar(255)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":2,\"name\":\"DB_VERSION\",\"declared_type\":\"char(8)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":3,\"name\":\"PROJECT_VERSION\",\"declared_type\":\"char(8)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":4,\"name\":\"PROJECT_PATCH_NO\",\"declared_type\":\"integer(10)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":5,\"name\":\"PROJECT_BUILD\",\"declared_type\":\"varchar(12)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":6,\"name\":\"TEAMWORK\",\"declared_type\":\"boolean\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":7,\"name\":\"DEFINITION\",\"declared_type\":\"BLOB\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":8,\"name\":\"ROOT_MODEL_ELEMENTS_DEFINITION\",\"declared_type\":\"TEXT\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":9,\"name\":\"DIAGRAMS_DEFINITION\",\"declared_type\":\"TEXT\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0}]},{\"name\":\"MODEL_ELEMENT\",\"sql\":\"CREATE TABLE MODEL_ELEMENT (ID char(16) NOT NULL, USER_ID varchar(64), USER_ID_PARENT char(16), MODEL_TYPE varchar(64) NOT NULL, PARENT_ID char(16), NAME text, DEFINITION blob NOT NULL, MIRROR_SOURCE text, AUTHOR varchar(256), CREATE_AT integer(10), LAST_MOD_AT integer(10), PRIMARY KEY (ID), FOREIGN KEY(PARENT_ID) REFERENCES MODEL_ELEMENT(ID))\",\"root_page\":3,\"kind\":\"table\",\"without_rowid\":false,\"strict\":false,\"column_count\":11,\"columns_completeness\":\"complete\",\"columns\":[{\"cid\":0,\"name\":\"ID\",\"declared_type\":\"char(16)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":1,\"hidden\":0},{\"cid\":1,\"name\":\"USER_ID\",\"declared_type\":\"varchar(64)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":2,\"name\":\"USER_ID_PARENT\",\"declared_type\":\"char(16)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":3,\"name\":\"MODEL_TYPE\",\"declared_type\":\"varchar(64)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":4,\"name\":\"PARENT_ID\",\"declared_type\":\"char(16)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":5,\"name\":\"NAME\",\"declared_type\":\"TEXT\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":6,\"name\":\"DEFINITION\",\"declared_type\":\"BLOB\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":7,\"name\":\"MIRROR_SOURCE\",\"declared_type\":\"TEXT\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":8,\"name\":\"AUTHOR\",\"declared_type\":\"varchar(256)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":9,\"name\":\"CREATE_AT\",\"declared_type\":\"integer(10)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":10,\"name\":\"LAST_MOD_AT\",\"declared_type\":\"integer(10)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0}]},{\"name\":\"DIAGRAM\",\"sql\":\"CREATE TABLE DIAGRAM (ID char(16) NOT NULL, DIAGRAM_TYPE varchar(64) NOT NULL, PARENT_MODEL_ID char(16), NAME text NOT NULL, DEFINITION blob NOT NULL, PRIMARY KEY (ID), FOREIGN KEY(PARENT_MODEL_ID) REFERENCES MODEL_ELEMENT(ID))\",\"root_page\":5,\"kind\":\"table\",\"without_rowid\":false,\"strict\":false,\"column_count\":5,\"columns_completeness\":\"complete\",\"columns\":[{\"cid\":0,\"name\":\"ID\",\"declared_type\":\"char(16)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":1,\"hidden\":0},{\"cid\":1,\"name\":\"DIAGRAM_TYPE\",\"declared_type\":\"varchar(64)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":2,\"name\":\"PARENT_MODEL_ID\",\"declared_type\":\"char(16)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":3,\"name\":\"NAME\",\"declared_type\":\"TEXT\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":4,\"name\":\"DEFINITION\",\"declared_type\":\"BLOB\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0}]},{\"name\":\"DIAGRAM_ELEMENT\",\"sql\":\"CREATE TABLE DIAGRAM_ELEMENT (ID char(16) NOT NULL, SHAPE_TYPE varchar(64) NOT NULL, DIAGRAM_ID char(16) NOT NULL, MODEL_ELEMENT_ID char(16), COMPOSITE_MODEL_ELEMENT_ADDRESS text, REF_MODEL_ELEMENT_ADDRESS text, PARENT_ID char(16), DEFINITION blob NOT NULL, PRIMARY KEY (ID), FOREIGN KEY(DIAGRAM_ID) REFERENCES DIAGRAM(ID), FOREIGN KEY(MODEL_ELEMENT_ID) REFERENCES MODEL_ELEMENT(ID), FOREIGN KEY(PARENT_ID) REFERENCES DIAGRAM_ELEMENT(ID))\",\"root_page\":7,\"kind\":\"table\",\"without_rowid\":false,\"strict\":false,\"column_count\":8,\"columns_completeness\":\"complete\",\"columns\":[{\"cid\":0,\"name\":\"ID\",\"declared_type\":\"char(16)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":1,\"hidden\":0},{\"cid\":1,\"name\":\"SHAPE_TYPE\",\"declared_type\":\"varchar(64)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":2,\"name\":\"DIAGRAM_ID\",\"declared_type\":\"char(16)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":3,\"name\":\"MODEL_ELEMENT_ID\",\"declared_type\":\"char(16)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":4,\"name\":\"COMPOSITE_MODEL_ELEMENT_ADDRESS\",\"declared_type\":\"TEXT\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":5,\"name\":\"REF_MODEL_ELEMENT_ADDRESS\",\"declared_type\":\"TEXT\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":6,\"name\":\"PARENT_ID\",\"declared_type\":\"char(16)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":7,\"name\":\"DEFINITION\",\"declared_type\":\"BLOB\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0}]},{\"name\":\"PROJECT_FILE\",\"sql\":\"CREATE TABLE PROJECT_FILE (PATH text NOT NULL, CONTENT blob, STATUS char(1), PRIMARY KEY (PATH))\",\"root_page\":9,\"kind\":\"table\",\"without_rowid\":false,\"strict\":false,\"column_count\":3,\"columns_completeness\":\"complete\",\"columns\":[{\"cid\":0,\"name\":\"PATH\",\"declared_type\":\"TEXT\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":1,\"hidden\":0},{\"cid\":1,\"name\":\"CONTENT\",\"declared_type\":\"BLOB\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":2,\"name\":\"STATUS\",\"declared_type\":\"char(1)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0}]},{\"name\":\"TW_HISTORY\",\"sql\":\"CREATE TABLE TW_HISTORY (HISTORY_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, KIND char(1) NOT NULL, ACTION char(1) NOT NULL, ID char(16) NOT NULL, NEW_PARENT_ID char(16))\",\"root_page\":11,\"kind\":\"table\",\"without_rowid\":false,\"strict\":false,\"column_count\":5,\"columns_completeness\":\"complete\",\"columns\":[{\"cid\":0,\"name\":\"HISTORY_ID\",\"declared_type\":\"INTEGER\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":1,\"hidden\":0},{\"cid\":1,\"name\":\"KIND\",\"declared_type\":\"char(1)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":2,\"name\":\"ACTION\",\"declared_type\":\"char(1)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":3,\"name\":\"ID\",\"declared_type\":\"char(16)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":4,\"name\":\"NEW_PARENT_ID\",\"declared_type\":\"char(16)\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0}]},{\"name\":\"sqlite_sequence\",\"sql\":\"CREATE TABLE sqlite_sequence(name,seq)\",\"root_page\":12,\"kind\":\"table\",\"without_rowid\":false,\"strict\":false,\"column_count\":2,\"columns_completeness\":\"complete\",\"columns\":[{\"cid\":0,\"name\":\"name\",\"declared_type\":\"\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":1,\"name\":\"seq\",\"declared_type\":\"\",\"not_null\":false,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0}]},{\"name\":\"USER_ID_FORMAT\",\"sql\":\"CREATE TABLE USER_ID_FORMAT (ID char(16) NOT NULL, MODEL_TYPE varchar(64) NOT NULL, PREFIX varchar(64) NOT NULL, SUFFIX varchar(64) NOT NULL, DIGITS INTEGER NOT NULL, GUID boolean NOT NULL, LAST_NUMERIC_VALUE INTEGER NOT NULL, STATUS char(1) NOT NULL, PRIMARY KEY (ID))\",\"root_page\":13,\"kind\":\"table\",\"without_rowid\":false,\"strict\":false,\"column_count\":8,\"columns_completeness\":\"complete\",\"columns\":[{\"cid\":0,\"name\":\"ID\",\"declared_type\":\"char(16)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":1,\"hidden\":0},{\"cid\":1,\"name\":\"MODEL_TYPE\",\"declared_type\":\"varchar(64)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":2,\"name\":\"PREFIX\",\"declared_type\":\"varchar(64)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":3,\"name\":\"SUFFIX\",\"declared_type\":\"varchar(64)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":4,\"name\":\"DIGITS\",\"declared_type\":\"INTEGER\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":5,\"name\":\"GUID\",\"declared_type\":\"boolean\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":6,\"name\":\"LAST_NUMERIC_VALUE\",\"declared_type\":\"INTEGER\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0},{\"cid\":7,\"name\":\"STATUS\",\"declared_type\":\"char(1)\",\"not_null\":true,\"default_sql\":null,\"primary_key_position\":0,\"hidden\":0}]}],\"indexes\":[{\"name\":\"sqlite_autoindex_MODEL_ELEMENT_1\",\"table\":\"MODEL_ELEMENT\",\"sql\":null,\"root_page\":4},{\"name\":\"sqlite_autoindex_DIAGRAM_1\",\"table\":\"DIAGRAM\",\"sql\":null,\"root_page\":6},{\"name\":\"sqlite_autoindex_DIAGRAM_ELEMENT_1\",\"table\":\"DIAGRAM_ELEMENT\",\"sql\":null,\"root_page\":8},{\"name\":\"sqlite_autoindex_PROJECT_FILE_1\",\"table\":\"PROJECT_FILE\",\"sql\":null,\"root_page\":10},{\"name\":\"sqlite_autoindex_USER_ID_FORMAT_1\",\"table\":\"USER_ID_FORMAT\",\"sql\":null,\"root_page\":14},{\"name\":\"MODEL_ELEMENT_MODEL_TYPE\",\"table\":\"MODEL_ELEMENT\",\"sql\":\"CREATE INDEX MODEL_ELEMENT_MODEL_TYPE ON MODEL_ELEMENT (MODEL_TYPE)\",\"root_page\":15},{\"name\":\"MODEL_ELEMENT_PARENT_ID\",\"table\":\"MODEL_ELEMENT\",\"sql\":\"CREATE INDEX MODEL_ELEMENT_PARENT_ID ON MODEL_ELEMENT (PARENT_ID)\",\"root_page\":16},{\"name\":\"DIAGRAM_DIAGRAM_TYPE\",\"table\":\"DIAGRAM\",\"sql\":\"CREATE INDEX DIAGRAM_DIAGRAM_TYPE ON DIAGRAM (DIAGRAM_TYPE)\",\"root_page\":17},{\"name\":\"DIAGRAM_PARENT_MODEL_ID\",\"table\":\"DIAGRAM\",\"sql\":\"CREATE INDEX DIAGRAM_PARENT_MODEL_ID ON DIAGRAM (PARENT_MODEL_ID)\",\"root_page\":18},{\"name\":\"DIAGRAM_ELEMENT_DIAGRAM_ID\",\"table\":\"DIAGRAM_ELEMENT\",\"sql\":\"CREATE INDEX DIAGRAM_ELEMENT_DIAGRAM_ID ON DIAGRAM_ELEMENT (DIAGRAM_ID)\",\"root_page\":19},{\"name\":\"DIAGRAM_ELEMENT_PARENT_ID\",\"table\":\"DIAGRAM_ELEMENT\",\"sql\":\"CREATE INDEX DIAGRAM_ELEMENT_PARENT_ID ON DIAGRAM_ELEMENT (PARENT_ID)\",\"root_page\":20},{\"name\":\"USER_ID_FORMAT_MODEL_TYPE\",\"table\":\"USER_ID_FORMAT\",\"sql\":\"CREATE INDEX USER_ID_FORMAT_MODEL_TYPE ON USER_ID_FORMAT (MODEL_TYPE)\",\"root_page\":21}],\"views\":[],\"triggers\":[]},\"rows\":{\"table\":\"DIAGRAM\",\"columns\":[\"ID\",\"DIAGRAM_TYPE\",\"NAME\"],\"values\":[[{\"type\":\"text\",\"value\":\"sXvgFYWFYHxgAQXs\",\"bytes_hex\":\"73587667465957465948786741515873\",\"encoding\":\"UTF-8\"},{\"type\":\"text\",\"value\":\"ClassDiagram\",\"bytes_hex\":\"436c6173734469616772616d\",\"encoding\":\"UTF-8\"},{\"type\":\"text\",\"value\":\"REA Class Study\",\"bytes_hex\":\"52454120436c617373205374756479\",\"encoding\":\"UTF-8\"}],[{\"type\":\"text\",\"value\":\"jYrQFYWFYHxgAQYk\",\"bytes_hex\":\"6a59725146595746594878674151596b\",\"encoding\":\"UTF-8\"},{\"type\":\"text\",\"value\":\"InteractionDiagram\",\"bytes_hex\":\"496e746572616374696f6e4469616772616d\",\"encoding\":\"UTF-8\"},{\"type\":\"text\",\"value\":\"Sequence Diagram1\",\"bytes_hex\":\"53657175656e6365204469616772616d31\",\"encoding\":\"UTF-8\"}],[{\"type\":\"text\",\"value\":\"oxswFYWFYHxgAQZe\",\"bytes_hex\":\"6f787377465957465948786741515a65\",\"encoding\":\"UTF-8\"},{\"type\":\"text\",\"value\":\"ERDiagram\",\"bytes_hex\":\"45524469616772616d\",\"encoding\":\"UTF-8\"},{\"type\":\"text\",\"value\":\"Entity Relationship Diagram1\",\"bytes_hex\":\"456e746974792052656c6174696f6e73686970204469616772616d31\",\"encoding\":\"UTF-8\"}]],\"row_limit\":20,\"returned_rows\":3,\"truncated\":false,\"order\":\"unspecified\"},\"limitations\":[\"Inspects an offline stable file set. Filesystem identity checks detect observed acquisition changes; they do not establish an atomic snapshot of an actively changing database. Supply an application-created backup or quiescent database/WAL pair.\",\"The source database and WAL are never opened by SQLite or modified. A private copy may acquire its own WAL-index sidecar and is removed after inspection.\",\"SQLite reports current schema and selected committed rows from its valid database/WAL state. Deleted records, uncommitted or invalid WAL tails, encrypted databases, forensic recovery, and full integrity verification are outside this profile.\",\"Stored CREATE statements preserve index/view/trigger definitions. Views, triggers, and virtual/shadow table rows are not executed; virtual-table column expansion is unsupported.\",\"Selected rows have unspecified order and are a bounded sample. Text display may replace invalid sequences; bytes_hex and encoding preserve SQLite's text byte representation, not original on-disk page offsets.\",\"Resource boundaries: at most two concurrent inspections per provider; combined input 256 MiB per inspection, complete worker JSON 16 MiB, native SQLite value/record and SQL statement lengths 16 MiB, owned-worker JavaScript heap 256 MiB and supervised deadline 30 seconds. These are distinct from total resident memory; an overall native SQLite heap cap is not claimed. Failures return no partial success.\"]},\"confidence\":\"observed\",\"authority\":\"shipped-artifact\",\"environment\":null,\"limitations\":[\"Inspects an offline stable file set. Filesystem identity checks detect observed acquisition changes; they do not establish an atomic snapshot of an actively changing database. Supply an application-created backup or quiescent database/WAL pair.\",\"The source database and WAL are never opened by SQLite or modified. A private copy may acquire its own WAL-index sidecar and is removed after inspection.\",\"SQLite reports current schema and selected committed rows from its valid database/WAL state. Deleted records, uncommitted or invalid WAL tails, encrypted databases, forensic recovery, and full integrity verification are outside this profile.\",\"Stored CREATE statements preserve index/view/trigger definitions. Views, triggers, and virtual/shadow table rows are not executed; virtual-table column expansion is unsupported.\",\"Selected rows have unspecified order and are a bounded sample. Text display may replace invalid sequences; bytes_hex and encoding preserve SQLite's text byte representation, not original on-disk page offsets.\",\"Resource boundaries: at most two concurrent inspections per provider; combined input 256 MiB per inspection, complete worker JSON 16 MiB, native SQLite value/record and SQL statement lengths 16 MiB, owned-worker JavaScript heap 256 MiB and supervised deadline 30 seconds. These are distinct from total resident memory; an overall native SQLite heap cap is not claimed. Failures return no partial success.\"],\"relationship_coverage\":null,\"locations\":[{\"kind\":\"artifact-path\",\"path\":\"D:\\\\REA visual\\\\research\\\\visual-paradigm\\\\ce-evidence\\\\ui-research.vpp\"}],\"evidence_links\":[]}"
+    }
+  ],
+  "structuredContent": {
+    "evidence_id": "ev_3c3f507d4c5134d87ca76e26fc08d3a92976bf94e72430409bbb3b72867d03dc",
+    "subject": {
+      "name": "ui-research.vpp",
+      "digest": {
+        "sha256": "ae712cfcc32bce8b1891be3b2d5807494ce61d585bbfad498417db14c697843a"
+      },
+      "local_path": "D:\\REA visual\\research\\visual-paradigm\\ce-evidence\\ui-research.vpp",
+      "format": "file",
+      "architecture": null
+    },
+    "provider": {
+      "id": "sqlite",
+      "name": "REA SQLite database inspector",
+      "version": "SQLite 3.53.0"
+    },
+    "analysis_profile": null,
+    "predicate_type": "rea.analysis",
+    "operation": "inspect_sqlite_database",
+    "parameters": {
+      "path": "D:\\REA visual\\research\\visual-paradigm\\ce-evidence\\ui-research.vpp",
+      "table": "DIAGRAM",
+      "columns": [
+        "ID",
+        "DIAGRAM_TYPE",
+        "NAME"
+      ],
+      "schema_scope": "database",
+      "row_limit": 20
+    },
+    "raw_result": null,
+    "normalized_result": {
+      "artifact": {
+        "path": "D:\\REA visual\\research\\visual-paradigm\\ce-evidence\\ui-research.vpp",
+        "sha256": "ae712cfcc32bce8b1891be3b2d5807494ce61d585bbfad498417db14c697843a",
+        "bytes": 696320
+      },
+      "wal": null,
+      "engine": {
+        "name": "SQLite",
+        "version": "3.53.0"
+      },
+      "database_encoding": "UTF-8",
+      "schema": {
+        "scope": "database",
+        "completeness": "complete",
+        "tables": [
+          {
+            "name": "PROJECT_INFO",
+            "sql": "CREATE TABLE PROJECT_INFO (ID char(16) NOT NULL, NAME varchar(255) NOT NULL, DB_VERSION char(8) NOT NULL, PROJECT_VERSION char(8) NOT NULL, PROJECT_PATCH_NO integer(10) NOT NULL, PROJECT_BUILD varchar(12) NOT NULL, TEAMWORK boolean NOT NULL, DEFINITION blob NOT NULL, ROOT_MODEL_ELEMENTS_DEFINITION text, DIAGRAMS_DEFINITION text)",
+            "root_page": 2,
+            "kind": "table",
+            "without_rowid": false,
+            "strict": false,
+            "column_count": 10,
+            "columns_completeness": "complete",
+            "columns": [
+              {
+                "cid": 0,
+                "name": "ID",
+                "declared_type": "char(16)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 1,
+                "name": "NAME",
+                "declared_type": "varchar(255)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 2,
+                "name": "DB_VERSION",
+                "declared_type": "char(8)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 3,
+                "name": "PROJECT_VERSION",
+                "declared_type": "char(8)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 4,
+                "name": "PROJECT_PATCH_NO",
+                "declared_type": "integer(10)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 5,
+                "name": "PROJECT_BUILD",
+                "declared_type": "varchar(12)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 6,
+                "name": "TEAMWORK",
+                "declared_type": "boolean",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 7,
+                "name": "DEFINITION",
+                "declared_type": "BLOB",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 8,
+                "name": "ROOT_MODEL_ELEMENTS_DEFINITION",
+                "declared_type": "TEXT",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 9,
+                "name": "DIAGRAMS_DEFINITION",
+                "declared_type": "TEXT",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              }
+            ]
+          },
+          {
+            "name": "MODEL_ELEMENT",
+            "sql": "CREATE TABLE MODEL_ELEMENT (ID char(16) NOT NULL, USER_ID varchar(64), USER_ID_PARENT char(16), MODEL_TYPE varchar(64) NOT NULL, PARENT_ID char(16), NAME text, DEFINITION blob NOT NULL, MIRROR_SOURCE text, AUTHOR varchar(256), CREATE_AT integer(10), LAST_MOD_AT integer(10), PRIMARY KEY (ID), FOREIGN KEY(PARENT_ID) REFERENCES MODEL_ELEMENT(ID))",
+            "root_page": 3,
+            "kind": "table",
+            "without_rowid": false,
+            "strict": false,
+            "column_count": 11,
+            "columns_completeness": "complete",
+            "columns": [
+              {
+                "cid": 0,
+                "name": "ID",
+                "declared_type": "char(16)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 1,
+                "hidden": 0
+              },
+              {
+                "cid": 1,
+                "name": "USER_ID",
+                "declared_type": "varchar(64)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 2,
+                "name": "USER_ID_PARENT",
+                "declared_type": "char(16)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 3,
+                "name": "MODEL_TYPE",
+                "declared_type": "varchar(64)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 4,
+                "name": "PARENT_ID",
+                "declared_type": "char(16)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 5,
+                "name": "NAME",
+                "declared_type": "TEXT",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 6,
+                "name": "DEFINITION",
+                "declared_type": "BLOB",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 7,
+                "name": "MIRROR_SOURCE",
+                "declared_type": "TEXT",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 8,
+                "name": "AUTHOR",
+                "declared_type": "varchar(256)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 9,
+                "name": "CREATE_AT",
+                "declared_type": "integer(10)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 10,
+                "name": "LAST_MOD_AT",
+                "declared_type": "integer(10)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              }
+            ]
+          },
+          {
+            "name": "DIAGRAM",
+            "sql": "CREATE TABLE DIAGRAM (ID char(16) NOT NULL, DIAGRAM_TYPE varchar(64) NOT NULL, PARENT_MODEL_ID char(16), NAME text NOT NULL, DEFINITION blob NOT NULL, PRIMARY KEY (ID), FOREIGN KEY(PARENT_MODEL_ID) REFERENCES MODEL_ELEMENT(ID))",
+            "root_page": 5,
+            "kind": "table",
+            "without_rowid": false,
+            "strict": false,
+            "column_count": 5,
+            "columns_completeness": "complete",
+            "columns": [
+              {
+                "cid": 0,
+                "name": "ID",
+                "declared_type": "char(16)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 1,
+                "hidden": 0
+              },
+              {
+                "cid": 1,
+                "name": "DIAGRAM_TYPE",
+                "declared_type": "varchar(64)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 2,
+                "name": "PARENT_MODEL_ID",
+                "declared_type": "char(16)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 3,
+                "name": "NAME",
+                "declared_type": "TEXT",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 4,
+                "name": "DEFINITION",
+                "declared_type": "BLOB",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              }
+            ]
+          },
+          {
+            "name": "DIAGRAM_ELEMENT",
+            "sql": "CREATE TABLE DIAGRAM_ELEMENT (ID char(16) NOT NULL, SHAPE_TYPE varchar(64) NOT NULL, DIAGRAM_ID char(16) NOT NULL, MODEL_ELEMENT_ID char(16), COMPOSITE_MODEL_ELEMENT_ADDRESS text, REF_MODEL_ELEMENT_ADDRESS text, PARENT_ID char(16), DEFINITION blob NOT NULL, PRIMARY KEY (ID), FOREIGN KEY(DIAGRAM_ID) REFERENCES DIAGRAM(ID), FOREIGN KEY(MODEL_ELEMENT_ID) REFERENCES MODEL_ELEMENT(ID), FOREIGN KEY(PARENT_ID) REFERENCES DIAGRAM_ELEMENT(ID))",
+            "root_page": 7,
+            "kind": "table",
+            "without_rowid": false,
+            "strict": false,
+            "column_count": 8,
+            "columns_completeness": "complete",
+            "columns": [
+              {
+                "cid": 0,
+                "name": "ID",
+                "declared_type": "char(16)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 1,
+                "hidden": 0
+              },
+              {
+                "cid": 1,
+                "name": "SHAPE_TYPE",
+                "declared_type": "varchar(64)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 2,
+                "name": "DIAGRAM_ID",
+                "declared_type": "char(16)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 3,
+                "name": "MODEL_ELEMENT_ID",
+                "declared_type": "char(16)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 4,
+                "name": "COMPOSITE_MODEL_ELEMENT_ADDRESS",
+                "declared_type": "TEXT",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 5,
+                "name": "REF_MODEL_ELEMENT_ADDRESS",
+                "declared_type": "TEXT",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 6,
+                "name": "PARENT_ID",
+                "declared_type": "char(16)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 7,
+                "name": "DEFINITION",
+                "declared_type": "BLOB",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              }
+            ]
+          },
+          {
+            "name": "PROJECT_FILE",
+            "sql": "CREATE TABLE PROJECT_FILE (PATH text NOT NULL, CONTENT blob, STATUS char(1), PRIMARY KEY (PATH))",
+            "root_page": 9,
+            "kind": "table",
+            "without_rowid": false,
+            "strict": false,
+            "column_count": 3,
+            "columns_completeness": "complete",
+            "columns": [
+              {
+                "cid": 0,
+                "name": "PATH",
+                "declared_type": "TEXT",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 1,
+                "hidden": 0
+              },
+              {
+                "cid": 1,
+                "name": "CONTENT",
+                "declared_type": "BLOB",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 2,
+                "name": "STATUS",
+                "declared_type": "char(1)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              }
+            ]
+          },
+          {
+            "name": "TW_HISTORY",
+            "sql": "CREATE TABLE TW_HISTORY (HISTORY_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, KIND char(1) NOT NULL, ACTION char(1) NOT NULL, ID char(16) NOT NULL, NEW_PARENT_ID char(16))",
+            "root_page": 11,
+            "kind": "table",
+            "without_rowid": false,
+            "strict": false,
+            "column_count": 5,
+            "columns_completeness": "complete",
+            "columns": [
+              {
+                "cid": 0,
+                "name": "HISTORY_ID",
+                "declared_type": "INTEGER",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 1,
+                "hidden": 0
+              },
+              {
+                "cid": 1,
+                "name": "KIND",
+                "declared_type": "char(1)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 2,
+                "name": "ACTION",
+                "declared_type": "char(1)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 3,
+                "name": "ID",
+                "declared_type": "char(16)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 4,
+                "name": "NEW_PARENT_ID",
+                "declared_type": "char(16)",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              }
+            ]
+          },
+          {
+            "name": "sqlite_sequence",
+            "sql": "CREATE TABLE sqlite_sequence(name,seq)",
+            "root_page": 12,
+            "kind": "table",
+            "without_rowid": false,
+            "strict": false,
+            "column_count": 2,
+            "columns_completeness": "complete",
+            "columns": [
+              {
+                "cid": 0,
+                "name": "name",
+                "declared_type": "",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 1,
+                "name": "seq",
+                "declared_type": "",
+                "not_null": false,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              }
+            ]
+          },
+          {
+            "name": "USER_ID_FORMAT",
+            "sql": "CREATE TABLE USER_ID_FORMAT (ID char(16) NOT NULL, MODEL_TYPE varchar(64) NOT NULL, PREFIX varchar(64) NOT NULL, SUFFIX varchar(64) NOT NULL, DIGITS INTEGER NOT NULL, GUID boolean NOT NULL, LAST_NUMERIC_VALUE INTEGER NOT NULL, STATUS char(1) NOT NULL, PRIMARY KEY (ID))",
+            "root_page": 13,
+            "kind": "table",
+            "without_rowid": false,
+            "strict": false,
+            "column_count": 8,
+            "columns_completeness": "complete",
+            "columns": [
+              {
+                "cid": 0,
+                "name": "ID",
+                "declared_type": "char(16)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 1,
+                "hidden": 0
+              },
+              {
+                "cid": 1,
+                "name": "MODEL_TYPE",
+                "declared_type": "varchar(64)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 2,
+                "name": "PREFIX",
+                "declared_type": "varchar(64)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 3,
+                "name": "SUFFIX",
+                "declared_type": "varchar(64)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 4,
+                "name": "DIGITS",
+                "declared_type": "INTEGER",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 5,
+                "name": "GUID",
+                "declared_type": "boolean",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 6,
+                "name": "LAST_NUMERIC_VALUE",
+                "declared_type": "INTEGER",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              },
+              {
+                "cid": 7,
+                "name": "STATUS",
+                "declared_type": "char(1)",
+                "not_null": true,
+                "default_sql": null,
+                "primary_key_position": 0,
+                "hidden": 0
+              }
+            ]
+          }
+        ],
+        "indexes": [
+          {
+            "name": "sqlite_autoindex_MODEL_ELEMENT_1",
+            "table": "MODEL_ELEMENT",
+            "sql": null,
+            "root_page": 4
+          },
+          {
+            "name": "sqlite_autoindex_DIAGRAM_1",
+            "table": "DIAGRAM",
+            "sql": null,
+            "root_page": 6
+          },
+          {
+            "name": "sqlite_autoindex_DIAGRAM_ELEMENT_1",
+            "table": "DIAGRAM_ELEMENT",
+            "sql": null,
+            "root_page": 8
+          },
+          {
+            "name": "sqlite_autoindex_PROJECT_FILE_1",
+            "table": "PROJECT_FILE",
+            "sql": null,
+            "root_page": 10
+          },
+          {
+            "name": "sqlite_autoindex_USER_ID_FORMAT_1",
+            "table": "USER_ID_FORMAT",
+            "sql": null,
+            "root_page": 14
+          },
+          {
+            "name": "MODEL_ELEMENT_MODEL_TYPE",
+            "table": "MODEL_ELEMENT",
+            "sql": "CREATE INDEX MODEL_ELEMENT_MODEL_TYPE ON MODEL_ELEMENT (MODEL_TYPE)",
+            "root_page": 15
+          },
+          {
+            "name": "MODEL_ELEMENT_PARENT_ID",
+            "table": "MODEL_ELEMENT",
+            "sql": "CREATE INDEX MODEL_ELEMENT_PARENT_ID ON MODEL_ELEMENT (PARENT_ID)",
+            "root_page": 16
+          },
+          {
+            "name": "DIAGRAM_DIAGRAM_TYPE",
+            "table": "DIAGRAM",
+            "sql": "CREATE INDEX DIAGRAM_DIAGRAM_TYPE ON DIAGRAM (DIAGRAM_TYPE)",
+            "root_page": 17
+          },
+          {
+            "name": "DIAGRAM_PARENT_MODEL_ID",
+            "table": "DIAGRAM",
+            "sql": "CREATE INDEX DIAGRAM_PARENT_MODEL_ID ON DIAGRAM (PARENT_MODEL_ID)",
+            "root_page": 18
+          },
+          {
+            "name": "DIAGRAM_ELEMENT_DIAGRAM_ID",
+            "table": "DIAGRAM_ELEMENT",
+            "sql": "CREATE INDEX DIAGRAM_ELEMENT_DIAGRAM_ID ON DIAGRAM_ELEMENT (DIAGRAM_ID)",
+            "root_page": 19
+          },
+          {
+            "name": "DIAGRAM_ELEMENT_PARENT_ID",
+            "table": "DIAGRAM_ELEMENT",
+            "sql": "CREATE INDEX DIAGRAM_ELEMENT_PARENT_ID ON DIAGRAM_ELEMENT (PARENT_ID)",
+            "root_page": 20
+          },
+          {
+            "name": "USER_ID_FORMAT_MODEL_TYPE",
+            "table": "USER_ID_FORMAT",
+            "sql": "CREATE INDEX USER_ID_FORMAT_MODEL_TYPE ON USER_ID_FORMAT (MODEL_TYPE)",
+            "root_page": 21
+          }
+        ],
+        "views": [],
+        "triggers": []
+      },
+      "rows": {
+        "table": "DIAGRAM",
+        "columns": [
+          "ID",
+          "DIAGRAM_TYPE",
+          "NAME"
+        ],
+        "values": [
+          [
+            {
+              "type": "text",
+              "value": "sXvgFYWFYHxgAQXs",
+              "bytes_hex": "73587667465957465948786741515873",
+              "encoding": "UTF-8"
+            },
+            {
+              "type": "text",
+              "value": "ClassDiagram",
+              "bytes_hex": "436c6173734469616772616d",
+              "encoding": "UTF-8"
+            },
+            {
+              "type": "text",
+              "value": "REA Class Study",
+              "bytes_hex": "52454120436c617373205374756479",
+              "encoding": "UTF-8"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "jYrQFYWFYHxgAQYk",
+              "bytes_hex": "6a59725146595746594878674151596b",
+              "encoding": "UTF-8"
+            },
+            {
+              "type": "text",
+              "value": "InteractionDiagram",
+              "bytes_hex": "496e746572616374696f6e4469616772616d",
+              "encoding": "UTF-8"
+            },
+            {
+              "type": "text",
+              "value": "Sequence Diagram1",
+              "bytes_hex": "53657175656e6365204469616772616d31",
+              "encoding": "UTF-8"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "oxswFYWFYHxgAQZe",
+              "bytes_hex": "6f787377465957465948786741515a65",
+              "encoding": "UTF-8"
+            },
+            {
+              "type": "text",
+              "value": "ERDiagram",
+              "bytes_hex": "45524469616772616d",
+              "encoding": "UTF-8"
+            },
+            {
+              "type": "text",
+              "value": "Entity Relationship Diagram1",
+              "bytes_hex": "456e746974792052656c6174696f6e73686970204469616772616d31",
+              "encoding": "UTF-8"
+            }
+          ]
+        ],
+        "row_limit": 20,
+        "returned_rows": 3,
+        "truncated": false,
+        "order": "unspecified"
+      },
+      "limitations": [
+        "Inspects an offline stable file set. Filesystem identity checks detect observed acquisition changes; they do not establish an atomic snapshot of an actively changing database. Supply an application-created backup or quiescent database/WAL pair.",
+        "The source database and WAL are never opened by SQLite or modified. A private copy may acquire its own WAL-index sidecar and is removed after inspection.",
+        "SQLite reports current schema and selected committed rows from its valid database/WAL state. Deleted records, uncommitted or invalid WAL tails, encrypted databases, forensic recovery, and full integrity verification are outside this profile.",
+        "Stored CREATE statements preserve index/view/trigger definitions. Views, triggers, and virtual/shadow table rows are not executed; virtual-table column expansion is unsupported.",
+        "Selected rows have unspecified order and are a bounded sample. Text display may replace invalid sequences; bytes_hex and encoding preserve SQLite's text byte representation, not original on-disk page offsets.",
+        "Resource boundaries: at most two concurrent inspections per provider; combined input 256 MiB per inspection, complete worker JSON 16 MiB, native SQLite value/record and SQL statement lengths 16 MiB, owned-worker JavaScript heap 256 MiB and supervised deadline 30 seconds. These are distinct from total resident memory; an overall native SQLite heap cap is not claimed. Failures return no partial success."
+      ]
+    },
+    "confidence": "observed",
+    "authority": "shipped-artifact",
+    "environment": null,
+    "limitations": [
+      "Inspects an offline stable file set. Filesystem identity checks detect observed acquisition changes; they do not establish an atomic snapshot of an actively changing database. Supply an application-created backup or quiescent database/WAL pair.",
+      "The source database and WAL are never opened by SQLite or modified. A private copy may acquire its own WAL-index sidecar and is removed after inspection.",
+      "SQLite reports current schema and selected committed rows from its valid database/WAL state. Deleted records, uncommitted or invalid WAL tails, encrypted databases, forensic recovery, and full integrity verification are outside this profile.",
+      "Stored CREATE statements preserve index/view/trigger definitions. Views, triggers, and virtual/shadow table rows are not executed; virtual-table column expansion is unsupported.",
+      "Selected rows have unspecified order and are a bounded sample. Text display may replace invalid sequences; bytes_hex and encoding preserve SQLite's text byte representation, not original on-disk page offsets.",
+      "Resource boundaries: at most two concurrent inspections per provider; combined input 256 MiB per inspection, complete worker JSON 16 MiB, native SQLite value/record and SQL statement lengths 16 MiB, owned-worker JavaScript heap 256 MiB and supervised deadline 30 seconds. These are distinct from total resident memory; an overall native SQLite heap cap is not claimed. Failures return no partial success."
+    ],
+    "relationship_coverage": null,
+    "locations": [
+      {
+        "kind": "artifact-path",
+        "path": "D:\\REA visual\\research\\visual-paradigm\\ce-evidence\\ui-research.vpp"
+      }
+    ],
+    "evidence_links": []
+  }
+}

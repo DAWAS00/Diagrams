@@ -1,0 +1,774 @@
+{
+  "source": "D:\\REA visual\\research\\visual-paradigm\\ce-evidence\\xml-export\\project.xml",
+  "source_bytes": 45599,
+  "source_sha256": "7bbbd540fb6ab04d4b535f401eac2fee47e9adceb52c1831149f8516e4285cad",
+  "root_tag": "Project",
+  "root_attributes": {
+    "Author": "dawas",
+    "CommentTableSortAscending": "false",
+    "CommentTableSortColumn": "Date Time",
+    "DocumentationType": "html",
+    "ExportedFromDifferentName": "false",
+    "ExporterVersion": "16.1.1",
+    "Name": "ui-research",
+    "TextualAnalysisHighlightOptionCaseSensitive": "false",
+    "UmlVersion": "2.x",
+    "Xml_structure": "simple"
+  },
+  "root_sections": [
+    "ProjectInfo",
+    "Models",
+    "Diagrams"
+  ],
+  "counts": {
+    "top_level_model_types": {
+      "DataType": 10,
+      "Class": 2,
+      "ModelRelationshipContainer": 1,
+      "Frame": 1,
+      "DBTable": 1
+    },
+    "id_bearing_model_types_recursive": {
+      "DataType": 10,
+      "Class": 2,
+      "ModelRelationshipContainer": 3,
+      "Association": 1,
+      "AssociationEnd": 2,
+      "Qualifier": 2,
+      "Message": 1,
+      "MessageEnd": 2,
+      "Frame": 1,
+      "InteractionLifeLine": 2,
+      "Activation": 2,
+      "DBTable": 1
+    },
+    "diagram_types": {
+      "ClassDiagram": 1,
+      "InteractionDiagram": 1,
+      "ERDiagram": 1
+    },
+    "visual_types": {
+      "Class": 2,
+      "Association": 1,
+      "InteractionLifeLine": 2,
+      "Activation": 2,
+      "Message": 1,
+      "DBTable": 1
+    }
+  },
+  "rendering_and_defaults": {
+    "FractionalMetrics": "true",
+    "GraphicAntiAliasing": "true",
+    "TextAntiAliasing": "true",
+    "EnableMinimumSize": "true",
+    "DefaultDiagramBackground": "rgb(255, 255, 255)",
+    "DefaultConnectorStyle": "\\u0001",
+    "DefaultConnectionPointStyle": "\\u0000",
+    "DefaultLineJumps": "\\u0000",
+    "LineJumpSize": "\\u0000",
+    "ShowNumberInSequenceDiagram": "true",
+    "ShowNumberInCollaborationDiagram": "true",
+    "PaintConnectorThroughLabel": "false",
+    "PointConnectorEndToCompartmentMember": "true",
+    "SnapConnectorsAfterZoom": "false",
+    "DefaultColumnType": "integer(10)",
+    "AutoSetColumnType": "true",
+    "AutoSetAttributeType": "true"
+  },
+  "diagrams": [
+    {
+      "type": "ClassDiagram",
+      "attrs": {
+        "AlignToGrid": "false",
+        "AutoFitShapesSize": "false",
+        "ConnectorStyle": "1",
+        "Editable": "true",
+        "GridHeight": "10",
+        "GridVisible": "false",
+        "GridWidth": "10",
+        "Height": "597",
+        "Id": "sXvgFYWFYHxgAQXs",
+        "Name": "REA Class Study",
+        "Width": "982",
+        "X": "0",
+        "Y": "0",
+        "ZoomRatio": "1.0"
+      },
+      "views": [
+        {
+          "tag": "Class",
+          "kind": "Shapes",
+          "attrs": {
+            "ConnectToPoint": "true",
+            "ConnectionPointType": "2",
+            "Height": "40",
+            "Id": "gNgQFYWFYHxgAQX5",
+            "MetaModelElement": "UNgQFYWFYHxgAQX6",
+            "Model": "UNgQFYWFYHxgAQX6",
+            "Name": "Customer",
+            "Width": "80",
+            "X": "168",
+            "Y": "116",
+            "ZOrder": "4"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": []
+        },
+        {
+          "tag": "Class",
+          "kind": "Shapes",
+          "attrs": {
+            "ConnectToPoint": "true",
+            "ConnectionPointType": "2",
+            "Height": "40",
+            "Id": "y.6QFYWFYHxgAQYF",
+            "MetaModelElement": "K.6QFYWFYHxgAQYG",
+            "Model": "K.6QFYWFYHxgAQYG",
+            "Name": "Order",
+            "Width": "80",
+            "X": "430",
+            "Y": "117",
+            "ZOrder": "2"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": []
+        },
+        {
+          "tag": "Association",
+          "kind": "Connectors",
+          "attrs": {
+            "ConnectorStyle": "Follow Diagram",
+            "From": "gNgQFYWFYHxgAQX5",
+            "FromPinType": "1",
+            "FromShapeXDiff": "0",
+            "FromShapeYDiff": "0",
+            "Height": "100",
+            "Id": "u_OQFYWFYHxgAQYV",
+            "MetaModelElement": "C_OQFYWFYHxgAQYO",
+            "Model": "C_OQFYWFYHxgAQYO",
+            "To": "y.6QFYWFYHxgAQYF",
+            "ToPinType": "1",
+            "ToShapeXDiff": "0",
+            "ToShapeYDiff": "0",
+            "Width": "280",
+            "X": "199",
+            "Y": "90",
+            "ZOrder": "6"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": [
+            {
+              "tag": "Points",
+              "attrs": {},
+              "text": null
+            },
+            {
+              "tag": "Point",
+              "attrs": {
+                "X": "249.0",
+                "Y": "140.0"
+              },
+              "text": null
+            },
+            {
+              "tag": "Point",
+              "attrs": {
+                "X": "429.0",
+                "Y": "140.0"
+              },
+              "text": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "InteractionDiagram",
+      "attrs": {
+        "AlignToGrid": "false",
+        "AutoFitShapesSize": "false",
+        "ConnectorStyle": "1",
+        "Editable": "true",
+        "GridHeight": "10",
+        "GridVisible": "false",
+        "GridWidth": "10",
+        "Height": "597",
+        "Id": "jYrQFYWFYHxgAQYk",
+        "Name": "Sequence Diagram1",
+        "Width": "982",
+        "X": "0",
+        "Y": "0",
+        "ZoomRatio": "1.0"
+      },
+      "views": [
+        {
+          "tag": "InteractionLifeLine",
+          "kind": "Shapes",
+          "attrs": {
+            "ConnectToPoint": "true",
+            "ConnectionPointType": "2",
+            "Height": "150",
+            "Id": "CyHQFYWFYHxgAQY1",
+            "MetaModelElement": "SyHQFYWFYHxgAQY2",
+            "Model": "SyHQFYWFYHxgAQY2",
+            "Name": "Lifeline",
+            "Width": "70",
+            "X": "144",
+            "Y": "40",
+            "ZOrder": "8"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": []
+        },
+        {
+          "tag": "InteractionLifeLine",
+          "kind": "Shapes",
+          "attrs": {
+            "ConnectToPoint": "true",
+            "ConnectionPointType": "2",
+            "Height": "150",
+            "Id": "hLXQFYWFYHxgAQY7",
+            "MetaModelElement": "hLXQFYWFYHxgAQY8",
+            "Model": "hLXQFYWFYHxgAQY8",
+            "Name": "Lifeline2",
+            "Width": "70",
+            "X": "401",
+            "Y": "40",
+            "ZOrder": "6"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": []
+        },
+        {
+          "tag": "Activation",
+          "kind": "Shapes",
+          "attrs": {
+            "ConnectToPoint": "true",
+            "ConnectionPointType": "2",
+            "Height": "24",
+            "Id": ".zfQFYWFYHxgAQZJ",
+            "MetaModelElement": "mzfQFYWFYHxgAQZH",
+            "Model": "mzfQFYWFYHxgAQZH",
+            "Name": "Activation",
+            "Width": "8",
+            "X": "175",
+            "Y": "123",
+            "ZOrder": "4"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": []
+        },
+        {
+          "tag": "Activation",
+          "kind": "Shapes",
+          "attrs": {
+            "ConnectToPoint": "true",
+            "ConnectionPointType": "2",
+            "Height": "12",
+            "Id": "jzfQFYWFYHxgAQZP",
+            "MetaModelElement": "1zfQFYWFYHxgAQZN",
+            "Model": "1zfQFYWFYHxgAQZN",
+            "Name": "Activation",
+            "Width": "8",
+            "X": "432",
+            "Y": "123",
+            "ZOrder": "2"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": []
+        },
+        {
+          "tag": "Message",
+          "kind": "Connectors",
+          "attrs": {
+            "ConnectorStyle": "Follow Diagram",
+            "From": "CyHQFYWFYHxgAQY1",
+            "FromPinType": "1",
+            "FromShapeXDiff": "0",
+            "FromShapeYDiff": "0",
+            "Height": "100",
+            "Id": "wLfQFYWFYHxgAQZV",
+            "MetaModelElement": "7zfQFYWFYHxgAQZR",
+            "Model": "7zfQFYWFYHxgAQZR",
+            "To": "hLXQFYWFYHxgAQY7",
+            "ToPinType": "1",
+            "ToShapeXDiff": "0",
+            "ToShapeYDiff": "0",
+            "Width": "349",
+            "X": "133",
+            "Y": "73",
+            "ZOrder": "10"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": [
+            {
+              "tag": "Points",
+              "attrs": {},
+              "text": null
+            },
+            {
+              "tag": "Point",
+              "attrs": {
+                "X": "183.0",
+                "Y": "123.0"
+              },
+              "text": null
+            },
+            {
+              "tag": "Point",
+              "attrs": {
+                "X": "432.0",
+                "Y": "123.0"
+              },
+              "text": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ERDiagram",
+      "attrs": {
+        "AlignToGrid": "false",
+        "AutoFitShapesSize": "false",
+        "ConnectorStyle": "1",
+        "DataModel": "2",
+        "Editable": "true",
+        "GridHeight": "10",
+        "GridVisible": "false",
+        "GridWidth": "10",
+        "Height": "597",
+        "Id": "oxswFYWFYHxgAQZe",
+        "Name": "Entity Relationship Diagram1",
+        "Width": "982",
+        "X": "0",
+        "Y": "0",
+        "ZoomRatio": "1.0"
+      },
+      "views": [
+        {
+          "tag": "DBTable",
+          "kind": "Shapes",
+          "attrs": {
+            "ConnectToPoint": "true",
+            "ConnectionPointType": "2",
+            "Height": "40",
+            "Id": "bwiwFYWFYHxgAQZs",
+            "MetaModelElement": "7wiwFYWFYHxgAQZt",
+            "Model": "7wiwFYWFYHxgAQZt",
+            "Name": "Entity",
+            "Width": "70",
+            "X": "191",
+            "Y": "152",
+            "ZOrder": "2"
+          },
+          "model_reference_resolves": true,
+          "geometry_children": []
+        }
+      ]
+    }
+  ],
+  "relevant_semantic_models": [
+    {
+      "tag": "Class",
+      "attrs": {
+        "Id": "UNgQFYWFYHxgAQX6",
+        "Name": "Customer",
+        "Visibility": "public"
+      },
+      "reference_children": [
+        {
+          "tag": "Class",
+          "attrs": {
+            "Idref": "gNgQFYWFYHxgAQX5",
+            "Name": "Customer"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "Class",
+      "attrs": {
+        "Id": "K.6QFYWFYHxgAQYG",
+        "Name": "Order",
+        "Visibility": "public"
+      },
+      "reference_children": [
+        {
+          "tag": "Class",
+          "attrs": {
+            "Idref": "y.6QFYWFYHxgAQYF",
+            "Name": "Order"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "Association",
+      "attrs": {
+        "Direction": "From To",
+        "EndRelationshipFromMetaModelElement": "UNgQFYWFYHxgAQX6",
+        "EndRelationshipToMetaModelElement": "K.6QFYWFYHxgAQYG",
+        "Id": "C_OQFYWFYHxgAQYO",
+        "Visibility": "Unspecified"
+      },
+      "reference_children": [
+        {
+          "tag": "AssociationEnd",
+          "attrs": {
+            "AggregationKind": "None",
+            "BacklogActivityId": "0",
+            "ConnectToCodeModel": "1",
+            "DefaultValue_IsNull": "true",
+            "Derived": "false",
+            "DerivedUnion": "false",
+            "Documentation_plain": "",
+            "EndModelElement": "UNgQFYWFYHxgAQX6",
+            "Id": "q_OQFYWFYHxgAQYQ",
+            "JavaCodeAttributeName": "",
+            "Leaf": "false",
+            "Multiplicity": "Unspecified",
+            "Navigable": "Navigable",
+            "PmAuthor": "dawas",
+            "PmCreateDateTime": "2026-11-04T21:29:37.749",
+            "PmLastModified_IsNull": "true",
+            "ProvidePropertyGetterMethod": "false",
+            "ProvidePropertySetterMethod": "false",
+            "QualityReason_IsNull": "true",
+            "QualityScore": "-1",
+            "ReadOnly": "false",
+            "Static": "false",
+            "TypeModifier": "",
+            "UserIDLastNumericValue": "0",
+            "UserID_IsNull": "true",
+            "Visibility": "Unspecified"
+          }
+        },
+        {
+          "tag": "Class",
+          "attrs": {
+            "Idref": "UNgQFYWFYHxgAQX6",
+            "Name": "Customer"
+          }
+        },
+        {
+          "tag": "AssociationEnd",
+          "attrs": {
+            "AggregationKind": "None",
+            "BacklogActivityId": "0",
+            "ConnectToCodeModel": "1",
+            "DefaultValue_IsNull": "true",
+            "Derived": "false",
+            "DerivedUnion": "false",
+            "Documentation_plain": "",
+            "EndModelElement": "K.6QFYWFYHxgAQYG",
+            "Id": "G_OQFYWFYHxgAQYT",
+            "JavaCodeAttributeName": "",
+            "Leaf": "false",
+            "Multiplicity": "Unspecified",
+            "Navigable": "Navigable",
+            "PmAuthor": "dawas",
+            "PmCreateDateTime": "2026-11-04T21:29:37.752",
+            "PmLastModified_IsNull": "true",
+            "ProvidePropertyGetterMethod": "false",
+            "ProvidePropertySetterMethod": "false",
+            "QualityReason_IsNull": "true",
+            "QualityScore": "-1",
+            "ReadOnly": "false",
+            "Static": "false",
+            "TypeModifier": "",
+            "UserIDLastNumericValue": "0",
+            "UserID_IsNull": "true",
+            "Visibility": "Unspecified"
+          }
+        },
+        {
+          "tag": "Class",
+          "attrs": {
+            "Idref": "K.6QFYWFYHxgAQYG",
+            "Name": "Order"
+          }
+        },
+        {
+          "tag": "Association",
+          "attrs": {
+            "Idref": "u_OQFYWFYHxgAQYV"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "AssociationEnd",
+      "attrs": {
+        "AggregationKind": "None",
+        "EndModelElement": "UNgQFYWFYHxgAQX6",
+        "Id": "q_OQFYWFYHxgAQYQ",
+        "Multiplicity": "Unspecified",
+        "Navigable": "Navigable",
+        "Visibility": "Unspecified"
+      },
+      "reference_children": [
+        {
+          "tag": "Class",
+          "attrs": {
+            "Idref": "UNgQFYWFYHxgAQX6",
+            "Name": "Customer"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "AssociationEnd",
+      "attrs": {
+        "AggregationKind": "None",
+        "EndModelElement": "K.6QFYWFYHxgAQYG",
+        "Id": "G_OQFYWFYHxgAQYT",
+        "Multiplicity": "Unspecified",
+        "Navigable": "Navigable",
+        "Visibility": "Unspecified"
+      },
+      "reference_children": [
+        {
+          "tag": "Class",
+          "attrs": {
+            "Idref": "K.6QFYWFYHxgAQYG",
+            "Name": "Order"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "Message",
+      "attrs": {
+        "EndRelationshipFromMetaModelElement": "SyHQFYWFYHxgAQY2",
+        "EndRelationshipToMetaModelElement": "hLXQFYWFYHxgAQY8",
+        "FromActivation": "mzfQFYWFYHxgAQZH",
+        "Id": "7zfQFYWFYHxgAQZR",
+        "SequenceNumber": "1",
+        "ToActivation": "1zfQFYWFYHxgAQZN",
+        "Type": "Message"
+      },
+      "reference_children": [
+        {
+          "tag": "MessageEnd",
+          "attrs": {
+            "BacklogActivityId": "0",
+            "Documentation_plain": "",
+            "EndModelElement": "SyHQFYWFYHxgAQY2",
+            "Id": "3zfQFYWFYHxgAQZT",
+            "PmAuthor": "dawas",
+            "PmCreateDateTime": "2026-11-04T21:31:56.283",
+            "PmLastModified_IsNull": "true",
+            "QualityReason_IsNull": "true",
+            "QualityScore": "-1",
+            "UserIDLastNumericValue": "0",
+            "UserID_IsNull": "true"
+          }
+        },
+        {
+          "tag": "MessageEnd",
+          "attrs": {
+            "BacklogActivityId": "0",
+            "Documentation_plain": "",
+            "EndModelElement": "hLXQFYWFYHxgAQY8",
+            "Id": "3zfQFYWFYHxgAQZU",
+            "PmAuthor": "dawas",
+            "PmCreateDateTime": "2026-11-04T21:31:56.283",
+            "PmLastModified_IsNull": "true",
+            "QualityReason_IsNull": "true",
+            "QualityScore": "-1",
+            "UserIDLastNumericValue": "0",
+            "UserID_IsNull": "true"
+          }
+        },
+        {
+          "tag": "Message",
+          "attrs": {
+            "Idref": "wLfQFYWFYHxgAQZV"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "MessageEnd",
+      "attrs": {
+        "EndModelElement": "SyHQFYWFYHxgAQY2",
+        "Id": "3zfQFYWFYHxgAQZT"
+      },
+      "reference_children": []
+    },
+    {
+      "tag": "MessageEnd",
+      "attrs": {
+        "EndModelElement": "hLXQFYWFYHxgAQY8",
+        "Id": "3zfQFYWFYHxgAQZU"
+      },
+      "reference_children": []
+    },
+    {
+      "tag": "Frame",
+      "attrs": {
+        "BaseY": "40",
+        "Id": "C4rQFYWFYHxgAQYp",
+        "Name": "Sequence Diagram1",
+        "Type": "sd"
+      },
+      "reference_children": [
+        {
+          "tag": "Activation",
+          "attrs": {
+            "Idref": ".zfQFYWFYHxgAQZJ",
+            "Name": "Activation"
+          }
+        },
+        {
+          "tag": "InteractionLifeLine",
+          "attrs": {
+            "Idref": "CyHQFYWFYHxgAQY1",
+            "Name": "Lifeline"
+          }
+        },
+        {
+          "tag": "Activation",
+          "attrs": {
+            "Idref": "jzfQFYWFYHxgAQZP",
+            "Name": "Activation"
+          }
+        },
+        {
+          "tag": "InteractionLifeLine",
+          "attrs": {
+            "Idref": "hLXQFYWFYHxgAQY7",
+            "Name": "Lifeline2"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "InteractionLifeLine",
+      "attrs": {
+        "Id": "SyHQFYWFYHxgAQY2",
+        "Multiplicity": "Unspecified",
+        "Name": "Lifeline"
+      },
+      "reference_children": [
+        {
+          "tag": "Activation",
+          "attrs": {
+            "Idref": ".zfQFYWFYHxgAQZJ",
+            "Name": "Activation"
+          }
+        },
+        {
+          "tag": "InteractionLifeLine",
+          "attrs": {
+            "Idref": "CyHQFYWFYHxgAQY1",
+            "Name": "Lifeline"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "Activation",
+      "attrs": {
+        "Id": "mzfQFYWFYHxgAQZH",
+        "Name": "Activation"
+      },
+      "reference_children": [
+        {
+          "tag": "Activation",
+          "attrs": {
+            "Idref": ".zfQFYWFYHxgAQZJ",
+            "Name": "Activation"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "InteractionLifeLine",
+      "attrs": {
+        "Id": "hLXQFYWFYHxgAQY8",
+        "Multiplicity": "Unspecified",
+        "Name": "Lifeline2"
+      },
+      "reference_children": [
+        {
+          "tag": "Activation",
+          "attrs": {
+            "Idref": "jzfQFYWFYHxgAQZP",
+            "Name": "Activation"
+          }
+        },
+        {
+          "tag": "InteractionLifeLine",
+          "attrs": {
+            "Idref": "hLXQFYWFYHxgAQY7",
+            "Name": "Lifeline2"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "Activation",
+      "attrs": {
+        "Id": "1zfQFYWFYHxgAQZN",
+        "Name": "Activation"
+      },
+      "reference_children": [
+        {
+          "tag": "Activation",
+          "attrs": {
+            "Idref": "jzfQFYWFYHxgAQZP",
+            "Name": "Activation"
+          }
+        }
+      ]
+    },
+    {
+      "tag": "DBTable",
+      "attrs": {
+        "DataModel": "Physical",
+        "Id": "7wiwFYWFYHxgAQZt",
+        "Name": "Entity",
+        "Type": "0"
+      },
+      "reference_children": [
+        {
+          "tag": "DBTable",
+          "attrs": {
+            "Idref": "bwiwFYWFYHxgAQZs",
+            "Name": "Entity"
+          }
+        }
+      ]
+    }
+  ],
+  "data_zip": {
+    "source": "D:\\REA visual\\research\\visual-paradigm\\ce-evidence\\xml-export\\data.zip",
+    "bytes": 2444,
+    "sha256": "ed1a228301102727606e12d1aefb0e33506348962f0590a5cfbfbe635e832c8b",
+    "entries": [
+      {
+        "path": "projectOptions/DataTypeOptions/LanguageDataType.options.embdf",
+        "bytes": 3953,
+        "compressed_bytes": 617
+      },
+      {
+        "path": "codeSync.settings.embdf",
+        "bytes": 3050,
+        "compressed_bytes": 838
+      },
+      {
+        "path": "projectOptions/BPMNOptions/IDPositionRotation.options.embdf",
+        "bytes": 3089,
+        "compressed_bytes": 405
+      }
+    ]
+  },
+  "limitations": [
+    "ExporterVersion 16.1.1 is the XML exporter version, not the installed application version (18.1).",
+    "This fixture covers class, sequence and ER diagrams only, not every supported notation.",
+    "Option values are observed serialization; numeric and escaped-character enumerations are not decoded unless separately established.",
+    "All semantic model references on inventoried views resolve in this export; this does not prove import round-trip compatibility."
+  ]
+}

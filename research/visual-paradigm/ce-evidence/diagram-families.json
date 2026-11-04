@@ -1,0 +1,608 @@
+[
+  {
+    "constant": "DIAGRAM_TYPE_ACTIVITY_DIAGRAM",
+    "family": "UML behavioral",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ANALYSIS_DIAGRAM",
+    "family": "Analysis and specification",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ANALYSIS_ITEM_DIAGRAM",
+    "family": "Analysis and specification",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ARCHITECTURE_ROADMAP",
+    "family": "Enterprise architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ARCHI_MATE4_DIAGRAM",
+    "family": "Enterprise architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ARCHI_MATE_DIAGRAM",
+    "family": "Enterprise architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_BLOCK_DEFINITION_DIAGRAM",
+    "family": "SysML and requirements",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_BRAINSTORM",
+    "family": "General visual diagrams",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_BREAKDOWN_STRUCTURE",
+    "family": "Planning and experience",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_BUSINESS_MOTIVATION_MODEL_DIAGRAM",
+    "family": "Rules, facts and decisions",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_BUSINESS_PROCESS_DIAGRAM",
+    "family": "Business processes and cases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_BUSINESS_PROCESS_REENGINEERING",
+    "family": "Business processes and cases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_BUSINESS_RULE_EDITOR_DIAGRAM",
+    "family": "Rules, facts and decisions",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_C4_MODEL_COMPONENT_DIAGRAM",
+    "family": "C4 architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_C4_MODEL_CONTAINER_DIAGRAM",
+    "family": "C4 architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_C4_MODEL_DEPLOYMENT_DIAGRAM",
+    "family": "C4 architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_C4_MODEL_DYNAMIC_DIAGRAM",
+    "family": "C4 architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_C4_MODEL_SYSTEM_CONTEXT_DIAGRAM",
+    "family": "C4 architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_C4_MODEL_SYSTEM_LANDSCAPE_DIAGRAM",
+    "family": "C4 architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_CHART_DIAGRAM",
+    "family": "Data and tabular editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_CHEN_NOTATION_ERDUI_MODEL",
+    "family": "Database and ORM",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_CLASS_DIAGRAM",
+    "family": "UML structural",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_CMMN_DIAGRAM",
+    "family": "Business processes and cases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_COMMUNICATION_DIAGRAM",
+    "family": "UML behavioral",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_COMPETITOR_ANALYSIS",
+    "family": "Analysis and specification",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_COMPONENT_DIAGRAM",
+    "family": "UML structural",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_COMPOSITE_STRUCTURE_DIAGRAM",
+    "family": "UML structural",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_CONVERSATION_DIAGRAM",
+    "family": "Business processes and cases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_CRC_CARD_DIAGRAM",
+    "family": "Analysis and specification",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_CUSTOMER_JOURNEY_MAP",
+    "family": "Planning and experience",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_DATA_FLOW_DIAGRAM",
+    "family": "Data-flow models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_DATA_STUDIO_SHEET",
+    "family": "Data and tabular editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_DATA_TABLE_DIAGRAM",
+    "family": "Data and tabular editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_DECISION_MODEL_DIAGRAM",
+    "family": "Rules, facts and decisions",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_DEPLOYMENT_DIAGRAM",
+    "family": "UML structural",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_DOCUMENTATION_CABINET",
+    "family": "Documents and form editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_DTB_DECISION_TABLE_EDITOR_DIAGRAM",
+    "family": "Rules, facts and decisions",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_EA_FORM_DIAGRAM",
+    "family": "Enterprise architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_EA_PROCESS_STEP_DIAGRAM",
+    "family": "Enterprise architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_EJB_DIAGRAM",
+    "family": "Services and code-oriented models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_EPC_DIAGRAM",
+    "family": "Business processes and cases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ER_DIAGRAM",
+    "family": "Database and ORM",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ETL_TABLE_DIAGRAM",
+    "family": "Data and tabular editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_FACT_DIAGRAM",
+    "family": "Rules, facts and decisions",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_FACT_TYPE_EDITOR_DIAGRAM",
+    "family": "Rules, facts and decisions",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_FISHBONE_DIAGRAM",
+    "family": "General visual diagrams",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_FLOWCHART",
+    "family": "General visual diagrams",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_FORM",
+    "family": "Documents and form editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_FREEHAND_DIAGRAM",
+    "family": "General visual diagrams",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_FREEHAND_DIAGRAM2",
+    "family": "General visual diagrams",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_GANE_SARSON_DFDUI_MODEL",
+    "family": "Data-flow models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_GRID_DIAGRAM",
+    "family": "Data and tabular editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_INTERACTION_DIAGRAM",
+    "family": "UML behavioral",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_INTERACTION_OVERVIEW_DIAGRAM",
+    "family": "UML behavioral",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_INTERNAL_BLOCK_DIAGRAM",
+    "family": "SysML and requirements",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_MATRIX_DIAGRAM",
+    "family": "Data and tabular editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_MATURITY_ANALYSIS",
+    "family": "Analysis and specification",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_MIGRATION_ROADMAP",
+    "family": "Enterprise architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_MIND_MAP_DIAGRAM",
+    "family": "General visual diagrams",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_OBJECT_DIAGRAM",
+    "family": "UML structural",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ORGANIZATION_CHART",
+    "family": "General visual diagrams",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ORM_DIAGRAM",
+    "family": "Database and ORM",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_OVERVIEW_DIAGRAM",
+    "family": "Enterprise architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_PACKAGE_DIAGRAM",
+    "family": "UML structural",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_PARAMETRIC_DIAGRAM",
+    "family": "SysML and requirements",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_PERT_CHART",
+    "family": "Planning and experience",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_PM_PROCESS_MAP",
+    "family": "Business processes and cases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_PROCESS_CANVAS",
+    "family": "Structured canvases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_PROCESS_MAP_DIAGRAM",
+    "family": "Business processes and cases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_PROFILE_DIAGRAM",
+    "family": "UML structural",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_QUALITY_CONTROL_CANVAS",
+    "family": "Structured canvases",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_REPORT_DIAGRAM",
+    "family": "Documents and form editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_REQUIREMENT_DIAGRAM",
+    "family": "SysML and requirements",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ROOT_CAUSE_ANALYSIS",
+    "family": "Analysis and specification",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_SOA_ML_SERVICES_ARCHITECTURE_DIAGRAM",
+    "family": "Services and code-oriented models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_SOA_ML_SERVICE_CATEGORIZATION_DIAGRAM",
+    "family": "Services and code-oriented models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_SOA_ML_SERVICE_CONTRACT_DIAGRAM",
+    "family": "Services and code-oriented models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_SOA_ML_SERVICE_INTERFACE_DIAGRAM",
+    "family": "Services and code-oriented models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_SOA_ML_SERVICE_PARTICIPANT_DIAGRAM",
+    "family": "Services and code-oriented models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_STATE_DIAGRAM",
+    "family": "UML behavioral",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_TABULAR",
+    "family": "Data and tabular editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_TERM_EDITOR_DIAGRAM",
+    "family": "Rules, facts and decisions",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_TEXTUAL_ANALYSIS",
+    "family": "Analysis and specification",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_TIMING_DIAGRAM",
+    "family": "UML behavioral",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_USER_INTERFACE_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_USER_STORY_MAP_DIAGRAM",
+    "family": "Planning and experience",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_USE_CASE_DESCRIPTION_DIAGRAM",
+    "family": "Analysis and specification",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_USE_CASE_DIAGRAM",
+    "family": "UML behavioral",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_VIEW_EDITOR_DIAGRAM",
+    "family": "Documents and form editors",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WEB_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WFI_PAD_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WFI_PHONE_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WF_ANDROID_PHONE_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WF_ANDROID_TABLET_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WF_DESKTOP_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WF_WEB_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WIREFLOW_DIAGRAM",
+    "family": "UI and wireflow",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_WSDL_DIAGRAM",
+    "family": "Services and code-oriented models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_YOURDON_AND_COAD_DFDUI_MODEL",
+    "family": "Data-flow models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_YOURDON_DE_MARCO_DFDUI_MODEL",
+    "family": "Data-flow models",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  },
+  {
+    "constant": "DIAGRAM_TYPE_ZACHMAN_DIAGRAM",
+    "family": "Enterprise architecture",
+    "evidence": "installed public API constant",
+    "ce_runtime_status": "not established by API presence"
+  }
+]

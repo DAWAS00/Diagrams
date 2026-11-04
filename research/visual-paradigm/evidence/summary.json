@@ -1,0 +1,191 @@
+{
+  "root": "C:\\Program Files\\Visual Paradigm 18.1",
+  "file_count": 2113,
+  "bytes": 1077417376,
+  "directories": {
+    ".install4j": {
+      "files": 36,
+      "bytes": 9987043
+    },
+    "bin": {
+      "files": 31,
+      "bytes": 10447272
+    },
+    "bundled": {
+      "files": 62,
+      "bytes": 3145591
+    },
+    "integration": {
+      "files": 14,
+      "bytes": 28844
+    },
+    "jre": {
+      "files": 311,
+      "bytes": 193760349
+    },
+    "lib": {
+      "files": 19,
+      "bytes": 453029792
+    },
+    "ormlib": {
+      "files": 25,
+      "bytes": 32545298
+    },
+    "resources": {
+      "files": 458,
+      "bytes": 323410398
+    },
+    "scripts": {
+      "files": 27,
+      "bytes": 24467
+    },
+    "sde": {
+      "files": 1095,
+      "bytes": 25405203
+    },
+    "shapes": {
+      "files": 22,
+      "bytes": 13153303
+    },
+    "uninstaller": {
+      "files": 1,
+      "bytes": 509784
+    },
+    "UserLanguage": {
+      "files": 12,
+      "bytes": 11970032
+    }
+  },
+  "extensions": [
+    [
+      ".png",
+      702
+    ],
+    [
+      ".vm",
+      288
+    ],
+    [
+      ".dll",
+      157
+    ],
+    [
+      ".xml",
+      146
+    ],
+    [
+      "",
+      132
+    ],
+    [
+      ".jar",
+      55
+    ],
+    [
+      ".exe",
+      47
+    ],
+    [
+      ".txt",
+      46
+    ],
+    [
+      ".md",
+      38
+    ],
+    [
+      ".gif",
+      34
+    ],
+    [
+      ".dat",
+      29
+    ],
+    [
+      ".bat",
+      26
+    ],
+    [
+      ".vpt",
+      19
+    ],
+    [
+      ".properties",
+      11
+    ],
+    [
+      ".h",
+      11
+    ],
+    [
+      ".lng",
+      11
+    ],
+    [
+      ".policy",
+      7
+    ],
+    [
+      ".ico",
+      6
+    ],
+    [
+      ".vpact",
+      5
+    ],
+    [
+      ".vpwap",
+      5
+    ],
+    [
+      ".vpwat",
+      5
+    ],
+    [
+      ".vpbdd",
+      5
+    ],
+    [
+      ".vpbsd",
+      5
+    ],
+    [
+      ".vpbus",
+      5
+    ],
+    [
+      ".vpbpd",
+      5
+    ]
+  ],
+  "launchers": [
+    {
+      "path": "bin/Visual Paradigm Product Selector.exe",
+      "machine": "0x8664",
+      "sha256": "07f5b6b39712b0bbaac256b602a3c5a1836b02f47ef3ab9e43d103d907252baa"
+    },
+    {
+      "path": "bin/Visual Paradigm Shape Editor.exe",
+      "machine": "0x8664",
+      "sha256": "159998d6ca377c854759117d6ed3c4052cbcfb9aea814635588b601d644356c4"
+    },
+    {
+      "path": "bin/Visual Paradigm Update.exe",
+      "machine": "0x8664",
+      "sha256": "79f0219e96abfa4f44f729e9b4c5d570d681fe844575cf11d94d43f8310382bb"
+    },
+    {
+      "path": "bin/Visual Paradigm.exe",
+      "machine": "0x8664",
+      "sha256": "996fa7dfa1cd06f37511c7f9ad2e6f311fa6f37354e8f5d5cb3040e70b391f63"
+    }
+  ],
+  "vpp_samples": [
+    {
+      "path": "resources/BaggageSchemas.vpp",
+      "bytes": 1438720,
+      "header_hex": "53514c69746520666f726d61742033000400010100402020000010b90000057d00000462000001ba000003f00000000400000000000000000000000100000000",
+      "header_ascii": "SQLite format 3......@  .......}...b............................"
+    }
+  ]
+}

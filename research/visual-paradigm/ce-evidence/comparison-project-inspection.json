@@ -1,0 +1,97 @@
+{
+  "path": "D:\\REA visual\\research\\visual-paradigm\\ce-evidence\\comparison-research.vpp",
+  "sha256": "4f7d87eb7cb53b30ddda7716a028805b073692bb78f18989413b65306749f0e5",
+  "source_fixture_sha256": "2486e5e97a41417ad85190ce46b33df25e12e346f5f6c797c69d3961fc3015a9",
+  "quick_check": [
+    [
+      "ok"
+    ]
+  ],
+  "models": [
+    {
+      "id": "UNgQFYWFYHxgAQX6",
+      "type": "Class",
+      "name": "Customer"
+    },
+    {
+      "id": "K.6QFYWFYHxgAQYG",
+      "type": "Class",
+      "name": "Order"
+    }
+  ],
+  "class_views": [
+    {
+      "id": "gNgQFYWFYHxgAQX5",
+      "diagram_id": "sXvgFYWFYHxgAQXs",
+      "model_id": "UNgQFYWFYHxgAQX6",
+      "shape_type": "Class"
+    },
+    {
+      "id": "y.6QFYWFYHxgAQYF",
+      "diagram_id": "sXvgFYWFYHxgAQXs",
+      "model_id": "K.6QFYWFYHxgAQYG",
+      "shape_type": "Class"
+    },
+    {
+      "id": "ArCkFYWFYHxgAQae",
+      "diagram_id": "9dCkFYWFYHxgAQaR",
+      "model_id": "UNgQFYWFYHxgAQX6",
+      "shape_type": "Class"
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "sXvgFYWFYHxgAQXs",
+      "type": "ClassDiagram",
+      "name": "REA Class Study"
+    },
+    {
+      "id": "jYrQFYWFYHxgAQYk",
+      "type": "InteractionDiagram",
+      "name": "Sequence Diagram1"
+    },
+    {
+      "id": "oxswFYWFYHxgAQZe",
+      "type": "ERDiagram",
+      "name": "Entity Relationship Diagram1"
+    },
+    {
+      "id": "9dCkFYWFYHxgAQaR",
+      "type": "ClassDiagram",
+      "name": "REA Class Study2"
+    }
+  ],
+  "shared_models": [
+    {
+      "model": {
+        "id": "UNgQFYWFYHxgAQX6",
+        "type": "Class",
+        "name": "Customer"
+      },
+      "views": [
+        {
+          "id": "gNgQFYWFYHxgAQX5",
+          "diagram_id": "sXvgFYWFYHxgAQXs",
+          "model_id": "UNgQFYWFYHxgAQX6",
+          "shape_type": "Class"
+        },
+        {
+          "id": "ArCkFYWFYHxgAQae",
+          "diagram_id": "9dCkFYWFYHxgAQaR",
+          "model_id": "UNgQFYWFYHxgAQX6",
+          "shape_type": "Class"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Copy to Diagram and resulting shared identities are confirmed; cross-view rename was not performed in this comparison pass.",
+    "This is a disposable project created during the UI study, not a user document.",
+    "The original disposable fixture hash differs from the earlier inspection baseline across resumed sessions. It must not be described as an immutable preserved baseline; cause is not attributed."
+  ],
+  "source_fixture_current_summary": {
+    "diagrams": 4,
+    "class_views": 3,
+    "baseline_sha256_matches": false
+  }
+}

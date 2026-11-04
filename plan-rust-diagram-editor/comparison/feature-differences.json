@@ -1,0 +1,242 @@
+[
+  {
+    "area": "Product breadth",
+    "vp": "L: 101 shared API constants and many suite entrypoints; enabled CE subset differs",
+    "rust": "P: partial class workflow",
+    "difference": "**Defer** most breadth; do not advertise suite parity"
+  },
+  {
+    "area": "Start a diagram",
+    "vp": "L: type search \u2192 template/blank \u2192 name/location/description",
+    "rust": "P: choose type/name and enter editor; metadata later",
+    "difference": "**Simplify** default path while keeping metadata editable"
+  },
+  {
+    "area": "Templates",
+    "vp": "L: preview catalog loads asynchronously",
+    "rust": "P: blank initial workflow",
+    "difference": "**Defer** template catalog; fewer starter examples"
+  },
+  {
+    "area": "Online/AI creation",
+    "vp": "L: prompts and web-category cards; no request executed",
+    "rust": "P: offline creation",
+    "difference": "**Separate/defer** service-backed workflows"
+  },
+  {
+    "area": "Primary commands",
+    "vp": "L: multiple ribbon groups",
+    "rust": "P: compact project/diagram/view command surface",
+    "difference": "**Redesign** command organization; advanced suite actions absent"
+  },
+  {
+    "area": "Project navigation",
+    "vp": "L: navigator tree, model explorer, thumbnail browser and recent/files views",
+    "rust": "P: Diagrams/Model sidebar, tabs and search",
+    "difference": "**Simplify** basic navigation; less rich browsing"
+  },
+  {
+    "area": "Class placement",
+    "vp": "L: click tool then canvas, or drag from palette",
+    "rust": "P: labeled tool, drag and contextual add",
+    "difference": "**Keep** direct manipulation with clearer discovery"
+  },
+  {
+    "area": "Naming",
+    "vp": "L: immediate inline name editing",
+    "rust": "P: inline naming with explicit commit/cancel",
+    "difference": "**Keep/refine**, not an entirely new capability"
+  },
+  {
+    "area": "Class members",
+    "vp": "L: class/attribute specification dialogs and typed API members",
+    "rust": "P: ordered attributes/operations in inspector",
+    "difference": "**Redesign** UI; preserve typed ordered members"
+  },
+  {
+    "area": "Detailed UML",
+    "vp": "L: flags, receptions, stereotypes/profiles and extensive properties",
+    "rust": "P: limited declared class subset",
+    "difference": "**Defer** semantics outside the defined subset"
+  },
+  {
+    "area": "Associations",
+    "vp": "L: created connection; semantic AssociationEnd records separate from view routes",
+    "rust": "P: roles/multiplicities plus basic association",
+    "difference": "**Keep subset**; not every navigability/aggregation/qualifier option"
+  },
+  {
+    "area": "Generalization",
+    "vp": "L: palette/API support; creation not exercised",
+    "rust": "P: inheritance relation, self/cycle checks",
+    "difference": "**Plan** and validate its exact subset independently"
+  },
+  {
+    "area": "Shared identity",
+    "vp": "L: Copy to Diagram creates a second appearance referencing the same Class ID",
+    "rust": "P: Show in diagram",
+    "difference": "**Keep**, use more explicit wording"
+  },
+  {
+    "area": "Model duplication",
+    "vp": "D: duplicate/copy-model distinctions; menu observed",
+    "rust": "P: Duplicate model with new IDs",
+    "difference": "**Specify/test** identity rules, not just appearance"
+  },
+  {
+    "area": "Master/auxiliary views",
+    "vp": "D: containment behavior can differ by view role",
+    "rust": "P: simpler explicit semantic reparent command",
+    "difference": "**Redesign**; do not silently infer semantic ownership from dragging"
+  },
+  {
+    "area": "Semantic versus visual change",
+    "vp": "L: separate model and visual fields",
+    "rust": "P: Model versus Appearance inspector sections",
+    "difference": "**Keep/make explicit** property scope"
+  },
+  {
+    "area": "Node movement",
+    "vp": "L: connector follows a moved class",
+    "rust": "P: transient preview, commit one transaction",
+    "difference": "**Keep**, internal implementation is our own"
+  },
+  {
+    "area": "Undo",
+    "vp": "L: class movement undo restored placement/route",
+    "rust": "P: reversible atomic commands and bounded history",
+    "difference": "**Keep/validate** compound actions and text-focus behavior"
+  },
+  {
+    "area": "Resize and precise placement",
+    "vp": "L/API: geometry and handles; complex behavior not fully tested",
+    "rust": "P: resize, snapping, keyboard movement",
+    "difference": "**Keep subset**, measure coordinate/focus edge cases"
+  },
+  {
+    "area": "Selection",
+    "vp": "L: selected handles/context actions; API supports members",
+    "rust": "P: single/multi-selection plus object-list access",
+    "difference": "**Keep core**; member-level targets require explicit design"
+  },
+  {
+    "area": "Connection affordances",
+    "vp": "L: palette tools and contextual handles",
+    "rust": "P: visible valid-target previews and large hit areas",
+    "difference": "**Refine** discoverability; UX benefit unmeasured"
+  },
+  {
+    "area": "Connector styles",
+    "vp": "L/API: route points, pins, jumps, multiple styles, labels and member endpoints",
+    "rust": "P: basic straight/orthogonal routes and anchors",
+    "difference": "**Defer advanced** curves, crossings, edge/member targets and rich labels"
+  },
+  {
+    "area": "Auto-layout",
+    "vp": "L/API: several layout families and option factories",
+    "rust": "P: initial arrangement/alignment; richer layout later",
+    "difference": "**Narrow** automatic layout capability"
+  },
+  {
+    "area": "Formatting",
+    "vp": "L: styles/presentation controls; stored per-view values",
+    "rust": "P: small style set, font/line/fill basics",
+    "difference": "**Keep subset**, less presentation configurability"
+  },
+  {
+    "area": "Layers/grouping",
+    "vp": "L/API/menu: supported surfaces, not fully exercised",
+    "rust": "P: basic grouping in quality milestone; layers not core v0.1 contract",
+    "difference": "**Clarify/defer**, distinguish semantic ownership"
+  },
+  {
+    "area": "Clipboard exchange",
+    "vp": "L: image JPG/EMF, Simple/Traditional XML and internal copy menu",
+    "rust": "P: explicit reuse/duplication first",
+    "difference": "**Defer formats**; loss for office/document workflows"
+  },
+  {
+    "area": "View removal / model deletion",
+    "vp": "D/menu: distinct possible semantics; destructive workflow untested",
+    "rust": "P: Remove view default; Delete model everywhere separately",
+    "difference": "**Define/test**, not a claim about VP defaults"
+  },
+  {
+    "area": "Search",
+    "vp": "L/D: browser search across project perspectives",
+    "rust": "P: sidebar name search",
+    "difference": "**Narrow** search scope; specify members/docs/roles later"
+  },
+  {
+    "area": "References/navigation",
+    "vp": "L/API/D: subdiagrams, references, jump/bookmarks, referenced projects",
+    "rust": "P: within-project IDs and tabs",
+    "difference": "**Defer** cross-project reference/reuse infrastructure"
+  },
+  {
+    "area": "Project file",
+    "vp": "L: native `.vpp` is SQLite in two inspected fixtures",
+    "rust": "P: independently versioned `.dgram` SQLite",
+    "difference": "**Change format**; shared database technology does not create compatibility"
+  },
+  {
+    "area": "XML exchange",
+    "vp": "L: selected diagrams exported as Simple XML plus data.zip",
+    "rust": "P: no VP XML importer in v0.1",
+    "difference": "**Defer** VP interchange and roundtrip guarantees"
+  },
+  {
+    "area": "Image/document export",
+    "vp": "L: export entrypoints; D: multiple image/PDF formats",
+    "rust": "P: SVG first",
+    "difference": "**Narrow** sharing formats; consider PNG next based on user need"
+  },
+  {
+    "area": "Save state",
+    "vp": "L: modified title marker and save status",
+    "rust": "P: visible Saving/Saved/error state",
+    "difference": "**Refine** feedback; no claim of stronger safety yet"
+  },
+  {
+    "area": "Recovery/migrations",
+    "vp": "VP behavior not fully investigated",
+    "rust": "P: recovery snapshots, transactional migration and errors",
+    "difference": "**Plan/verify**, never assert VP lacks safeguards"
+  },
+  {
+    "area": "Runtime stack",
+    "vp": "L: native Windows launchers, bundled JVM and Java platform",
+    "rust": "P: Rust/eframe application",
+    "difference": "**Replace implementation** without inferring performance benefits"
+  },
+  {
+    "area": "Accessibility",
+    "vp": "Full VP conformance not established",
+    "rust": "P: keyboard/object-list/screen-reader gates",
+    "difference": "**Test**, do not claim superiority"
+  },
+  {
+    "area": "Multilingual content",
+    "vp": "Not comprehensively tested in VP",
+    "rust": "P: English/Arabic/mixed text and IME gate",
+    "difference": "**Test** shaping/input; localization is a separate gap"
+  },
+  {
+    "area": "Multiple platforms",
+    "vp": "D: broader VP platform support",
+    "rust": "P: Windows-first",
+    "difference": "**Narrow** initial support; portability is only an architectural aim"
+  },
+  {
+    "area": "Extensions",
+    "vp": "L/D: public Java plugin APIs and automation scripts",
+    "rust": "P: internal Rust notation modules",
+    "difference": "**Defer** public SDK, plugin lifecycle and automation compatibility"
+  },
+  {
+    "area": "Reports/engineering/services",
+    "vp": "D: broad suite, edition/service boundaries apply",
+    "rust": "P: later or unspecified",
+    "difference": "**Defer** as separately scoped systems"
+  }
+]

@@ -1,0 +1,1988 @@
+[
+  {
+    "path": ".install4j/i4jruntime.jar",
+    "bytes": 2132267,
+    "entries": 1429,
+    "classes": 1279,
+    "top_packages": [
+      [
+        "com/install4j/runtime",
+        1060
+      ],
+      [
+        "com/install4j/api",
+        154
+      ],
+      [
+        "com/exe4j/runtime",
+        37
+      ],
+      [
+        "com/ejt/internal",
+        22
+      ],
+      [
+        "com/exe4j/Controller$LegacyStartupThread$1.class",
+        1
+      ],
+      [
+        "com/exe4j/Controller$LegacyStartupThread.class",
+        1
+      ],
+      [
+        "com/exe4j/Controller$1.class",
+        1
+      ],
+      [
+        "com/exe4j/Controller.class",
+        1
+      ],
+      [
+        "com/exe4j/Controller$ConnectionException.class",
+        1
+      ],
+      [
+        "com/exe4j/Controller$StartupListener.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\n\r\n"
+  },
+  {
+    "path": ".install4j/user/flatlaf.jar",
+    "bytes": 758100,
+    "entries": 350,
+    "classes": 313,
+    "top_packages": [
+      [
+        "com/install4j/shadow",
+        304
+      ],
+      [
+        "META-INF/versions/9",
+        5
+      ],
+      [
+        "com/install4j/runtime",
+        3
+      ],
+      [
+        "module-info.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\n\r\n"
+  },
+  {
+    "path": ".install4j/user.jar",
+    "bytes": 5463487,
+    "entries": 2520,
+    "classes": 2263,
+    "top_packages": [
+      [
+        "com/vp/platform",
+        127
+      ],
+      [
+        "com/install4j/script",
+        10
+      ],
+      [
+        "platform/installer/task",
+        6
+      ],
+      [
+        "platform/installer/deploy",
+        4
+      ],
+      [
+        "p/a/a.class",
+        1
+      ],
+      [
+        "p/aa/a.class",
+        1
+      ],
+      [
+        "p/aa/b.class",
+        1
+      ],
+      [
+        "p/aa/c.class",
+        1
+      ],
+      [
+        "p/aa/d.class",
+        1
+      ],
+      [
+        "p/aa/e.class",
+        1
+      ],
+      [
+        "p/aa/f.class",
+        1
+      ],
+      [
+        "p/ab/a.class",
+        1
+      ],
+      [
+        "p/ac/a.class",
+        1
+      ],
+      [
+        "p/ac/b.class",
+        1
+      ],
+      [
+        "p/ac/c.class",
+        1
+      ],
+      [
+        "p/ac/d.class",
+        1
+      ],
+      [
+        "p/ac/e.class",
+        1
+      ],
+      [
+        "p/ad/a.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "bundled/j2ee-api.jar",
+    "bytes": 62861,
+    "entries": 99,
+    "classes": 91,
+    "top_packages": [
+      [
+        "javax/ejb/EJBException.class",
+        1
+      ],
+      [
+        "javax/ejb/TransactionRolledbackLocalException.class",
+        1
+      ],
+      [
+        "javax/ejb/EJBContext.class",
+        1
+      ],
+      [
+        "javax/ejb/TimerHandle.class",
+        1
+      ],
+      [
+        "javax/ejb/EJBLocalHome.class",
+        1
+      ],
+      [
+        "javax/ejb/CreateException.class",
+        1
+      ],
+      [
+        "javax/ejb/EJBLocalObject.class",
+        1
+      ],
+      [
+        "javax/ejb/RemoveException.class",
+        1
+      ],
+      [
+        "javax/ejb/Timer.class",
+        1
+      ],
+      [
+        "javax/ejb/SessionBean.class",
+        1
+      ],
+      [
+        "javax/ejb/TransactionRequiredLocalException.class",
+        1
+      ],
+      [
+        "javax/ejb/MessageDrivenBean.class",
+        1
+      ],
+      [
+        "javax/ejb/SessionSynchronization.class",
+        1
+      ],
+      [
+        "javax/ejb/Handle.class",
+        1
+      ],
+      [
+        "javax/ejb/TimedObject.class",
+        1
+      ],
+      [
+        "javax/ejb/HomeHandle.class",
+        1
+      ],
+      [
+        "javax/ejb/EntityBean.class",
+        1
+      ],
+      [
+        "javax/ejb/ObjectNotFoundException.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.5.4 \r\nCreated-By: 1.4.2_05-b04 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "bundled/openapi.jar",
+    "bytes": 2497847,
+    "entries": 2464,
+    "classes": 2445,
+    "top_packages": [
+      [
+        "com/vp/plugin",
+        2445
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "jre/lib/javafx-swt.jar",
+    "bytes": 36148,
+    "entries": 23,
+    "classes": 17,
+    "top_packages": [
+      [
+        "javafx/embed/swt",
+        17
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.9.13\r\nCreated-By: 12.0.2+10 (AdoptOpenJDK)\r\n\r\n"
+  },
+  {
+    "path": "jre/lib/jrt-fs.jar",
+    "bytes": 105234,
+    "entries": 62,
+    "classes": 59,
+    "top_packages": [
+      [
+        "jdk/internal/jimage",
+        38
+      ],
+      [
+        "jdk/internal/jrtfs",
+        21
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nSpecification-Title: Java Platform API Specification\r\nSpecification-Version: 11\r\nSpecification-Vendor: Oracle Corporation\r\nImplementation-Title: Java Runtime Environment\r\nImplementation-Version: 11.0.16.1\r\nImplementation-Vendor: Eclipse Adoptium\r\nCreated-By: 10.0.2 (AdoptOpenJDK)\r\n\r\n"
+  },
+  {
+    "path": "lib/ant.jar",
+    "bytes": 23025,
+    "entries": 32,
+    "classes": 32,
+    "top_packages": [
+      [
+        "com/vp/ant",
+        32
+      ]
+    ],
+    "manifest": ""
+  },
+  {
+    "path": "lib/derby.jar",
+    "bytes": 2623509,
+    "entries": 1551,
+    "classes": 1491,
+    "top_packages": [
+      [
+        "org/apache/derby",
+        1491
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.7.1\r\nCreated-By: 14.3-b01-101 (Apple Inc.)\r\nBundle-Vendor: Apache Software Foundation\r\nBundle-Name: Apache Derby 10.6\r\nBundle-Version: 10.6.1000000.938214\r\nBundle-ManifestVersion: 2\r\nSealed: true\r\nBundle-Activator: org.apache.derby.osgi.EmbeddedActivator\r\nBundle-SymbolicName: derby\r\nDynamicImport-Package: *\r\nExport-Package: org.apache.derby.authentication,org.apache.derby.datab\r\n ase,org.apache.derby.io,org.apache.derby.jdbc,org.apache.derby.vti\r\nClass-Path: derbyLocale_cs.jar derbyLocale_de_DE.jar derbyLocale_es.ja\r\n r derbyLocale_fr.jar derbyLocale_hu.jar derbyLocale_it.jar derbyLocal\r\n e_ja_JP.jar derbyLocale_ko_KR.jar derbyLocale_pl.jar derbyLocale_pt_B\r\n R.jar derbyLocale_ru.jar derbyLocale_zh_CN.jar derbyLocale_zh_TW.jar\r\n\r\nName: org/apache/derby/impl/tools/sysinfo/\r\nSealed: false\r\n\r\nName: org/apache/derby/iapi/services/context/\r\nSealed: false\r\n\r\nName: org/apache/derby/iapi/services/info/\r\nSealed: false\r\n\r\nName: org/apache/derby/jdbc/\r\nSealed: false\r\n\r\nName: org/apache/derby/info/\r\nSealed: false\r\n\r\nName: org/apache/derby/iapi/services/i18n/\r\nSealed: false\r\n\r\nName: org/apache/derby/iapi/tools/i18n/\r\nSealed: false\r\n\r\nName: org/apache/derby/loc/\r\nSealed: false\r\n\r\nName: org/apache/derby/tools/\r\nSealed: false\r\n\r\n"
+  },
+  {
+    "path": "lib/jniwrap.jar",
+    "bytes": 234300,
+    "entries": 195,
+    "classes": 188,
+    "top_packages": [
+      [
+        "com/jniwrapper/util",
+        10
+      ],
+      [
+        "com/jniwrapper/jawt",
+        4
+      ],
+      [
+        "com/jniwrapper/Int8.class",
+        1
+      ],
+      [
+        "com/jniwrapper/ArithmeticalPointer.class",
+        1
+      ],
+      [
+        "com/jniwrapper/ComplexArray.class",
+        1
+      ],
+      [
+        "com/jniwrapper/a.class",
+        1
+      ],
+      [
+        "com/jniwrapper/Pointer$Const.class",
+        1
+      ],
+      [
+        "com/jniwrapper/Pointer$Void.class",
+        1
+      ],
+      [
+        "com/jniwrapper/UInt64.class",
+        1
+      ],
+      [
+        "com/jniwrapper/b.class",
+        1
+      ],
+      [
+        "com/jniwrapper/Bool.class",
+        1
+      ],
+      [
+        "com/jniwrapper/c.class",
+        1
+      ],
+      [
+        "com/jniwrapper/DoubleFloat.class",
+        1
+      ],
+      [
+        "com/jniwrapper/BufferFactory14Unsafe.class",
+        1
+      ],
+      [
+        "com/jniwrapper/d.class",
+        1
+      ],
+      [
+        "com/jniwrapper/e.class",
+        1
+      ],
+      [
+        "com/jniwrapper/f.class",
+        1
+      ],
+      [
+        "com/jniwrapper/g.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nExport-Package: com.jniwrapper,com.jniwrapper.jawt,com.jniwrapper.util\r\nApplication-Name: JNIWrapper\r\nVendor: TeamDev Ltd.\r\nBundle-Name: JNIWrapper\r\nCreated-By: 1.6.0_18-ea-b02 (Sun Microsystems Inc.)\r\nBuild: 3.12.377\r\nVersion: 3.12\r\nAnt-Version: Apache Ant 1.9.6\r\nBundle-Vendor: TeamDev Ltd.\r\nTitle: JNIWrapper\r\nTrusted-library: true\r\nBundle-Version: 3.12\r\nPermissions: all-permissions\r\nBundle-ManifestVersion: 2\r\nBundle-Description: JNIWrapper library\r\nBundle-SymbolicName: com.jniwrapper\r\nImport-Package: org.slf4j,org.w3c.dom,javax.xml.parsers\r\nCodebase: *\r\n\r\nName: com/jniwrapper/UInt32.class\r\nSHA1-Digest: fVbG26LjQYW3tAQy2auJGc1UP/g=\r\n\r\nName: com/jniwrapper/j.class\r\nSHA1-Digest: WYooLMm/eWeHXEpCoEQBgGVUM5g=\r\n\r\nName: com/jniwrapper/bq.class\r\nSHA1-Digest: +MIazgJN03KX0AtDPzdP3C5n7BQ=\r\n\r\nName: com/jniwrapper/bo.class\r\nSHA1-Digest: nWj94SI2SJ2bjpEMpF+iNQwPJSQ=\r\n\r\nName: com/jniwrapper/NativeResource.class\r\nSHA1-Digest: dXCwQkF2MKG8L9IvpOvaXrQD+Kw=\r\n\r\nName: com/jniwrapper/by.class\r\nSHA1-Digest: FWOI1O7JxbCuOYw1ko6MJo8r624=\r\n\r\nName: com/jniwrapper/as.class\r\nSHA1-Digest: NaZumRGqSzmCx2fFwluzJnM0pd4=\r\n\r\nName: com/jniwrapper/UShortInt.class\r\nSHA1-Digest: Qg9OIK/iqOOwGy7o3PvljzFMIv8=\r\n\r\nName: com/jniwrapper/jawt/JAWT.class\r\nSHA1-Digest: 8YMsNLPddWdHkzqF2jCe20HlEAQ=\r\n\r\nName: com/jniwrapper/DoubleFloat.class\r\nSHA1-Digest: Q2qRPHRETVfTKGQv9UbA/7Edul0=\r\n\r\nName: com/jniwrapper/bk.class\r\nSHA1-Digest: vlNtXHZCEC2ASQ1UlslZl/5Gf60=\r\n\r\nName: com/jniwrapper/NoSuchVariableException.class\r\nSHA1-Digest: xHTURfxbC7vJthlGT3Vw46yhfrY=\r\n\r\nName: com/jniwrapper/FunctionExecutionException.class\r\nSHA1-Digest: By4RGiHEI5itkKdQj8D1Fd0vayU=\r\n\r\nName: com/jniwrapper/at.class\r\nSHA1-Digest: pjFpBN4dTPLGGKYhc6Y8yYWUlhI=\r\n\r\nName: com/jniwrapper/ak.class\r\nSHA1-Digest: cU9Czg9pVediWlNd3dmk0XDUzPg=\r\n\r\nName: com/jniwrapper/WideStringArray.class\r\nSHA1-Digest: B7YfGJZQxhgiIUJ5f0cOvFiT8qI=\r\n\r\nName: com/jniwrapper/Int8.class\r\nSHA1-Digest: ahml85Xnzoh6NLcWjjhzgwioqOQ=\r\n\r\nName: com/jniwrapper/au.class\r\nSHA1-Digest: FOMSXIybsTIzADkPLGKiKHinaa4=\r\n\r\nName: com/jniwrapper/bw.class\r\nSHA1-Digest: kMWcMI577BX4MfdmSNUp6UAHZmM=\r\n\r\nName: com/jniwrapper/JNIWrapperException.class\r\nSHA1-Digest: 9tt4BHsNiKkf43FW1oSZFE5sVIs=\r\n\r\nName: com/jniwrapper/ExternalStringArray.class\r\nSHA1-Digest: OpsFeXdRPXFbqzGBhx+Rnz0XUQw=\r\n\r\nName: com/jniwrapper/AutoDeleteParameter.class\r\nSHA1-Digest: pGpLQejc3lFV8jyiSDe/Rg57OUw=\r\n\r\nName: com/jniwrapper/Int16.class\r\nSHA1-Digest: ZTncZaR66GoPLOfU/6CCY5npEl0=\r\n\r\nName: com/jniwrapper/av.class\r\nSHA1-Digest: KwWON+ZvNMWSlz29ItuspTp63l4=\r\n\r\nName: com/jniwrapper/LongInt.class\r\nSHA1-Digest: l9ohu6kYRDC9bJysrX1TCGWZgLE=\r\n\r\nName: com/jniwrapper/bp.class\r\nSHA1-Digest: 5ta63ZIKR0Mb2IArLSPASaO7hh8=\r\n\r\nName: com/jniwrapper/BufferFactory14Unsafe.class\r\nSHA1-Digest: yDGmtmLWl8mrrvoJzz43zNCwQpM=\r\n\r\nName: com/jniwrapper/ArrayParameter.class\r\nSHA1-Digest: +sfi6AfgVpAcrZl2NM8gPnW66KE=\r\n\r\nName: com/jniwrapper/h.class\r\nSHA1-Digest: banuevEmsNEEWS1ePLS9+Q2Jcyg=\r\n\r\nName: com/jniwrapper/SingleFloat.class\r\nSHA1-Digest: uHB2kG4Y88WJrI1A3Fh2/uDTurw=\r\n\r\nName: com/jniwrapper/UInt8.class\r\nSHA1-Digest: 1C/Zj/f08rXwSZvvuQWsTTNP+lI=\r\n\r\nName: com/jniwrapper/o.class\r\nSHA1-Digest: GadRFjir/lLmO/N6C19yepfy6bE=\r\n\r\nName: com/jniwrapper/ad.class\r\nSHA1-Digest: JeWXMbJ5PGeNCgwqk32cER5AM/8=\r\n\r\nName: com/jniwrapper/AlignmentAwareParameter.class\r\nSHA1-Digest: WkfSZLWyBZ4E+LaVnu++CmzMYfQ=\r\n\r\nName: com/jniwrapper/ar.class\r\nSHA1-Digest: /4ZchJJXY62tgEPGYzGcZ5YojGs=\r\n\r\nName: com/jniwrapper/StringArray.class\r\nSHA1-Digest: Um5ncl1eGJsvJ/ET/eoVqhZv+aM=\r\n\r\nName: com/jniwrapper/bu.class\r\nSHA1-Digest: ElIWP2uS9bcDWXOubgb9btYs0DY=\r\n\r\nName: com/jniwrapper/Pointer$OutOnly.class\r\nSHA1-Digest: rn1SaA9OkO+lyv+sedUjHzJTifU=\r\n\r\nName: com/jniwrapper/p.class\r\nSHA1-Digest: /IGX//QwIN6bJjwen+amjEE7XK0=\r\n\r\nName: com/jniwrapper/w.class\r\nSHA1-Digest: 83QWaZd4NR4K56ar2HeUiptSyTM=\r\n\r\nName: com/jniwrapper/LibraryLoader.class\r\nSHA1-Digest: 3SNSQAgA8ZVJ/V71QxmCpu/7Wo0=\r\n\r\nName: com/jniwrapper/g.class\r\nSHA1-Digest: t1W4"
+  },
+  {
+    "path": "lib/lib01.jar",
+    "bytes": 89891250,
+    "entries": 67777,
+    "classes": 66053,
+    "top_packages": [
+      [
+        "v/aux/d.class",
+        1
+      ],
+      [
+        "v/aux/a.class",
+        1
+      ],
+      [
+        "v/aux/c.class",
+        1
+      ],
+      [
+        "v/aux/b.class",
+        1
+      ],
+      [
+        "v/auy/dy.class",
+        1
+      ],
+      [
+        "v/auy/af.class",
+        1
+      ],
+      [
+        "v/auy/br.class",
+        1
+      ],
+      [
+        "v/auy/bs.class",
+        1
+      ],
+      [
+        "v/auy/g.class",
+        1
+      ],
+      [
+        "v/auy/e.class",
+        1
+      ],
+      [
+        "v/auy/f.class",
+        1
+      ],
+      [
+        "v/auy/bl.class",
+        1
+      ],
+      [
+        "v/auy/bk.class",
+        1
+      ],
+      [
+        "v/auy/bm.class",
+        1
+      ],
+      [
+        "v/auy/bn.class",
+        1
+      ],
+      [
+        "v/auy/cm.class",
+        1
+      ],
+      [
+        "v/auy/bi.class",
+        1
+      ],
+      [
+        "v/auy/bv.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "lib/lib02.jar",
+    "bytes": 77996668,
+    "entries": 41251,
+    "classes": 26819,
+    "top_packages": [
+      [
+        "org/apache/batik",
+        2537
+      ],
+      [
+        "com/vp/plugin",
+        2445
+      ],
+      [
+        "com/google/common",
+        2238
+      ],
+      [
+        "org/openxmlformats/schemas",
+        2105
+      ],
+      [
+        "org/apache/poi",
+        1920
+      ],
+      [
+        "org/apache/xmlbeans",
+        1516
+      ],
+      [
+        "org/eclipse/emf",
+        802
+      ],
+      [
+        "com/jidesoft/grid",
+        777
+      ],
+      [
+        "org/apache/http",
+        742
+      ],
+      [
+        "com/vp/instantgenerator",
+        727
+      ],
+      [
+        "com/sun/xml",
+        694
+      ],
+      [
+        "org/eclipse/elk",
+        650
+      ],
+      [
+        "com/jidesoft/plaf",
+        570
+      ],
+      [
+        "org/apache/tools",
+        558
+      ],
+      [
+        "com/sun/msv",
+        512
+      ],
+      [
+        "com/google/api",
+        498
+      ],
+      [
+        "org/jfree/chart",
+        441
+      ],
+      [
+        "org/pushingpixels/flamingo",
+        398
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "lib/lib03.jar",
+    "bytes": 4292943,
+    "entries": 2661,
+    "classes": 2478,
+    "top_packages": [
+      [
+        "org/apache/fop",
+        2478
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.9.3\r\nCreated-By: 1.6.0_34-b04 (Sun Microsystems Inc.)\r\nMain-Class: org.apache.fop.cli.Main\r\nBuild-Id: 20170403-122416-BST (simon [Linux 3.13.0-107-generic amd64, \r\n Java 1.6.0_34-b04, Target Java 1.6])\r\n\r\nName: org/apache/fop/\r\nSpecification-Title: XSL-FO - Extensible Stylesheet Language\r\nSpecification-Version: 1.1\r\nSpecification-Vendor: World Wide Web Consortium\r\nSpecification-URL: http://www.w3.org/TR/xsl\r\nImplementation-Title: Apache FOP\r\nImplementation-Version: 2.2\r\nImplementation-Vendor: The Apache Software Foundation (http://xmlgraph\r\n ics.apache.org/fop/)\r\n\r\n"
+  },
+  {
+    "path": "lib/lib04.jar",
+    "bytes": 40389716,
+    "entries": 19463,
+    "classes": 9884,
+    "top_packages": [
+      [
+        "net/sourceforge/plantuml",
+        3282
+      ],
+      [
+        "org/glassfish/jersey",
+        1051
+      ],
+      [
+        "org/glassfish/grizzly",
+        940
+      ],
+      [
+        "com/fasterxml/jackson",
+        852
+      ],
+      [
+        "jersey/repackaged/com",
+        753
+      ],
+      [
+        "com/lowagie/text",
+        467
+      ],
+      [
+        "org/apache/xmlgraphics",
+        374
+      ],
+      [
+        "org/glassfish/tyrus",
+        326
+      ],
+      [
+        "org/glassfish/hk2",
+        245
+      ],
+      [
+        "org/apache/velocity",
+        224
+      ],
+      [
+        "org/yaml/snakeyaml",
+        207
+      ],
+      [
+        "javax/ws/rs",
+        137
+      ],
+      [
+        "org/apache/commons",
+        130
+      ],
+      [
+        "org/jvnet/hk2",
+        105
+      ],
+      [
+        "org/apache/avalon",
+        75
+      ],
+      [
+        "org/apache/log",
+        67
+      ],
+      [
+        "org/apache/oro",
+        62
+      ],
+      [
+        "zext/plantuml/com",
+        54
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "lib/lib05.jar",
+    "bytes": 9731064,
+    "entries": 178,
+    "classes": 105,
+    "top_packages": [
+      [
+        "org/sqlite/date",
+        37
+      ],
+      [
+        "org/sqlite/jdbc3",
+        10
+      ],
+      [
+        "org/sqlite/core",
+        9
+      ],
+      [
+        "org/sqlite/jdbc4",
+        7
+      ],
+      [
+        "org/sqlite/javax",
+        4
+      ],
+      [
+        "org/sqlite/util",
+        3
+      ],
+      [
+        "org/sqlite/SQLiteException.class",
+        1
+      ],
+      [
+        "org/sqlite/SQLiteConfig$TempStore.class",
+        1
+      ],
+      [
+        "org/sqlite/BusyHandler.class",
+        1
+      ],
+      [
+        "org/sqlite/SQLiteErrorCode.class",
+        1
+      ],
+      [
+        "org/sqlite/SQLiteConfig$JournalMode.class",
+        1
+      ],
+      [
+        "org/sqlite/SQLiteConfig.class",
+        1
+      ],
+      [
+        "org/sqlite/ExtendedCommand$RestoreCommand.class",
+        1
+      ],
+      [
+        "org/sqlite/SQLiteLimits.class",
+        1
+      ],
+      [
+        "org/sqlite/SQLiteConnection.class",
+        1
+      ],
+      [
+        "org/sqlite/JDBC.class",
+        1
+      ],
+      [
+        "org/sqlite/ExtendedCommand.class",
+        1
+      ],
+      [
+        "org/sqlite/SQLiteConfig$Pragma.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: Apache Maven Bundle Plugin\r\nBuild-Jdk-Spec: 11\r\nAutomatic-Module-Name: org.xerial.sqlitejdbc\r\nBnd-LastModified: 1630301840110\r\nBuild-Jdk: 11.0.11\r\nBuilt-By: leo\r\nBundle-Description: SQLite JDBC library\r\nBundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt\r\nBundle-ManifestVersion: 2\r\nBundle-Name: SQLite JDBC\r\nBundle-SymbolicName: org.xerial.sqlite-jdbc;singleton:=true\r\nBundle-Version: 3.36.0.3\r\nExport-Package: org.sqlite;version=\"3.36.0\";uses:=\"javax.sql,org.sqlite.\r\n core,org.sqlite.date\",org.sqlite.core;version=\"3.36.0\";uses:=\"org.sqlit\r\n e,org.sqlite.jdbc4\",org.sqlite.util;version=\"3.36.0\",org.sqlite.date;ve\r\n rsion=\"3.36.0\",org.sqlite.javax;version=\"3.36.0\";uses:=\"javax.sql,org.s\r\n qlite,org.sqlite.jdbc4\",org.sqlite.jdbc4;version=\"3.36.0\";uses:=\"javax.\r\n sql,org.sqlite,org.sqlite.core,org.sqlite.jdbc3\",org.sqlite.jdbc3;versi\r\n on=\"3.36.0\";uses:=\"org.sqlite,org.sqlite.core\"\r\nImport-Package: javax.sql;resolution:=optional\r\nOriginally-Created-By: Apache Maven Bundle Plugin\r\nTool: Bnd-2.1.0.20130426-122213\r\n\r\n"
+  },
+  {
+    "path": "lib/lib06.jar",
+    "bytes": 13543611,
+    "entries": 6559,
+    "classes": 6254,
+    "top_packages": [
+      [
+        "com/teamdev/jxbrowser",
+        6254
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "lib/lib07.jar",
+    "bytes": 1214290,
+    "entries": 739,
+    "classes": 681,
+    "top_packages": [
+      [
+        "com/teamdev/jxcapture",
+        461
+      ],
+      [
+        "com/teamdev/jxdesktop",
+        220
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.9.15\r\nCreated-By: 1.6.0_45-b06 (Sun Microsystems Inc.)\r\nTitle: JxCapture\r\nVendor: TeamDev Ltd.\r\nVersion: 3.6\r\nBuild: 3.6\r\nBundle-Name: JxCapture 3\r\nBundle-Description: JxCapture Library\r\nBundle-Vendor: TeamDev Ltd.\r\nBundle-Version: 3.6\r\nBundle-ManifestVersion: 2\r\nBundle-SymbolicName: com.teamdev.jxcapture\r\nExport-Package: com.teamdev.jxcapture;\r\nImport-Package: com.jniwrapper,com.teamdev.jxdesktop,org.slf4j\r\nPermissions: all-permissions\r\nCodebase: *\r\nApplication-Name: JxCapture\r\nTrusted-library: true\r\n\r\n"
+  },
+  {
+    "path": "lib/lib09.jar",
+    "bytes": 86911651,
+    "entries": 5,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\n\r\n"
+  },
+  {
+    "path": "lib/openapi.jar",
+    "bytes": 2497847,
+    "entries": 2464,
+    "classes": 2445,
+    "top_packages": [
+      [
+        "com/vp/plugin",
+        2445
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "lib/platforminstaller.jar",
+    "bytes": 5451465,
+    "entries": 2508,
+    "classes": 2253,
+    "top_packages": [
+      [
+        "com/vp/platform",
+        127
+      ],
+      [
+        "platform/installer/task",
+        6
+      ],
+      [
+        "platform/installer/deploy",
+        4
+      ],
+      [
+        "p/dl/f.class",
+        1
+      ],
+      [
+        "p/dl/c.class",
+        1
+      ],
+      [
+        "p/dl/d.class",
+        1
+      ],
+      [
+        "p/dl/b.class",
+        1
+      ],
+      [
+        "p/dl/e.class",
+        1
+      ],
+      [
+        "p/dl/a.class",
+        1
+      ],
+      [
+        "p/d/aj.class",
+        1
+      ],
+      [
+        "p/d/ah.class",
+        1
+      ],
+      [
+        "p/d/z.class",
+        1
+      ],
+      [
+        "p/d/ac.class",
+        1
+      ],
+      [
+        "p/d/aa.class",
+        1
+      ],
+      [
+        "p/d/al.class",
+        1
+      ],
+      [
+        "p/d/ad.class",
+        1
+      ],
+      [
+        "p/d/af.class",
+        1
+      ],
+      [
+        "p/d/f.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "lib/startsde.jar",
+    "bytes": 25229,
+    "entries": 31,
+    "classes": 25,
+    "top_packages": [
+      [
+        "sderunner/b.class",
+        1
+      ],
+      [
+        "sderunner/SDERunner.class",
+        1
+      ],
+      [
+        "sderunner/d.class",
+        1
+      ],
+      [
+        "sderunner/c.class",
+        1
+      ],
+      [
+        "sderunner/a.class",
+        1
+      ],
+      [
+        "s/b/o.class",
+        1
+      ],
+      [
+        "s/b/k.class",
+        1
+      ],
+      [
+        "s/b/d.class",
+        1
+      ],
+      [
+        "s/b/e.class",
+        1
+      ],
+      [
+        "s/b/f.class",
+        1
+      ],
+      [
+        "s/b/g.class",
+        1
+      ],
+      [
+        "s/b/h.class",
+        1
+      ],
+      [
+        "s/b/p.class",
+        1
+      ],
+      [
+        "s/b/c.class",
+        1
+      ],
+      [
+        "s/b/b.class",
+        1
+      ],
+      [
+        "s/b/n.class",
+        1
+      ],
+      [
+        "s/b/l.class",
+        1
+      ],
+      [
+        "s/b/a.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nMain-Class: sderunner.SDERunner\r\n\r\n"
+  },
+  {
+    "path": "lib/vpplatform.jar",
+    "bytes": 89431667,
+    "entries": 40774,
+    "classes": 36515,
+    "top_packages": [
+      [
+        "fr/jayasoft/jexplose",
+        42
+      ],
+      [
+        "v/byf/bz.class",
+        1
+      ],
+      [
+        "v/byf/ck.class",
+        1
+      ],
+      [
+        "v/byf/cl.class",
+        1
+      ],
+      [
+        "v/byf/cm.class",
+        1
+      ],
+      [
+        "v/byf/cn.class",
+        1
+      ],
+      [
+        "v/byf/co.class",
+        1
+      ],
+      [
+        "v/byf/cp.class",
+        1
+      ],
+      [
+        "v/byf/cq.class",
+        1
+      ],
+      [
+        "v/byf/ct.class",
+        1
+      ],
+      [
+        "v/byf/cs.class",
+        1
+      ],
+      [
+        "v/byf/cr.class",
+        1
+      ],
+      [
+        "v/byf/ca.class",
+        1
+      ],
+      [
+        "v/byf/cc.class",
+        1
+      ],
+      [
+        "v/byf/cb.class",
+        1
+      ],
+      [
+        "v/byf/cd.class",
+        1
+      ],
+      [
+        "v/byf/ce.class",
+        1
+      ],
+      [
+        "v/byf/cf.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "lib/vpserver.jar",
+    "bytes": 11729684,
+    "entries": 12069,
+    "classes": 8026,
+    "top_packages": [
+      [
+        "com/vp/vpserver",
+        1608
+      ],
+      [
+        "com/vp/cmd",
+        3
+      ],
+      [
+        "s/fg/a.class",
+        1
+      ],
+      [
+        "s/fh/h.class",
+        1
+      ],
+      [
+        "s/fh/g.class",
+        1
+      ],
+      [
+        "s/fh/f.class",
+        1
+      ],
+      [
+        "s/fh/e.class",
+        1
+      ],
+      [
+        "s/fh/d.class",
+        1
+      ],
+      [
+        "s/fh/c.class",
+        1
+      ],
+      [
+        "s/fh/b.class",
+        1
+      ],
+      [
+        "s/fh/a.class",
+        1
+      ],
+      [
+        "s/co/b.class",
+        1
+      ],
+      [
+        "s/co/a.class",
+        1
+      ],
+      [
+        "s/co/c.class",
+        1
+      ],
+      [
+        "s/cp/i.class",
+        1
+      ],
+      [
+        "s/cp/j.class",
+        1
+      ],
+      [
+        "s/cp/l.class",
+        1
+      ],
+      [
+        "s/cp/m.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module-Short-Description: Visual Paradigm Teamwork Server\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module-Name: Visual Paradigm Teamwork Server\r\nMain-Class: TeamworkServer\r\n\r\n"
+  },
+  {
+    "path": "lib/vpserverres.jar",
+    "bytes": 11711476,
+    "entries": 7851,
+    "classes": 6704,
+    "top_packages": [
+      [
+        "org/apache/fop",
+        2478
+      ],
+      [
+        "com/sun/xml",
+        694
+      ],
+      [
+        "org/apache/commons",
+        580
+      ],
+      [
+        "org/apache/tools",
+        558
+      ],
+      [
+        "com/sun/msv",
+        512
+      ],
+      [
+        "org/jfree/chart",
+        441
+      ],
+      [
+        "org/apache/xmlgraphics",
+        374
+      ],
+      [
+        "org/jfree/data",
+        194
+      ],
+      [
+        "com/google/gson",
+        180
+      ],
+      [
+        "javax/xml/bind",
+        110
+      ],
+      [
+        "org/jfree/ui",
+        107
+      ],
+      [
+        "org/apache/avalon",
+        75
+      ],
+      [
+        "net/java/plaf",
+        70
+      ],
+      [
+        "org/jfree/util",
+        41
+      ],
+      [
+        "org/jfree/base",
+        29
+      ],
+      [
+        "com/sun/istack",
+        21
+      ],
+      [
+        "org/iso_relax/dispatcher",
+        19
+      ],
+      [
+        "jp/gr/xml",
+        18
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module-Short-Description: Visual Paradigm Teamwork Server\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module-Name: Visual Paradigm Teamwork Server\r\nMain-Class: TeamworkServer\r\n\r\n"
+  },
+  {
+    "path": "lib/winpack.jar",
+    "bytes": 708668,
+    "entries": 526,
+    "classes": 470,
+    "top_packages": [
+      [
+        "com/jniwrapper/win32",
+        470
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCodebase: *\r\nCreated-By: 1.4.2_10-b03 (Sun Microsystems Inc.)\r\nVendor: TeamDev Ltd.\r\nImport-Package: com.jniwrapper,com.jniwrapper.util,com.jniwrapper.jawt\r\nTitle: WinPack\r\nExport-Package: com.jniwrapper.win32,com.jniwrapper.win32.dde,com.jniw\r\n rapper.win32.gdi,com.jniwrapper.win32.gdi.bitmap,com.jniwrapper.win32\r\n .gdi.bitmap.res,com.jniwrapper.win32.hook,com.jniwrapper.win32.hook.d\r\n ata,com.jniwrapper.win32.io,com.jniwrapper.win32.mapi,com.jniwrapper.\r\n win32.process,com.jniwrapper.win32.process.monitoring,com.jniwrapper.\r\n win32.registry,com.jniwrapper.win32.registry.ui,com.jniwrapper.win32.\r\n security,com.jniwrapper.win32.service,com.jniwrapper.win32.shell,com.\r\n jniwrapper.win32.shell.events,com.jniwrapper.win32.system,com.jniwrap\r\n per.win32.system.eventlog,com.jniwrapper.win32.ui,com.jniwrapper.win3\r\n 2.ui.controls,com.jniwrapper.win32.ui.dialogs,com.jniwrapper.win32.wi\r\n ndow,com.jniwrapper.win32.winhttp\r\nBundle-Version: 3.10\r\nVersion: 3.10\r\nBundle-Name: WinPack\r\nBundle-Description: WinPack library\r\nTrusted-library: True\r\nPermissions: all-permissions\r\nAnt-Version: Apache Ant 1.8.4\r\nBuild: 3.10.395\r\nBundle-Vendor: TeamDev Ltd.\r\nBundle-ManifestVersion: 2\r\nBundle-SymbolicName: com.jniwrapper.win32\r\nApplication-Name: WinPack\r\n\r\nName: com/jniwrapper/win32/process/monitoring/ModuleEntryIterator.clas\r\n s\r\nSHA1-Digest: xYosErhefQiAGxKInlL+Nl53hZQ=\r\n\r\nName: com/jniwrapper/win32/service/Service$StartupType.class\r\nSHA1-Digest: 1vM73fpvsJbxe+gC+HsbsTE7jrs=\r\n\r\nName: com/jniwrapper/win32/winhttp/ProxySettings.class\r\nSHA1-Digest: 7Qtusdh+MnRxQlTM187WIy92jxM=\r\n\r\nName: com/jniwrapper/win32/dde/DdeServiceHelper.class\r\nSHA1-Digest: FTy6AiJCvAO6+MdZY+fn7ombIIQ=\r\n\r\nName: com/jniwrapper/win32/ui/WindowPlacement.class\r\nSHA1-Digest: MmRtU9+FsF5xT1G3zJRmiM2MncI=\r\n\r\nName: com/jniwrapper/win32/hook/data/GetMsgHookData.class\r\nSHA1-Digest: a5z91m1JIYUHgg8Mx7HMMozV/0Y=\r\n\r\nName: com/jniwrapper/win32/gdi/bitmap/BitmapBuilderFactory.class\r\nSHA1-Digest: fUHtcZTkESQWM2uqgRD3Z/aSm0M=\r\n\r\nName: com/jniwrapper/win32/ui/Timer.class\r\nSHA1-Digest: 3AbsqrCxGDF/wi8bIeF8ubgePuI=\r\n\r\nName: com/jniwrapper/win32/winhttp/DefaultProxySettings.class\r\nSHA1-Digest: zAtkvmO3OqMJt0Cp3tg7s2ho9Vo=\r\n\r\nName: com/jniwrapper/win32/ui/dialogs/OpenSaveFileDialog$1.class\r\nSHA1-Digest: i2QOTx7+SX44Ono+sdeQ2tlZPEQ=\r\n\r\nName: com/jniwrapper/win32/ui/WindowProc.class\r\nSHA1-Digest: xf+ZC1j37QBsEv7TkU7wKJe3nv8=\r\n\r\nName: com/jniwrapper/win32/gdi/GdiObject$Type.class\r\nSHA1-Digest: PE6BkFH9ZqTbKv7xysLxUlO5LP0=\r\n\r\nName: com/jniwrapper/win32/process/ProcessVariables$EnvironmentVariabl\r\n esResource.class\r\nSHA1-Digest: ufilVjEmD51n/qx5tTUIeRMx1as=\r\n\r\nName: com/jniwrapper/win32/ui/User32.class\r\nSHA1-Digest: UQujiT4TCX2HPaWflGTh6TaV9nU=\r\n\r\nName: com/jniwrapper/win32/hook/data/HooksData$GetMsgHookEventReader.c\r\n lass\r\nSHA1-Digest: /MjX+kwMEMTPSLhqCJu9iAaEr2o=\r\n\r\nName: com/jniwrapper/win32/hook/data/HooksData$CBTProcHookEventReader.\r\n class\r\nSHA1-Digest: FSgfc6wqaN3EpG2Cp67mVv2d1KQ=\r\n\r\nName: com/jniwrapper/win32/io/FileInfo.class\r\nSHA1-Digest: X9q/4qJxU/N0sk/kUOR9/g51p1w=\r\n\r\nName: com/jniwrapper/win32/shell/events/ShellEventsSubscriber$1.class\r\nSHA1-Digest: yoIdr5uP7Hvzbad7Ae05Qmo7kK8=\r\n\r\nName: com/jniwrapper/win32/registry/RegistryValueTransformer$3.class\r\nSHA1-Digest: kFcfDZ808UXnYT7xh06ssOvNmro=\r\n\r\nName: com/jniwrapper/win32/service/ServiceManager$ServiceState.class\r\nSHA1-Digest: t33iWFiOcnbroRCA34uH82pMqyo=\r\n\r\nName: com/jniwrapper/win32/process/monitoring/package.html\r\nSHA1-Digest: ah2fYh7D5XtFYqrdn6bqJHasHAw=\r\n\r\nName: com/jniwrapper/win32/io/FolderInfo.class\r\nSHA1-Digest: MEk3CcbpP9UAnezwWSt1S0xFlJA=\r\n\r\nName: com/jniwrapper/win32/service/Service$CurrentState.class\r\nSHA1-Digest: Zt/7f24jVKbqK03637x+/YLMcG4=\r\n\r\nName: com/jniwrapper/win32/gdi/Brush$BrushStyle.class\r\nSHA1-Digest: yBfjPtW7Eu1FapjrLxG71kgRirc=\r\n\r\nName: com/jniwrapper/win32/io/Win9xWatcherStrategy$1.class\r\nSHA1-Digest: vu2fLyWelFU01BTTpaIP/Bzkmbo=\r\n\r\nName: com/jniwrapper/win32/shell/events/ShellEventsSubscriber"
+  },
+  {
+    "path": "lib/xalan.jar",
+    "bytes": 4621729,
+    "entries": 2920,
+    "classes": 2755,
+    "top_packages": [
+      [
+        "org/apache/xerces",
+        687
+      ],
+      [
+        "org/apache/xalan",
+        646
+      ],
+      [
+        "org/apache/xml",
+        380
+      ],
+      [
+        "org/apache/bcel",
+        363
+      ],
+      [
+        "org/apache/xpath",
+        210
+      ],
+      [
+        "org/w3c/dom",
+        150
+      ],
+      [
+        "org/apache/wml",
+        76
+      ],
+      [
+        "org/apache/html",
+        71
+      ],
+      [
+        "org/xml/sax",
+        45
+      ],
+      [
+        "javax/xml/transform",
+        31
+      ],
+      [
+        "javax/xml/xpath",
+        24
+      ],
+      [
+        "javax/xml/validation",
+        18
+      ],
+      [
+        "org/apache/regexp",
+        16
+      ],
+      [
+        "javax/xml/datatype",
+        15
+      ],
+      [
+        "javax/xml/parsers",
+        15
+      ],
+      [
+        "javax/xml/namespace",
+        2
+      ],
+      [
+        "java_cup/runtime/Scanner.class",
+        1
+      ],
+      [
+        "java_cup/runtime/Symbol.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.6.5\r\nCreated-By: 1.5.0_04-b05 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "ormlib/antlr-2.7.7.jar",
+    "bytes": 445288,
+    "entries": 239,
+    "classes": 224,
+    "top_packages": [
+      [
+        "antlr/collections/impl",
+        11
+      ],
+      [
+        "antlr/debug/misc",
+        5
+      ],
+      [
+        "antlr/actions/python",
+        4
+      ],
+      [
+        "antlr/actions/cpp",
+        2
+      ],
+      [
+        "antlr/actions/csharp",
+        2
+      ],
+      [
+        "antlr/actions/java",
+        2
+      ],
+      [
+        "antlr/ActionElement.class",
+        1
+      ],
+      [
+        "antlr/ActionTransInfo.class",
+        1
+      ],
+      [
+        "antlr/Alternative.class",
+        1
+      ],
+      [
+        "antlr/AlternativeBlock.class",
+        1
+      ],
+      [
+        "antlr/AlternativeElement.class",
+        1
+      ],
+      [
+        "antlr/ANTLRError.class",
+        1
+      ],
+      [
+        "antlr/ANTLRException.class",
+        1
+      ],
+      [
+        "antlr/ANTLRGrammarParseBehavior.class",
+        1
+      ],
+      [
+        "antlr/ANTLRHashString.class",
+        1
+      ],
+      [
+        "antlr/ANTLRLexer.class",
+        1
+      ],
+      [
+        "antlr/ANTLRParser.class",
+        1
+      ],
+      [
+        "antlr/ANTLRStringBuffer.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.4.2_09 (Apple Computer, Inc.)\r\n\r\n"
+  },
+  {
+    "path": "ormlib/c3p0.jar",
+    "bytes": 1015234,
+    "entries": 863,
+    "classes": 775,
+    "top_packages": [
+      [
+        "com/mchange/v2",
+        464
+      ],
+      [
+        "com/mchange/v1",
+        181
+      ],
+      [
+        "com/mchange/util",
+        56
+      ],
+      [
+        "com/mchange/io",
+        26
+      ],
+      [
+        "com/mchange/lang",
+        19
+      ],
+      [
+        "com/mchange/v3",
+        10
+      ],
+      [
+        "com/mchange/net",
+        7
+      ],
+      [
+        "com/mchange/rmi",
+        7
+      ],
+      [
+        "org/hibernate/c3p0",
+        4
+      ],
+      [
+        "com/mchange/Debug.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.10.1\r\nCreated-By: 1.8.0_121-b13 (Oracle Corporation)\r\n\r\n"
+  },
+  {
+    "path": "ormlib/classmate-1.3.0.jar",
+    "bytes": 64110,
+    "entries": 52,
+    "classes": 37,
+    "top_packages": [
+      [
+        "com/fasterxml/classmate",
+        37
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nBnd-LastModified: 1442441334404\r\nBuild-Jdk: 1.7.0_67\r\nBuilt-By: tatu\r\nBundle-Description: Library for introspecting types with full generic in\r\n formationincluding resolving of field and method types.\r\nBundle-DocURL: http://github.com/cowtowncoder/java-classmate\r\nBundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt\r\nBundle-ManifestVersion: 2\r\nBundle-Name: ClassMate\r\nBundle-SymbolicName: com.fasterxml.classmate\r\nBundle-Vendor: fasterxml.com\r\nBundle-Version: 1.3.0\r\nCreated-By: Apache Maven Bundle Plugin\r\nExport-Package: com.fasterxml.classmate;version=\"1.3.0\",com.fasterxml.cl\r\n assmate.members;version=\"1.3.0\",com.fasterxml.classmate.types;version=\"\r\n 1.3.0\",com.fasterxml.classmate.util;version=\"1.3.0\"\r\nImplementation-Build-Date: 2015-09-16 22:08:50+0000\r\nImplementation-Title: ClassMate\r\nImplementation-Vendor: fasterxml.com\r\nImplementation-Vendor-Id: com.fasterxml\r\nImplementation-Version: 1.3.0\r\nPrivate-Package: com.fasterxml.classmate.util.*\r\nRequire-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.6))\"\r\nSpecification-Title: ClassMate\r\nSpecification-Vendor: fasterxml.com\r\nSpecification-Version: 1.3.0\r\nTool: Bnd-2.3.0.201405100607\r\nX-Compile-Source-JDK: 1.6\r\nX-Compile-Target-JDK: 1.6\r\n"
+  },
+  {
+    "path": "ormlib/javassist-3.20.0-GA.jar",
+    "bytes": 750581,
+    "entries": 423,
+    "classes": 399,
+    "top_packages": [
+      [
+        "javassist/util/proxy",
+        26
+      ],
+      [
+        "javassist/compiler/ast",
+        24
+      ],
+      [
+        "javassist/bytecode/analysis",
+        23
+      ],
+      [
+        "javassist/bytecode/annotation",
+        21
+      ],
+      [
+        "javassist/bytecode/stackmap",
+        21
+      ],
+      [
+        "javassist/tools/reflect",
+        11
+      ],
+      [
+        "javassist/tools/rmi",
+        9
+      ],
+      [
+        "javassist/tools/web",
+        4
+      ],
+      [
+        "javassist/ByteArrayClassPath.class",
+        1
+      ],
+      [
+        "javassist/CannotCompileException.class",
+        1
+      ],
+      [
+        "javassist/ClassClassPath.class",
+        1
+      ],
+      [
+        "javassist/ClassMap.class",
+        1
+      ],
+      [
+        "javassist/ClassPath.class",
+        1
+      ],
+      [
+        "javassist/ClassPathList.class",
+        1
+      ],
+      [
+        "javassist/ClassPool$1.class",
+        1
+      ],
+      [
+        "javassist/ClassPool.class",
+        1
+      ],
+      [
+        "javassist/ClassPoolTail.class",
+        1
+      ],
+      [
+        "javassist/CodeConverter$ArrayAccessReplacementMethodNames.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nBundle-Description: Javassist (JAVA programming ASSISTant) makes Java \r\n bytecode manipulation    simple.  It is a class library for editing b\r\n ytecodes in Java.\r\nBundle-License: http://www.mozilla.org/MPL/MPL-1.1.html, http://www.gn\r\n u.org/licenses/lgpl-2.1.html, http://www.apache.org/licenses/\r\nBundle-SymbolicName: javassist\r\nBuilt-By: smarlow\r\nBundle-ManifestVersion: 2\r\nBnd-LastModified: 1435234169221\r\nSpecification-Vendor: Shigeru Chiba, www.javassist.org\r\nSpecification-Title: Javassist\r\nBundle-Vendor: Shigeru Chiba, www.javassist.org\r\nTool: Bnd-0.0.357\r\nMain-Class: javassist.CtClass\r\nExport-Package: javassist.convert;uses:=\"javassist.bytecode.analysis,j\r\n avassist.bytecode,javassist\";version=\"3.20.0.GA\",javassist.tools;uses\r\n :=\"javassist,javassist.bytecode,javassist.bytecode.analysis\";version=\r\n \"3.20.0.GA\",javassist.tools.reflect;uses:=\"javassist,javassist.byteco\r\n de\";version=\"3.20.0.GA\",javassist.expr;uses:=\"javassist.compiler,java\r\n ssist.bytecode,javassist.compiler.ast,javassist\";version=\"3.20.0.GA\",\r\n javassist.tools.rmi;uses:=\"javassist.tools.web,javassist\";version=\"3.\r\n 20.0.GA\",javassist.util;version=\"3.20.0.GA\",javassist.bytecode.analys\r\n is;uses:=\"javassist.bytecode,javassist,javassist.bytecode.stackmap\";v\r\n ersion=\"3.20.0.GA\",javassist.bytecode.annotation;uses:=\"javassist.byt\r\n ecode,javassist\";version=\"3.20.0.GA\",javassist.bytecode.stackmap;uses\r\n :=\"javassist.bytecode,javassist\";version=\"3.20.0.GA\",javassist.util.p\r\n roxy;uses:=\"javassist.bytecode,javassist\";version=\"3.20.0.GA\",javassi\r\n st.compiler;uses:=\"javassist.bytecode,javassist,javassist.compiler.as\r\n t\";version=\"3.20.0.GA\",javassist.runtime;version=\"3.20.0.GA\",javassis\r\n t.bytecode;uses:=\"javassist.bytecode.annotation,javassist,javassist.b\r\n ytecode.stackmap\";version=\"3.20.0.GA\",javassist.scopedpool;uses:=java\r\n ssist;version=\"3.20.0.GA\",javassist.compiler.ast;uses:=\"javassist.com\r\n piler,javassist\";version=\"3.20.0.GA\",javassist;uses:=\"javassist.compi\r\n ler,javassist.bytecode,javassist.convert,javassist.expr,javassist.byt\r\n ecode.annotation,javassist.compiler.ast\";version=\"3.20.0.GA\",javassis\r\n t.tools.web;uses:=javassist;version=\"3.20.0.GA\"\r\nBundle-Version: 3.20.0.GA\r\nBundle-Name: Javassist\r\nIgnore-Package: com.sun.jdi.event,com.sun.jdi,com.sun.jdi.request,com.\r\n sun.jdi.connect\r\nCreated-By: Apache Maven Bundle Plugin\r\nBuild-Jdk: 1.8.0_45\r\nSpecification-Version: 3.20.0-GA\r\n\r\n"
+  },
+  {
+    "path": "ormlib/javax.activation-api-1.2.0.jar",
+    "bytes": 56674,
+    "entries": 41,
+    "classes": 31,
+    "top_packages": [
+      [
+        "javax/activation/MimetypesFileTypeMap.class",
+        1
+      ],
+      [
+        "javax/activation/DataHandlerDataSource.class",
+        1
+      ],
+      [
+        "javax/activation/UnsupportedDataTypeException.class",
+        1
+      ],
+      [
+        "javax/activation/SecuritySupport$4.class",
+        1
+      ],
+      [
+        "javax/activation/SecuritySupport.class",
+        1
+      ],
+      [
+        "javax/activation/FileTypeMap.class",
+        1
+      ],
+      [
+        "javax/activation/SecuritySupport$5.class",
+        1
+      ],
+      [
+        "javax/activation/CommandObject.class",
+        1
+      ],
+      [
+        "javax/activation/ObjectDataContentHandler.class",
+        1
+      ],
+      [
+        "javax/activation/URLDataSource.class",
+        1
+      ],
+      [
+        "javax/activation/DataSource.class",
+        1
+      ],
+      [
+        "javax/activation/MimeTypeParseException.class",
+        1
+      ],
+      [
+        "javax/activation/CommandInfo.class",
+        1
+      ],
+      [
+        "javax/activation/CommandInfo$Beans$1.class",
+        1
+      ],
+      [
+        "javax/activation/ActivationDataFlavor.class",
+        1
+      ],
+      [
+        "javax/activation/MimetypesFileTypeMap$1.class",
+        1
+      ],
+      [
+        "javax/activation/CommandMap.class",
+        1
+      ],
+      [
+        "javax/activation/FileDataSource.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nExport-Package: javax.activation;uses:=\"com.sun.activation.registries\"\r\n ;version=\"1.2\"\r\nImplementation-Title: javax.activation.javax.activation-api\r\nBuilt-By: shannon\r\nTool: Bnd-0.0.357\r\nImplementation-Vendor: Oracle\r\nAutomatic-Module-Name: java.activation\r\nImplementation-Vendor-Id: com.sun\r\nSpecification-Title: javax.activation.javax.activation-api\r\nBundle-License: https://github.com/javaee/activation/blob/master/LICEN\r\n SE.txt\r\nBundle-SymbolicName: javax.activation-api\r\nExtension-Name: javax.activation\r\nImplementation-Version: 1.2.0\r\nSpecification-Vendor: Oracle\r\nBundle-Name: JavaBeans Activation Framework API jar\r\nCreated-By: 1.7.0_121 (Oracle Corporation)\r\nBundle-Vendor: Oracle\r\nDynamicImport-Package: *\r\nBuild-Jdk: 1.7.0_121\r\nBundle-Version: 1.2.0\r\nBnd-LastModified: 1504739594803\r\nBundle-ManifestVersion: 2\r\nBundle-Description: JavaBeans Activation Framework API jar\r\nImport-Package: com.sun.activation.registries,javax.activation;version\r\n =\"1.2\"\r\nBundle-DocURL: http://www.oracle.com\r\nSpecification-Version: 1.2\r\nOriginally-Created-By: 1.8.0_141 (Oracle Corporation)\r\nArchiver-Version: Plexus Archiver\r\n\r\n"
+  },
+  {
+    "path": "ormlib/jaxb-api-2.3.1.jar",
+    "bytes": 128076,
+    "entries": 136,
+    "classes": 112,
+    "top_packages": [
+      [
+        "javax/xml/bind",
+        110
+      ],
+      [
+        "META-INF/versions/9",
+        1
+      ],
+      [
+        "module-info.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: Apache Maven Bundle Plugin\r\nBuilt-By: build\r\nBuild-Jdk: 9.0.4\r\nSpecification-Title: jaxb-api\r\nSpecification-Version: 2.3.1\r\nSpecification-Vendor: Oracle Corporation\r\nExtension-Name: javax.xml.bind\r\nImplementation-Build-Id: UNKNOWN-7de2ca118a0cfc4a373872915aef59148dff5\r\n f93, 2018-09-12T06:28:43-0700\r\nMulti-Release: true\r\nBnd-LastModified: 1536758926757\r\nBundle-Description: JAXB (JSR 222) API\r\nBundle-DocURL: http://www.oracle.com/\r\nBundle-License: https://oss.oracle.com/licenses/CDDL+GPL-1.1, https://\r\n oss.oracle.com/licenses/CDDL+GPL-1.1\r\nBundle-ManifestVersion: 2\r\nBundle-Name: jaxb-api\r\nBundle-SymbolicName: jaxb-api\r\nBundle-Vendor: Oracle Corporation\r\nBundle-Version: 2.3.1\r\nDynamicImport-Package: org.glassfish.hk2.osgiresourcelocator\r\nExport-Package: javax.xml.bind;version=\"2.3\";uses:=\"javax.xml.bind.ann\r\n otation.adapters,javax.xml.bind.attachment,javax.xml.namespace,javax.\r\n xml.stream,javax.xml.transform,javax.xml.validation,org.w3c.dom,org.x\r\n ml.sax\",javax.xml.bind.annotation;version=\"2.3\";uses:=\"javax.xml.bind\r\n ,javax.xml.parsers,javax.xml.transform,javax.xml.transform.dom,org.w3\r\n c.dom\",javax.xml.bind.annotation.adapters;version=\"2.3\",javax.xml.bin\r\n d.attachment;version=\"2.3\";uses:=\"javax.activation\",javax.xml.bind.he\r\n lpers;version=\"2.3\";uses:=\"javax.xml.bind,javax.xml.bind.annotation.a\r\n dapters,javax.xml.bind.attachment,javax.xml.stream,javax.xml.transfor\r\n m,javax.xml.validation,org.w3c.dom,org.xml.sax\",javax.xml.bind.util;v\r\n ersion=\"2.3\";uses:=\"javax.xml.bind,javax.xml.transform.sax\"\r\nImplementation-Vendor: Oracle Corporation\r\nImplementation-Vendor-Id: org.glassfish\r\nImplementation-Version: 2.3.0\r\nImport-Package: javax.activation,javax.xml.bind;version=\"[2.3,3)\",java\r\n x.xml.bind.annotation;version=\"[2.3,3)\",javax.xml.bind.annotation.ada\r\n pters;version=\"[2.3,3)\",javax.xml.bind.attachment;version=\"[2.3,3)\",j\r\n avax.xml.datatype,javax.xml.namespace,javax.xml.parsers,javax.xml.str\r\n eam,javax.xml.transform,javax.xml.transform.dom,javax.xml.transform.s\r\n ax,javax.xml.transform.stream,javax.xml.validation,org.w3c.dom,org.xm\r\n l.sax,org.xml.sax.ext,org.xml.sax.helpers,javax.xml.bind.helpers;vers\r\n ion=\"[2.3,3)\",javax.xml.bind.util;version=\"[2.3,3)\"\r\nRequire-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version>=1.8))\r\n \"\r\nTool: Bnd-3.5.0.201709291849\r\n\r\n"
+  },
+  {
+    "path": "ormlib/jaxb-core-2.3.0.1.jar",
+    "bytes": 254858,
+    "entries": 255,
+    "classes": 179,
+    "top_packages": [
+      [
+        "com/sun/xml",
+        158
+      ],
+      [
+        "com/sun/istack",
+        21
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: Apache Maven Bundle Plugin\r\nBuilt-By: build\r\nBuild-Jdk: 9.0.4\r\nClass-Path: jaxb-api.jar\r\nBuild-Id: 2.3.0.1\r\nBuild-Version: JAXB RI 2.3.0.1\r\nGit-Revision: b05407bdffb3dc82e6d25ee551fc1f632ef51433\r\nGit-Url: scm:git:git://java.net/jaxb~v2/jaxb-bundles/jaxb-core\r\nImplementation-Title: JAXB Implementation\r\nImplementation-Vendor: Oracle\r\nImplementation-Vendor-Id: com.oracle\r\nImplementation-Version: 2.3.0.1\r\nMajor-Version: 2.3.0\r\nSpecification-Title: Java Architecture for XML Binding\r\nSpecification-Version: 2.3\r\nBnd-LastModified: 1526643856361\r\nBundle-Description: Old JAXB Core module. Contains sources required by\r\n  XJC, JXC and Runtime modules with dependencies.\r\nBundle-DocURL: http://www.oracle.com/\r\nBundle-License: http://glassfish.java.net/public/CDDL+GPL_1_1.html\r\nBundle-ManifestVersion: 2\r\nBundle-Name: Old JAXB Core\r\nBundle-SymbolicName: com.sun.xml.bind.jaxb-core\r\nBundle-Vendor: Oracle Corporation\r\nBundle-Version: 2.3.0.1\r\nExport-Package: com.sun.istack;version=\"3.0.5\";uses:=\"javax.activation\r\n ,javax.xml.stream,org.xml.sax,org.xml.sax.helpers\",com.sun.istack.loc\r\n alization;version=\"3.0.5\",com.sun.istack.logging;version=\"3.0.5\",com.\r\n sun.xml.bind;uses:=\"org.xml.sax\";version=\"2.3.0\",com.sun.xml.bind.ann\r\n otation;version=\"2.3.0\",com.sun.xml.bind.api;uses:=\"org.xml.sax\";vers\r\n ion=\"2.3.0\",com.sun.xml.bind.api.impl;version=\"2.3.0\",com.sun.xml.bin\r\n d.marshaller;uses:=\"javax.xml.parsers,org.w3c.dom,org.xml.sax,org.xml\r\n .sax.helpers\";version=\"2.3.0\",com.sun.xml.bind.unmarshaller;uses:=\"co\r\n m.sun.xml.bind.v2.runtime.unmarshaller,javax.xml.bind,org.w3c.dom,org\r\n .xml.sax\";version=\"2.3.0\",com.sun.xml.bind.util;version=\"2.3.0\",com.s\r\n un.xml.bind.v2;version=\"2.3.0\",com.sun.xml.bind.v2.model.annotation;u\r\n ses:=\"com.sun.xml.bind.v2.model.core,com.sun.xml.bind.v2.runtime\";ver\r\n sion=\"2.3.0\",com.sun.xml.bind.v2.model.core;uses:=\"com.sun.xml.bind.v\r\n 2.model.annotation,com.sun.xml.bind.v2.model.impl,com.sun.xml.bind.v2\r\n .model.nav,com.sun.xml.bind.v2.runtime,javax.activation,javax.xml.bin\r\n d,javax.xml.bind.annotation,javax.xml.bind.annotation.adapters,javax.\r\n xml.namespace,javax.xml.transform\";version=\"2.3.0\",com.sun.xml.bind.v\r\n 2.model.impl;uses:=\"com.sun.xml.bind.v2.model.annotation,com.sun.xml.\r\n bind.v2.model.nav\";version=\"2.3.0\",com.sun.xml.bind.v2.model.nav;uses\r\n :=\"com.sun.xml.bind.v2.runtime\";version=\"2.3.0\",com.sun.xml.bind.v2.m\r\n odel.util;uses:=\"javax.xml.namespace\";version=\"2.3.0\",com.sun.xml.bin\r\n d.v2.runtime;uses:=\"com.sun.xml.bind.v2.model.annotation,javax.activa\r\n tion,javax.xml.bind,javax.xml.bind.annotation.adapters\";version=\"2.3.\r\n 0\",com.sun.xml.bind.v2.runtime.unmarshaller;uses:=\"javax.xml.bind,org\r\n .w3c.dom,org.xml.sax\";version=\"2.3.0\",com.sun.xml.bind.v2.schemagen.e\r\n pisode;uses:=\"com.sun.xml.txw2,com.sun.xml.txw2.annotation\";version=\"\r\n 2.3.0\",com.sun.xml.bind.v2.util;uses:=\"javax.xml.parsers,javax.xml.tr\r\n ansform,javax.xml.validation,javax.xml.xpath\";version=\"2.3.0\",com.sun\r\n .xml.txw2;uses:=\"com.sun.xml.txw2.output,javax.xml.namespace\";version\r\n =\"2.3.0\",com.sun.xml.txw2.annotation;version=\"2.3.0\",com.sun.xml.txw2\r\n .output;uses:=\"com.sun.xml.txw2,javax.xml.namespace,javax.xml.stream,\r\n javax.xml.transform,javax.xml.transform.dom,javax.xml.transform.sax,j\r\n avax.xml.transform.stream,org.w3c.dom,org.xml.sax,org.xml.sax.ext,org\r\n .xml.sax.helpers\";version=\"2.3.0\"\r\nImport-Package: com.sun.istack;version=\"[3.0,4)\";resolution:=optional,\r\n com.sun.xml.bind;resolution:=optional,com.sun.xml.bind.util;resolutio\r\n n:=optional,com.sun.xml.bind.v2;resolution:=optional,com.sun.xml.bind\r\n .v2.model.annotation;resolution:=optional,com.sun.xml.bind.v2.model.c\r\n ore;resolution:=optional,com.sun.xml.bind.v2.model.impl;resolution:=o\r\n ptional,com.sun.xml.bind.v2.model.nav;resolution:=optional,com.sun.xm\r\n l.bind.v2.runtime;resolution:=optional,com.sun.xml.bind.v2.runtime.un\r\n marshaller;resolution:=optional,com.sun.xml.bind.v2.util;resolution:=\r\n optional,com.sun.xml.txw2;resolution:="
+  },
+  {
+    "path": "ormlib/jaxb-impl-2.3.2.jar",
+    "bytes": 1017695,
+    "entries": 807,
+    "classes": 642,
+    "top_packages": [
+      [
+        "com/sun/xml",
+        642
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: Apache Maven Bundle Plugin\r\nBuilt-By: default\r\nBuild-Jdk: 11\r\nClass-Path: jaxb-runtime-2.3.2.jar txw2-2.3.2.jar istack-commons-runtime\r\n -3.0.8.jar stax-ex-1.8.1.jar FastInfoset-1.2.16.jar jakarta.activation-\r\n api-1.2.1.jar\r\nBuild-Id: 2.3.2\r\nBuild-Version: JAXB RI 2.3.2\r\nGit-Revision: ${buildNumber}\r\nGit-Url: scm:git:ssh://git@github.com/eclipse-ee4j/jaxb-ri/jaxb-bundles/\r\n jaxb-impl\r\nImplementation-Title: JAXB Implementation\r\nImplementation-Vendor: Oracle\r\nImplementation-Vendor-Id: com.oracle\r\nImplementation-Version: 2.3.2\r\nMajor-Version: ${jaxb.majorVersion}.${jaxb.minorVersion}.${jaxb.incremen\r\n talVersion}\r\nSpecification-Title: Java Architecture for XML Binding\r\nSpecification-Version: ${jaxb-api.majorVersion}.${jaxb-api.minorVersion}\r\nBnd-LastModified: 1546442747013\r\nBundle-Description: Old JAXB Runtime module. Contains sources required f\r\n or runtime processing.\r\nBundle-DocURL: http://www.oracle.com/\r\nBundle-License: http://www.eclipse.org/org/documents/edl-v10.php\r\nBundle-ManifestVersion: 2\r\nBundle-Name: Old JAXB Runtime\r\nBundle-SymbolicName: com.sun.xml.bind.jaxb-impl\r\nBundle-Vendor: Oracle Corporation\r\nBundle-Version: 2.3.2\r\nExport-Package: com.sun.xml.bind;uses:=\"com.sun.xml.bind.v2.runtime.refl\r\n ect,javax.xml.bind,javax.xml.bind.annotation.adapters,javax.xml.datatyp\r\n e,javax.xml.namespace,javax.xml.stream,org.xml.sax\";version=\"2.3.2\",com\r\n .sun.xml.bind.annotation;version=\"2.3.2\",com.sun.xml.bind.api;uses:=\"co\r\n m.sun.xml.bind.v2.model.annotation,com.sun.xml.bind.v2.model.runtime,co\r\n m.sun.xml.bind.v2.runtime,javax.xml.bind,javax.xml.bind.attachment,java\r\n x.xml.namespace,javax.xml.stream,javax.xml.transform,org.w3c.dom,org.xm\r\n l.sax\";version=\"2.3.2\",com.sun.xml.bind.api.impl;version=\"2.3.2\",com.su\r\n n.xml.bind.marshaller;uses:=\"javax.xml.parsers,org.w3c.dom,org.xml.sax,\r\n org.xml.sax.helpers\";version=\"2.3.2\",com.sun.xml.bind.unmarshaller;uses\r\n :=\"com.sun.xml.bind.v2.runtime.unmarshaller,javax.xml.bind,org.w3c.dom,\r\n org.xml.sax\";version=\"2.3.2\",com.sun.xml.bind.util;uses:=\"com.sun.xml.b\r\n ind,javax.xml.bind.helpers,org.xml.sax\";version=\"2.3.2\",com.sun.xml.bin\r\n d.v2;uses:=\"com.sun.xml.bind.api,com.sun.xml.bind.v2.model.annotation,j\r\n avax.xml.bind\";version=\"2.3.2\",com.sun.xml.bind.v2.bytecode;version=\"2.\r\n 3.2\",com.sun.xml.bind.v2.model.annotation;uses:=\"com.sun.xml.bind.v2.mo\r\n del.core,com.sun.xml.bind.v2.model.nav,com.sun.xml.bind.v2.runtime\";ver\r\n sion=\"2.3.2\",com.sun.xml.bind.v2.model.core;uses:=\"com.sun.xml.bind.v2.\r\n model.annotation,com.sun.xml.bind.v2.model.impl,com.sun.xml.bind.v2.mod\r\n el.nav,com.sun.xml.bind.v2.runtime,javax.activation,javax.xml.bind,java\r\n x.xml.bind.annotation,javax.xml.bind.annotation.adapters,javax.xml.name\r\n space,javax.xml.transform\";version=\"2.3.2\",com.sun.xml.bind.v2.model.im\r\n pl;uses:=\"com.sun.xml.bind.api,com.sun.xml.bind.v2.model.annotation,com\r\n .sun.xml.bind.v2.model.core,com.sun.xml.bind.v2.model.nav,com.sun.xml.b\r\n ind.v2.model.runtime,com.sun.xml.bind.v2.runtime,javax.activation,javax\r\n .xml.namespace\";version=\"2.3.2\",com.sun.xml.bind.v2.model.nav;uses:=\"co\r\n m.sun.xml.bind.v2.runtime\";version=\"2.3.2\",com.sun.xml.bind.v2.model.ru\r\n ntime;uses:=\"com.sun.xml.bind.v2.model.core,com.sun.xml.bind.v2.runtime\r\n ,com.sun.xml.bind.v2.runtime.reflect,javax.xml.bind,javax.xml.namespace\r\n ,org.xml.sax\";version=\"2.3.2\",com.sun.xml.bind.v2.model.util;uses:=\"jav\r\n ax.xml.namespace\";version=\"2.3.2\",com.sun.xml.bind.v2.runtime;uses:=\"co\r\n m.sun.istack,com.sun.xml.bind.api,com.sun.xml.bind.marshaller,com.sun.x\r\n ml.bind.v2.model.annotation,com.sun.xml.bind.v2.model.core,com.sun.xml.\r\n bind.v2.model.runtime,com.sun.xml.bind.v2.runtime.output,com.sun.xml.bi\r\n nd.v2.runtime.property,com.sun.xml.bind.v2.runtime.unmarshaller,javax.a\r\n ctivation,javax.xml.bind,javax.xml.bind.annotation,javax.xml.bind.annot\r\n ation.adapters,javax.xml.bind.attachment,javax.xml.bind.helpers,javax.x\r\n ml.namespace,javax.xml.stream,javax.xml.transform,javax.xml.transform.s\r\n "
+  },
+  {
+    "path": "ormlib/log4j.jar",
+    "bytes": 2682842,
+    "entries": 1846,
+    "classes": 1692,
+    "top_packages": [
+      [
+        "org/apache/logging",
+        1474
+      ],
+      [
+        "org/apache/log4j",
+        208
+      ],
+      [
+        "META-INF/versions/9",
+        10
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nMulti-Release: true\r\n\r\n"
+  },
+  {
+    "path": "ormlib/optionaljar/ehcache-2.10.1.jar",
+    "bytes": 9050624,
+    "entries": 6395,
+    "classes": 1341,
+    "top_packages": [
+      [
+        "net/sf/ehcache",
+        1020
+      ],
+      [
+        "org/terracotta/modules",
+        139
+      ],
+      [
+        "org/hibernate/cache",
+        58
+      ],
+      [
+        "org/terracotta/statistics",
+        56
+      ],
+      [
+        "org/terracotta/context",
+        47
+      ],
+      [
+        "com/terracotta/entity",
+        21
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.10.1\r\nCreated-By: 1.8.0_121-b13 (Oracle Corporation)\r\n\r\n"
+  },
+  {
+    "path": "ormlib/optionaljar/hibernate-search.jar",
+    "bytes": 1302810,
+    "entries": 1070,
+    "classes": 940,
+    "top_packages": [
+      [
+        "org/hibernate/search",
+        940
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.10.1\r\nCreated-By: 1.8.0_121-b13 (Oracle Corporation)\r\n\r\n"
+  },
+  {
+    "path": "ormlib/optionaljar/hibernate-validator.jar",
+    "bytes": 763159,
+    "entries": 594,
+    "classes": 493,
+    "top_packages": [
+      [
+        "org/hibernate/validator",
+        493
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nImplementation-Title: hibernate-validator\r\nBundle-Description: Hibernate's Bean Validation (JSR-303) reference im\r\n plementation.\r\nBundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt\r\nBundle-SymbolicName: org.hibernate.validator\r\nImplementation-Version: 5.4.2.Final\r\nBuilt-By: jenkins\r\nBnd-LastModified: 1508428354382\r\nBundle-ManifestVersion: 2\r\nImplementation-Vendor-Id: org.hibernate\r\nSpecification-Title: Bean Validation\r\nImport-Package: javax.persistence;version=\"[2.0.0,3.0.0)\";resolution:=\r\n optional,javax.validation;version=\"[1.0.0,2.0.0)\",javax.validation.co\r\n nstraints;version=\"[1.0.0,2.0.0)\",javax.validation.constraintvalidati\r\n on;version=\"[1.0.0,2.0.0)\",javax.validation.executable;version=\"[1.0.\r\n 0,2.0.0)\",javax.validation.groups;version=\"[1.0.0,2.0.0)\",javax.valid\r\n ation.metadata;version=\"[1.0.0,2.0.0)\",javax.validation.spi;version=\"\r\n [1.0.0,2.0.0)\",javax.xml.bind;version=0,javax.xml.bind.annotation;ver\r\n sion=0,javax.xml.bind.annotation.adapters;version=0,javax.xml.namespa\r\n ce;version=0,javax.xml.stream;version=0,javax.xml.stream.events;versi\r\n on=0,javax.xml.validation;version=0,javax.el;version=\"[2.0.0,4.0.0)\";\r\n resolution:=optional,org.xml.sax;version=0,org.jboss.logging;version=\r\n \"[3.1.0,4.0.0)\",com.fasterxml.classmate;version=\"[1.3.1,2.0.0)\",com.f\r\n asterxml.classmate.members;version=\"[1.3.1,2.0.0)\",org.joda.time;vers\r\n ion=\"[2.0.0,3.0.0)\";resolution:=optional,org.jsoup;version=\"[1.5.2,2.\r\n 0.0)\";resolution:=optional,org.jsoup.nodes;version=\"[1.5.2,2.0.0)\";re\r\n solution:=optional,org.jsoup.parser;version=\"[1.5.2,2.0.0)\";resolutio\r\n n:=optional,org.jsoup.safety;version=\"[1.5.2,2.0.0)\";resolution:=opti\r\n onal,org.jsoup.select;version=\"[1.5.2,2.0.0)\";resolution:=optional,ja\r\n vax.money;version=\"[1.0.0,2.0.0)\";resolution:=optional,com.thoughtwor\r\n ks.paranamer;version=\"[2.5.5,3.0.0)\";resolution:=optional\r\nRequire-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.6))\"\r\nTool: Bnd-3.2.0.201605172007\r\nImplementation-Vendor: org.hibernate\r\nExport-Package: org.hibernate.validator;version=\"5.4.2.Final\";uses:=\"j\r\n avax.validation,javax.validation.spi,org.hibernate.validator.cfg,org.\r\n hibernate.validator.spi.resourceloading,org.hibernate.validator.spi.t\r\n ime,org.hibernate.validator.spi.valuehandling\",org.hibernate.validato\r\n r.cfg;version=\"5.4.2.Final\";uses:=\"javax.validation,org.hibernate.val\r\n idator.cfg.context\",org.hibernate.validator.cfg.context;version=\"5.4.\r\n 2.Final\";uses:=\"javax.validation,org.hibernate.validator.cfg,org.hibe\r\n rnate.validator.spi.group\",org.hibernate.validator.cfg.defs;version=\"\r\n 5.4.2.Final\";uses:=\"javax.validation.constraints,org.hibernate.valida\r\n tor.cfg,org.hibernate.validator.constraints\",org.hibernate.validator.\r\n cfg.defs.br;version=\"5.4.2.Final\";uses:=\"org.hibernate.validator.cfg,\r\n org.hibernate.validator.constraints.br\",org.hibernate.validator.cfg.d\r\n efs.pl;version=\"5.4.2.Final\";uses:=\"org.hibernate.validator.cfg,org.h\r\n ibernate.validator.constraints.pl\",org.hibernate.validator.constraint\r\n s;version=\"5.4.2.Final\";uses:=\"javax.validation,javax.validation.cons\r\n traints,javax.validation.constraintvalidation\",org.hibernate.validato\r\n r.constraints.br;version=\"5.4.2.Final\";uses:=\"javax.validation,javax.\r\n validation.constraints,javax.validation.constraintvalidation,org.hibe\r\n rnate.validator.constraints\",org.hibernate.validator.constraints.pl;v\r\n ersion=\"5.4.2.Final\";uses:=\"javax.validation\",org.hibernate.validator\r\n .constraintvalidation;version=\"5.4.2.Final\";uses:=\"javax.validation,o\r\n rg.hibernate.validator.spi.time\",org.hibernate.validator.constraintva\r\n lidators;version=\"5.4.2.Final\";uses:=\"javax.validation,org.hibernate.\r\n validator.constraints\",org.hibernate.validator.group;version=\"5.4.2.F\r\n inal\";uses:=\"org.hibernate.validator.spi.group\",org.hibernate.validat\r\n or.messageinterpolation;version=\"5.4.2.Final\";uses:=\"javax.el,javax.v\r\n alidation,org.hibernate.validator.spi.resourceloading\",org.hibernate.\r\n validator.parameternameprovi"
+  },
+  {
+    "path": "ormlib/optionaljar/jboss-jacc-api_1.4_spec-1.0.2.Final.jar",
+    "bytes": 35271,
+    "entries": 28,
+    "classes": 15,
+    "top_packages": [
+      [
+        "javax/security/jacc",
+        15
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nArchiver-Version: Plexus Archiver\r\nCreated-By: Apache Maven Bundle Plugin\r\nBuilt-By: pgier\r\nBuild-Jdk: 1.6.0_20\r\nSpecification-Title: JSR-000115 Java(TM) Authorization Contract for Co\r\n ntainers\r\nSpecification-Version: 1.4\r\nSpecification-Vendor: Oracle\r\nImplementation-Title: JACC 1.4 API\r\nImplementation-Version: 1.0.2.Final\r\nImplementation-Vendor-Id: org.jboss.spec.javax.security.jacc\r\nImplementation-Vendor: JBoss by Red Hat\r\nBuild-Timestamp: Sun, 18 Mar 2012 16:27:33 -0500\r\nImplementation-URL: http://www.jboss.org/jboss-jacc-api_1.4_spec\r\nJava-Vendor: Sun Microsystems Inc.\r\nJava-Version: 1.6.0_20\r\nOs-Arch: i386\r\nOs-Name: Linux\r\nOs-Version: 3.2.7-1.fc16.i686.PAE\r\nScm-Connection: scm:git:git@github.com:jboss/jboss-jacc-api_spec.git\r\nScm-Revision: bb96161c69b2ce048b09831cc5b5a556a5d8db4c\r\nScm-Url: https://github.com/jboss/jboss-jacc-api_spec\r\nBnd-LastModified: 1332106055156\r\nBundle-Description: JSR-000115 Java(TM) Authorization Contract for Con\r\n tainers API\r\nBundle-DocURL: http://www.jboss.org\r\nBundle-License: http://repository.jboss.org/licenses/cddl.txt, http://\r\n repository.jboss.org/licenses/gpl-2.0-ce.txt\r\nBundle-ManifestVersion: 2\r\nBundle-Name: JACC 1.4 API\r\nBundle-SymbolicName: org.jboss.spec.javax.security.jacc.jboss-jacc-api\r\n _1.4_spec\r\nBundle-Vendor: JBoss by Red Hat\r\nBundle-Version: 1.0.2.Final\r\nExport-Package: javax.security.jacc;uses:=\"javax.servlet.http\";version\r\n =\"1.4\"\r\nImport-Package: javax.servlet.http;version=\"[3.0,4)\"\r\nTool: Bnd-1.50.0\r\n\r\n"
+  },
+  {
+    "path": "ormlib/optionaljar/lucene-core-5.5.5.jar",
+    "bytes": 2370237,
+    "entries": 1577,
+    "classes": 1546,
+    "top_packages": [
+      [
+        "org/apache/lucene",
+        1546
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.8.4\r\nCreated-By: 1.7.0_151-b01 (Oracle Corporation)\r\nExtension-Name: org.apache.lucene\r\nSpecification-Title: Lucene Search Engine: core\r\nSpecification-Version: 5.5.5\r\nSpecification-Vendor: The Apache Software Foundation\r\nImplementation-Title: org.apache.lucene\r\nImplementation-Version: 5.5.5 b3441673c21c83762035dc21d3827ad16aa17b68\r\n  - sarowe - 2017-10-20 08:57:09\r\nImplementation-Vendor: The Apache Software Foundation\r\nX-Compile-Source-JDK: 1.7\r\nX-Compile-Target-JDK: 1.7\r\n\r\n"
+  },
+  {
+    "path": "ormlib/optionaljar/proxool-0.8.3.jar",
+    "bytes": 475943,
+    "entries": 325,
+    "classes": 300,
+    "top_packages": [
+      [
+        "org/logicalcobwebs/cglib",
+        146
+      ],
+      [
+        "org/logicalcobwebs/proxool",
+        66
+      ],
+      [
+        "org/logicalcobwebs/asm",
+        44
+      ],
+      [
+        "org/logicalcobwebs/concurrent",
+        31
+      ],
+      [
+        "org/logicalcobwebs/logging",
+        13
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nAnt-Version: Apache Ant 1.5.4 \r\nCreated-By: 1.4.2_01-b06 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "ormlib/optionaljar/slf4j-api-1.7.7.jar",
+    "bytes": 29257,
+    "entries": 35,
+    "classes": 24,
+    "top_packages": [
+      [
+        "org/slf4j/helpers",
+        13
+      ],
+      [
+        "org/slf4j/spi",
+        4
+      ],
+      [
+        "org/slf4j/ILoggerFactory.class",
+        1
+      ],
+      [
+        "org/slf4j/IMarkerFactory.class",
+        1
+      ],
+      [
+        "org/slf4j/Logger.class",
+        1
+      ],
+      [
+        "org/slf4j/LoggerFactory.class",
+        1
+      ],
+      [
+        "org/slf4j/Marker.class",
+        1
+      ],
+      [
+        "org/slf4j/MarkerFactory.class",
+        1
+      ],
+      [
+        "org/slf4j/MDC.class",
+        1
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nArchiver-Version: Plexus Archiver\r\nCreated-By: Apache Maven\r\nBuilt-By: ceki\r\nBuild-Jdk: 1.6.0_22\r\nBundle-Description: The slf4j API\r\nBundle-Version: 1.7.7\r\nImplementation-Version: 1.7.7\r\nImplementation-Title: slf4j-api\r\nBundle-ManifestVersion: 2\r\nBundle-SymbolicName: slf4j.api\r\nBundle-Name: slf4j-api\r\nBundle-Vendor: SLF4J.ORG\r\nBundle-RequiredExecutionEnvironment: J2SE-1.3\r\nExport-Package: org.slf4j;version=1.7.7, org.slf4j.spi;version=1.7.7, \r\n org.slf4j.helpers;version=1.7.7\r\nImport-Package: org.slf4j.impl;version=1.6.0\r\n\r\n"
+  },
+  {
+    "path": "ormlib/orm.jar",
+    "bytes": 6149319,
+    "entries": 4991,
+    "classes": 4583,
+    "top_packages": [
+      [
+        "org/hibernate/boot",
+        707
+      ],
+      [
+        "org/hibernate/engine",
+        407
+      ],
+      [
+        "org/hibernate/type",
+        278
+      ],
+      [
+        "org/hibernate/loader",
+        254
+      ],
+      [
+        "org/hibernate/dialect",
+        236
+      ],
+      [
+        "org/hibernate/hql",
+        231
+      ],
+      [
+        "org/hibernate/internal",
+        193
+      ],
+      [
+        "org/hibernate/annotations",
+        179
+      ],
+      [
+        "org/hibernate/tool",
+        157
+      ],
+      [
+        "org/hibernate/cfg",
+        143
+      ],
+      [
+        "org/hibernate/event",
+        132
+      ],
+      [
+        "org/hibernate/persister",
+        93
+      ],
+      [
+        "org/hibernate/id",
+        92
+      ],
+      [
+        "org/hibernate/tuple",
+        78
+      ],
+      [
+        "org/hibernate/mapping",
+        64
+      ],
+      [
+        "org/hibernate/bytecode",
+        62
+      ],
+      [
+        "org/hibernate/sql",
+        62
+      ],
+      [
+        "org/hibernate/property",
+        61
+      ]
+    ],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "sde/sdeij/plugins/sdeIJ/lib/vpsdeij.jar",
+    "bytes": 840,
+    "entries": 3,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb36/modules/vpsdenb.jar",
+    "bytes": 1812,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nAnt-Version: Apache Ant 1.5.3 \r\nClass-Path: ../lib/vpsdenb/xalan.jar ../lib/vpsdenb/vpplatform.jar ../\r\n lib/vpsdenb/d2.jar ../lib/vpsdenb/d1.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.netbeans.core/1,org.netbeans.c\r\n ore.windows/2,org.netbeans.api.java/1,org.netbeans.modules.projects/1\r\nCreated-By: 1.4.2_02-b03 (Sun Microsystems Inc.)\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb4/ide4/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2143,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/xalan.jar ../lib/vpsdenb/v\r\n pplatform.jar ../lib/vpsdenb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsd\r\n enb/orm.jar ../lib/vpsdenb/jniwrap.jar ../lib/vpsdenb/winpack.jar ../\r\n lib/vpsdenb/antlr-2.7.6.jar  ../lib/vpsdenb/asm-3.1.jar  ../lib/vpsde\r\n nb/asm-attrs-1.5.3.jar  ../lib/vpsdenb/c3p0.jar  ../lib/vpsdenb/cglib\r\n -2.2.jar  ../lib/vpsdenb/commons-collections-3.1.jar  ../lib/vpsdenb/\r\n jta-1.1.jar  ../lib/vpsdenb/log4j.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.netbeans.api.java/1, org.openi\r\n de.loaders, org.openide.src > 1.0 ,org.openide.execution > 1.3, org.n\r\n etbeans.modules.javacore/1, org.netbeans.modules.java.platform/0, org\r\n .netbeans.modules.java.project/0, org.netbeans.jmi.javamodel/1, org.n\r\n etbeans.modules.junit/2, org.netbeans.modules.project.ant/0, org.netb\r\n eans.modules.projectapi/0, org.netbeans.modules.project.libraries/0, \r\n org.netbeans.modules.projectuiapi/0, org.netbeans.modules.queries/0, \r\n org.netbeans.modules.projectui, org.netbeans.core/1,org.netbeans.modu\r\n les.java/1, org.netbeans.libs.commons_logging/1 > 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb41/ide5/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2143,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/xalan.jar ../lib/vpsdenb/v\r\n pplatform.jar ../lib/vpsdenb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsd\r\n enb/orm.jar ../lib/vpsdenb/jniwrap.jar ../lib/vpsdenb/winpack.jar ../\r\n lib/vpsdenb/antlr-2.7.6.jar  ../lib/vpsdenb/asm-3.1.jar  ../lib/vpsde\r\n nb/asm-attrs-1.5.3.jar  ../lib/vpsdenb/c3p0.jar  ../lib/vpsdenb/cglib\r\n -2.2.jar  ../lib/vpsdenb/commons-collections-3.1.jar  ../lib/vpsdenb/\r\n jta-1.1.jar  ../lib/vpsdenb/log4j.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.netbeans.api.java/1, org.openi\r\n de.loaders, org.openide.src > 1.0 ,org.openide.execution > 1.3, org.n\r\n etbeans.modules.javacore/1, org.netbeans.modules.java.platform/0, org\r\n .netbeans.modules.java.project/0, org.netbeans.jmi.javamodel/1, org.n\r\n etbeans.modules.junit/2, org.netbeans.modules.project.ant/0, org.netb\r\n eans.modules.projectapi/0, org.netbeans.modules.project.libraries/0, \r\n org.netbeans.modules.projectuiapi/0, org.netbeans.modules.queries/0, \r\n org.netbeans.modules.projectui, org.netbeans.core/1,org.netbeans.modu\r\n les.java/1, org.netbeans.libs.commons_logging/1 > 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb50/ide6/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2095,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/vpplatform.jar ../lib/vpsd\r\n enb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsdenb/orm.jar ../lib/vpsden\r\n b/jniwrap.jar ../lib/vpsdenb/winpack.jar ../lib/vpsdenb/antlr-2.7.6.j\r\n ar  ../lib/vpsdenb/asm-3.1.jar  ../lib/vpsdenb/asm-attrs-1.5.3.jar  .\r\n ./lib/vpsdenb/c3p0.jar  ../lib/vpsdenb/cglib-2.2.jar  ../lib/vpsdenb/\r\n commons-collections-3.1.jar  ../lib/vpsdenb/jta-1.1.jar  ../lib/vpsde\r\n nb/log4j.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.openide.loaders, org.openide.s\r\n rc > 1.0 ,org.openide.execution > 1.3, org.netbeans.modules.javacore/\r\n 1, org.netbeans.modules.project.ant/0, org.netbeans.modules.projectap\r\n i/0, org.netbeans.modules.project.libraries/0, org.netbeans.modules.p\r\n rojectuiapi/0, org.netbeans.modules.queries/0, org.netbeans.modules.p\r\n rojectui, org.netbeans.modules.java/1, org.netbeans.libs.commons_logg\r\n ing/1 > 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb55/ide7/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2095,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/vpplatform.jar ../lib/vpsd\r\n enb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsdenb/orm.jar ../lib/vpsden\r\n b/jniwrap.jar ../lib/vpsdenb/winpack.jar ../lib/vpsdenb/antlr-2.7.6.j\r\n ar  ../lib/vpsdenb/asm-3.1.jar  ../lib/vpsdenb/asm-attrs-1.5.3.jar  .\r\n ./lib/vpsdenb/c3p0.jar  ../lib/vpsdenb/cglib-2.2.jar  ../lib/vpsdenb/\r\n commons-collections-3.1.jar  ../lib/vpsdenb/jta-1.1.jar  ../lib/vpsde\r\n nb/log4j.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.openide.loaders, org.openide.s\r\n rc > 1.0 ,org.openide.execution > 1.3, org.netbeans.modules.javacore/\r\n 1, org.netbeans.modules.project.ant/0, org.netbeans.modules.projectap\r\n i/0, org.netbeans.modules.project.libraries/0, org.netbeans.modules.p\r\n rojectuiapi/0, org.netbeans.modules.queries/0, org.netbeans.modules.p\r\n rojectui, org.netbeans.modules.java/1, org.netbeans.libs.commons_logg\r\n ing/1 > 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb60/ide8/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2095,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/vpplatform.jar ../lib/vpsd\r\n enb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsdenb/orm.jar ../lib/vpsden\r\n b/jniwrap.jar ../lib/vpsdenb/winpack.jar ../lib/vpsdenb/antlr-2.7.6.j\r\n ar  ../lib/vpsdenb/asm-3.1.jar  ../lib/vpsdenb/asm-attrs-1.5.3.jar  .\r\n ./lib/vpsdenb/c3p0.jar  ../lib/vpsdenb/cglib-2.2.jar  ../lib/vpsdenb/\r\n commons-collections-3.1.jar  ../lib/vpsdenb/jta-1.1.jar  ../lib/vpsde\r\n nb/log4j.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.openide.loaders, org.openide.e\r\n xecution > 1.3, org.netbeans.modules.project.ant/0, org.netbeans.modu\r\n les.projectapi/0, org.netbeans.modules.project.libraries/0, org.netbe\r\n ans.modules.projectuiapi/0, org.netbeans.modules.queries/0, org.netbe\r\n ans.modules.projectui, org.netbeans.libs.commons_logging/1 > 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-Layer: com/vp/vpsde/nb/layer.xml\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Specification-Version: 1.0\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb61/ide9/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2095,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/vpplatform.jar ../lib/vpsd\r\n enb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsdenb/orm.jar ../lib/vpsden\r\n b/jniwrap.jar ../lib/vpsdenb/winpack.jar ../lib/vpsdenb/antlr-2.7.6.j\r\n ar  ../lib/vpsdenb/asm-3.1.jar  ../lib/vpsdenb/asm-attrs-1.5.3.jar  .\r\n ./lib/vpsdenb/c3p0.jar  ../lib/vpsdenb/cglib-2.2.jar  ../lib/vpsdenb/\r\n commons-collections-3.1.jar  ../lib/vpsdenb/jta-1.1.jar  ../lib/vpsde\r\n nb/log4j.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.openide.loaders, org.openide.e\r\n xecution > 1.3, org.netbeans.modules.project.ant/0, org.netbeans.modu\r\n les.projectapi/0, org.netbeans.modules.project.libraries/0, org.netbe\r\n ans.modules.projectuiapi/0, org.netbeans.modules.queries/0, org.netbe\r\n ans.modules.projectui, org.netbeans.libs.commons_logging/1 > 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-Layer: com/vp/vpsde/nb/layer.xml\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Specification-Version: 1.0\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb65/ide10/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2095,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/vpplatform.jar ../lib/vpsd\r\n enb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsdenb/orm.jar ../lib/vpsden\r\n b/jniwrap.jar ../lib/vpsdenb/winpack.jar ../lib/vpsdenb/antlr-2.7.6.j\r\n ar  ../lib/vpsdenb/asm-3.1.jar  ../lib/vpsdenb/asm-attrs-1.5.3.jar  .\r\n ./lib/vpsdenb/c3p0.jar  ../lib/vpsdenb/cglib-2.2.jar  ../lib/vpsdenb/\r\n commons-collections-3.1.jar  ../lib/vpsdenb/jta-1.1.jar  ../lib/vpsde\r\n nb/log4j.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.openide.loaders, org.openide.e\r\n xecution > 1.3, org.netbeans.modules.project.ant/0, org.netbeans.modu\r\n les.projectapi/0, org.netbeans.modules.project.libraries/0, org.netbe\r\n ans.modules.projectuiapi/0, org.netbeans.modules.queries/0, org.netbe\r\n ans.modules.projectui, org.netbeans.libs.commons_logging/1 > 1.0\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-Layer: com/vp/vpsde/nb/layer.xml\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Specification-Version: 1.0\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb67/ide11/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2035,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/vpplatform.jar ../lib/vpsd\r\n enb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsdenb/orm.jar ../lib/vpsden\r\n b/jniwrap.jar ../lib/vpsdenb/winpack.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.openide.loaders, org.openide.e\r\n xecution > 1.3, org.netbeans.modules.project.ant/0, org.netbeans.modu\r\n les.projectapi/0, org.netbeans.modules.project.libraries/0, org.netbe\r\n ans.modules.projectuiapi/0, org.netbeans.modules.queries/0, org.netbe\r\n ans.modules.projectui, org.netbeans.libs.commons_logging/1 > 1.0, org\r\n .netbeans.modules.java.project\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-Layer: com/vp/vpsde/nb/layer.xml\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Specification-Version: 1.0\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb68/ide12/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2035,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/vpplatform.jar ../lib/vpsd\r\n enb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsdenb/orm.jar ../lib/vpsden\r\n b/jniwrap.jar ../lib/vpsdenb/winpack.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.openide.loaders, org.openide.e\r\n xecution > 1.3, org.netbeans.modules.project.ant/0, org.netbeans.modu\r\n les.projectapi/0, org.netbeans.modules.project.libraries/0, org.netbe\r\n ans.modules.projectuiapi/0, org.netbeans.modules.queries/0, org.netbe\r\n ans.modules.projectui, org.netbeans.libs.commons_logging/1 > 1.0, org\r\n .netbeans.modules.java.project\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-Layer: com/vp/vpsde/nb/layer.xml\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Specification-Version: 1.0\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  },
+  {
+    "path": "sde/sdenb69/ide/modules/com-vp-vpsde-nb.jar",
+    "bytes": 2035,
+    "entries": 8,
+    "classes": 0,
+    "top_packages": [],
+    "manifest": "Manifest-Version: 1.0\r\nOpenIDE-Module-IDE-Dependencies: IDE/1 > 3.17\r\nClass-Path: ../lib/vpsdenb/lib20.jar ../lib/vpsdenb/lib19.jar ../lib/v\r\n psdenb/lib18.jar ../lib/vpsdenb/lib17.jar ../lib/vpsdenb/lib16.jar ..\r\n /lib/vpsdenb/lib15.jar ../lib/vpsdenb/lib14.jar ../lib/vpsdenb/lib13.\r\n jar ../lib/vpsdenb/lib12.jar ../lib/vpsdenb/lib11.jar ../lib/vpsdenb/\r\n lib10.jar ../lib/vpsdenb/lib09.jar ../lib/vpsdenb/lib08.jar ../lib/vp\r\n sdenb/lib07.jar ../lib/vpsdenb/lib06.jar ../lib/vpsdenb/lib05.jar ../\r\n lib/vpsdenb/lib04.jar ../lib/vpsdenb/lib03.jar ../lib/vpsdenb/lib02.j\r\n ar ../lib/vpsdenb/lib01.jar ../lib/vpsdenb/vpplatform.jar ../lib/vpsd\r\n enb/d2.jar ../lib/vpsdenb/d1.jar ../lib/vpsdenb/orm.jar ../lib/vpsden\r\n b/jniwrap.jar ../lib/vpsdenb/winpack.jar\r\nOpenIDE-Module-Short-Description: Visual Paradigm Smart Development Ne\r\n tBeans Edition\r\nOpenIDE-Module-Module-Dependencies: org.openide.loaders, org.openide.e\r\n xecution > 1.3, org.netbeans.modules.project.ant/0, org.netbeans.modu\r\n les.projectapi/0, org.netbeans.modules.project.libraries/0, org.netbe\r\n ans.modules.projectuiapi/0, org.netbeans.modules.queries/0, org.netbe\r\n ans.modules.projectui, org.netbeans.libs.commons_logging/1 > 1.0, org\r\n .netbeans.modules.java.project\r\nCreated-By: 1.6.0_24 (Sun Microsystems Inc.)\r\nOpenIDE-Module: com.vp.vpsde.nb/1\r\nOpenIDE-Module-Layer: com/vp/vpsde/nb/layer.xml\r\nOpenIDE-Module-Implementation-Version: 200409220845\r\nOpenIDE-Module-Specification-Version: 1.0\r\nOpenIDE-Module-Name: Visual Paradigm Smart Development NetBeans Editio\r\n n Installation\r\nOpenIDE-Module-Public-Packages: -\r\nOpenIDE-Module-Install: com/vp/vpsde/nb/NBInit.class\r\n\r\n"
+  }
+]

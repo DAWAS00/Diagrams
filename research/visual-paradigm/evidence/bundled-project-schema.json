@@ -1,0 +1,266 @@
+[
+  {
+    "table": "DIAGRAM",
+    "sql": "CREATE TABLE DIAGRAM (ID char(16) NOT NULL, DIAGRAM_TYPE varchar(64) NOT NULL, PARENT_MODEL_ID char(16), NAME text NOT NULL, DEFINITION blob NOT NULL, PRIMARY KEY (ID), FOREIGN KEY(PARENT_MODEL_ID) REFERENCES MODEL_ELEMENT(ID))",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "DIAGRAM_TYPE",
+        "type": "varchar(64)"
+      },
+      {
+        "name": "PARENT_MODEL_ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "NAME",
+        "type": "TEXT"
+      },
+      {
+        "name": "DEFINITION",
+        "type": "BLOB"
+      }
+    ],
+    "rows": 18
+  },
+  {
+    "table": "DIAGRAM_ELEMENT",
+    "sql": "CREATE TABLE DIAGRAM_ELEMENT (ID char(16) NOT NULL, SHAPE_TYPE varchar(64) NOT NULL, DIAGRAM_ID char(16) NOT NULL, MODEL_ELEMENT_ID char(16), COMPOSITE_MODEL_ELEMENT_ADDRESS text, REF_MODEL_ELEMENT_ADDRESS text, PARENT_ID char(16), DEFINITION blob NOT NULL, PRIMARY KEY (ID), FOREIGN KEY(DIAGRAM_ID) REFERENCES DIAGRAM(ID), FOREIGN KEY(MODEL_ELEMENT_ID) REFERENCES MODEL_ELEMENT(ID), FOREIGN KEY(PARENT_ID) REFERENCES DIAGRAM_ELEMENT(ID))",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "SHAPE_TYPE",
+        "type": "varchar(64)"
+      },
+      {
+        "name": "DIAGRAM_ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "MODEL_ELEMENT_ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "COMPOSITE_MODEL_ELEMENT_ADDRESS",
+        "type": "TEXT"
+      },
+      {
+        "name": "REF_MODEL_ELEMENT_ADDRESS",
+        "type": "TEXT"
+      },
+      {
+        "name": "PARENT_ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "DEFINITION",
+        "type": "BLOB"
+      }
+    ],
+    "rows": 96
+  },
+  {
+    "table": "MODEL_ELEMENT",
+    "sql": "CREATE TABLE MODEL_ELEMENT (ID char(16) NOT NULL, USER_ID varchar(64), USER_ID_PARENT char(16), MODEL_TYPE varchar(64) NOT NULL, PARENT_ID char(16), NAME text, DEFINITION blob NOT NULL, MIRROR_SOURCE text, AUTHOR varchar(256), CREATE_AT integer(10), LAST_MOD_AT integer(10), PRIMARY KEY (ID), FOREIGN KEY(PARENT_ID) REFERENCES MODEL_ELEMENT(ID))",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "USER_ID",
+        "type": "varchar(64)"
+      },
+      {
+        "name": "USER_ID_PARENT",
+        "type": "char(16)"
+      },
+      {
+        "name": "MODEL_TYPE",
+        "type": "varchar(64)"
+      },
+      {
+        "name": "PARENT_ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "NAME",
+        "type": "TEXT"
+      },
+      {
+        "name": "DEFINITION",
+        "type": "BLOB"
+      },
+      {
+        "name": "MIRROR_SOURCE",
+        "type": "TEXT"
+      },
+      {
+        "name": "AUTHOR",
+        "type": "varchar(256)"
+      },
+      {
+        "name": "CREATE_AT",
+        "type": "integer(10)"
+      },
+      {
+        "name": "LAST_MOD_AT",
+        "type": "integer(10)"
+      }
+    ],
+    "rows": 899
+  },
+  {
+    "table": "PROJECT_FILE",
+    "sql": "CREATE TABLE PROJECT_FILE (PATH text NOT NULL, CONTENT blob, STATUS char(1), PRIMARY KEY (PATH))",
+    "columns": [
+      {
+        "name": "PATH",
+        "type": "TEXT"
+      },
+      {
+        "name": "CONTENT",
+        "type": "BLOB"
+      },
+      {
+        "name": "STATUS",
+        "type": "char(1)"
+      }
+    ],
+    "rows": 82
+  },
+  {
+    "table": "PROJECT_INFO",
+    "sql": "CREATE TABLE PROJECT_INFO (ID char(16) NOT NULL, NAME varchar(255) NOT NULL, DB_VERSION char(8) NOT NULL, PROJECT_VERSION char(8) NOT NULL, PROJECT_PATCH_NO integer(10) NOT NULL, PROJECT_BUILD varchar(12) NOT NULL, TEAMWORK boolean NOT NULL, DEFINITION blob NOT NULL, ROOT_MODEL_ELEMENTS_DEFINITION text, DIAGRAMS_DEFINITION text)",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "NAME",
+        "type": "varchar(255)"
+      },
+      {
+        "name": "DB_VERSION",
+        "type": "char(8)"
+      },
+      {
+        "name": "PROJECT_VERSION",
+        "type": "char(8)"
+      },
+      {
+        "name": "PROJECT_PATCH_NO",
+        "type": "integer(10)"
+      },
+      {
+        "name": "PROJECT_BUILD",
+        "type": "varchar(12)"
+      },
+      {
+        "name": "TEAMWORK",
+        "type": "boolean"
+      },
+      {
+        "name": "DEFINITION",
+        "type": "BLOB"
+      },
+      {
+        "name": "ROOT_MODEL_ELEMENTS_DEFINITION",
+        "type": "TEXT"
+      },
+      {
+        "name": "DIAGRAMS_DEFINITION",
+        "type": "TEXT"
+      }
+    ],
+    "rows": 1
+  },
+  {
+    "table": "TW_HISTORY",
+    "sql": "CREATE TABLE TW_HISTORY (HISTORY_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, KIND char(1) NOT NULL, ACTION char(1) NOT NULL, ID char(16) NOT NULL, NEW_PARENT_ID char(16))",
+    "columns": [
+      {
+        "name": "HISTORY_ID",
+        "type": "INTEGER"
+      },
+      {
+        "name": "KIND",
+        "type": "char(1)"
+      },
+      {
+        "name": "ACTION",
+        "type": "char(1)"
+      },
+      {
+        "name": "ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "NEW_PARENT_ID",
+        "type": "char(16)"
+      }
+    ],
+    "rows": 0
+  },
+  {
+    "table": "USER_ID_FORMAT",
+    "sql": "CREATE TABLE USER_ID_FORMAT (ID char(16) NOT NULL, MODEL_TYPE varchar(64) NOT NULL, PREFIX varchar(64) NOT NULL, SUFFIX varchar(64) NOT NULL, DIGITS INTEGER NOT NULL, GUID boolean NOT NULL, LAST_NUMERIC_VALUE INTEGER NOT NULL, STATUS char(1) NOT NULL, PRIMARY KEY (ID))",
+    "columns": [
+      {
+        "name": "ID",
+        "type": "char(16)"
+      },
+      {
+        "name": "MODEL_TYPE",
+        "type": "varchar(64)"
+      },
+      {
+        "name": "PREFIX",
+        "type": "varchar(64)"
+      },
+      {
+        "name": "SUFFIX",
+        "type": "varchar(64)"
+      },
+      {
+        "name": "DIGITS",
+        "type": "INTEGER"
+      },
+      {
+        "name": "GUID",
+        "type": "boolean"
+      },
+      {
+        "name": "LAST_NUMERIC_VALUE",
+        "type": "INTEGER"
+      },
+      {
+        "name": "STATUS",
+        "type": "char(1)"
+      }
+    ],
+    "rows": 7
+  },
+  {
+    "table": "sqlite_sequence",
+    "sql": "CREATE TABLE sqlite_sequence(name,seq)",
+    "columns": [
+      {
+        "name": "name",
+        "type": ""
+      },
+      {
+        "name": "seq",
+        "type": ""
+      }
+    ],
+    "rows": 0
+  }
+]

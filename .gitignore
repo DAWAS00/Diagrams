@@ -1,0 +1,21 @@
+# Local agent installation and machine-specific MCP settings
+/.agents/
+/.codex/
+
+# Rust builds and local tooling
+target/
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+
+# Research application lock files and automatic backups
+*.lck
+*.bak_*
+
+# Editor and OS metadata
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
