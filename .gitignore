@@ -1,5 +1,9 @@
 # Local agent installation and machine-specific MCP settings
-/.agents/
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/rust-best-practices/
+!/.agents/skills/rust-testing/
 /.codex/
 
 # Rust builds and local tooling

@@ -1,24 +1,18 @@
 # Progress log and next steps
 
-Updated 2026-11-04. **No application milestone is complete.** M0 (native prototype gate) is in progress: 1 of 5 tasks is done, 2 are implemented and waiting for Windows checks, 2 have not started. Task status lives in [roadmap.json](roadmap.json); this page explains what was built, how it was checked, and what comes next.
+Updated 2026-11-05 after syncing GitHub commit `17c20ea` and running the local Windows checks. **M0 remains incomplete: 3 of 5 tasks done.**
 
 ## Where we are
 
-```text
-M0  Native prototype gate   R0-01 done · R0-02 in progress · R0-03 in progress · R0-04 · R0-05
-M1  Model, commands, storage          (blocked until the M0 gate, R0-05, passes)
-M2  Complete class editor
-M3  Reliability and v0.1 release
-M4–M6  Later diagram families and proposals
-```
-
-| Task | Status | What is true today |
+| Task | Current status | Evidence / remaining work |
 |---|---|---|
-| R0-01 Cargo workspace | **Done** | Four crates, pinned Rust 1.99.1, lints, `ProjectName`. Evidence: [R0-01-VERIFICATION.md](../app/docs/R0-01-VERIFICATION.md) |
-| R0-02 Native egui shell | **In progress** | Built and tested on Linux. Windows debug and release launch not yet recorded |
-| R0-03 Bundled SQLite | **In progress** | Built and tested on Linux. Windows MSVC build not yet recorded |
-| R0-04 Text, focus, accessibility | Not started | Needs a real Windows desktop |
-| R0-05 Native foundation gate | Not started | Depends on R0-02, R0-03 and R0-04 |
+| R0-01 workspace | Done | Four crates, pinned compiler and shared checks |
+| R0-02 native shell | Done | Windows debug/release windows, selection, rename and focus smoke checks passed |
+| R0-03 bundled SQLite | Done | MSVC compile/link and temporary-file roundtrip passed; no sqlite3.dll import |
+| R0-04 text/accessibility | In progress | Initial English/mixed text and Escape checks passed; full bidi/IME/screen-reader/DPI matrix remains |
+| R0-05 foundation review | Not started | Requires completed R0-04 evidence |
+
+Read [the Windows review](../app/docs/WINDOWS-REVIEW-2026-11-05.md) for results, limitations and next work. Windows passed **29 integration tests + 1 doc test**, all **16 Python tests**, fmt/check/Clippy/docs/release build and five generators. The Linux-only display test is excluded on Windows. Local skill additions were preserved. The verification report and task tracker are included together in this update.
 
 ## What has been done
 
@@ -45,14 +39,14 @@ M4–M6  Later diagram families and proposals
 - rusqlite 0.41.1 with SQLite 3.54.1 compiled in; the release binary links no system SQLite.
 - Smoke test: write Latin and Arabic text, close, reopen read-only, integrity check, confirm no journal file is left, delete the file.
 
-Full results and the Windows table to fill in: [R0-02-R0-03-VERIFICATION.md](../app/docs/R0-02-R0-03-VERIFICATION.md).
+Full results and the completed Windows table: [R0-02-R0-03-VERIFICATION.md](../app/docs/R0-02-R0-03-VERIFICATION.md).
 
 ### Totals
-31 Rust tests (30 integration + 1 doc test) and 16 Python tests pass. `cargo fmt`, `clippy -D warnings` and `cargo doc` are clean.
+Linux recorded 31 Rust tests; Windows now passes 30 (29 integration + 1 doc test). All 16 Python tests pass. `cargo fmt`, `clippy -D warnings` and `cargo doc` are clean.
 
 ## Findings that shape the next steps
 
-- The headless test fonts have no Arabic glyphs, so **Arabic rendering is unverified** in the real window. This is R0-04's main risk.
+- Headless fonts lack Arabic glyphs. The initial Windows mixed-text sample rendered glyphs, but full Arabic/bidi editing and accessibility validation remains R0-04 work.
 - egui drops text focus the moment Escape is pressed, so shortcuts need previous-frame focus state. Expect this for every shortcut (F2, Delete, Ctrl+Z).
 - On Linux the app needs `libxkbcommon-x11` and a Vulkan or GL driver at run time. Windows needs neither.
 - The window follows the system theme; the design plan wants a light theme first.
@@ -61,15 +55,11 @@ Full results and the Windows table to fill in: [R0-02-R0-03-VERIFICATION.md](../
 ## Next steps, in order
 
 ### A. Finish M0 (the gate)
-| # | Step | Who | Done when |
-|---|---|---|---|
-| 1 | Merge PR #2, run `app\scripts\check.ps1` and launch the debug and release builds on Windows; fill in the Windows table | **You** (needs Windows) | R0-02 and R0-03 can be set to `done` with evidence |
-| 2 | Bundle an English + Arabic font, check its licence, keep its notice | Claude | Arabic and mixed text render in the shell on Windows, no empty boxes |
-| 3 | Set the light theme and 14–16 px text as the default, keeping dark mode selectable | Claude | Theme follows the design plan; tests still pass |
-| 4 | R0-04 test matrix: English, Arabic, mixed text; paste; IME; Tab/arrow focus; NVDA and Narrator; 100/150/200% scaling | **You** with Claude writing the checklist and fixes | A results table in `app/docs/`, failures fixed or listed as blockers |
-| 5 | R0-05: update ADR-001 with real results and decide whether egui stays | Claude drafts, **you** decide | ADR-001 states the decision with evidence; M0 gate marked passed |
 
-Steps 2 and 3 can be done now, before the Windows checks, because they do not depend on them.
+1. R0-02/R0-03 Windows verification is complete; do not repeat the prerequisite work without a new change or failure.
+2. Finish R0-04 with a dependable licensed font setup, bidi editing/selection, pure Arabic and mixed text, paste/IME, keyboard navigation, Narrator/NVDA and 100/150/200% DPI evidence.
+3. Apply the planned light default and text sizing with a dark-theme choice, then review longer labels and smaller windows.
+4. Complete R0-05: update ADR-001 using the full results and decide whether the GUI foundation passes.
 
 ### B. M1 — model, commands and storage (starts after R0-05)
 All headless: no window needed, so it can be tested fully in this environment.

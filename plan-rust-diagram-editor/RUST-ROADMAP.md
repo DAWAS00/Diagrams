@@ -1,6 +1,6 @@
 # Rust implementation roadmap
 
-Plan date: 2026-11-04. Status updated 2026-11-04: R0-01 is complete, R0-02 and R0-03 are implemented and awaiting Windows checks; **no application milestone is complete**. See [PROGRESS-AND-NEXT-STEPS.md](PROGRESS-AND-NEXT-STEPS.md) for what was done and what comes next. The [four-crate workspace](../app/README.md) now opens a native egui shell prototype. [Verification evidence](../app/docs/R0-01-VERIFICATION.md) records the limits. This document preserves M0–M6 and the existing product scope.
+Plan date: 2026-11-04. Status updated 2026-11-05: R0-01/R0-02/R0-03 are complete with Windows evidence. R0-04 is in progress; **M0 remains incomplete**. See [progress and next steps](PROGRESS-AND-NEXT-STEPS.md) and [the Windows review](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
 
 ## Product path
 
@@ -17,7 +17,7 @@ flowchart LR
 
 The first runnable prototype arrives in **M0**. The first useful class-modeling workflow arrives in **M2**. The first release requires **M3**, including failures, recovery, export, native usability and distribution checks. A window that opens is not a release.
 
-Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadmap.json](roadmap.json) as the editable tracking source, and [rust-backlog.csv](rust-backlog.csv) for spreadsheet/task tracking. R0-01 is `done` with evidence; other tasks remain `not_started`. No remote issues are created by this tracker.
+Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadmap.json](roadmap.json) as the editable tracking source, and [rust-backlog.csv](rust-backlog.csv) for spreadsheet/task tracking. R0-01/R0-02/R0-03 are `done`; R0-04 is `in_progress`; 35 tasks remain `not_started`. No remote issues are created by this tracker.
 
 ## Implementation stack
 

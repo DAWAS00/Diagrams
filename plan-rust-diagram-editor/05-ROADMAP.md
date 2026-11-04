@@ -4,7 +4,7 @@ Ordered deliverables with observable exit conditions. These are milestones, not 
 
 For the detailed Rust execution sequence, use [RUST-ROADMAP.md](RUST-ROADMAP.md), the [interactive dashboard](ROADMAP.html) and [Rust engineering rules](RUST-ENGINEERING.md). The `R0-01` through `R6-03` IDs in [roadmap.json](roadmap.json) are the detailed task tracker; the `BAS` IDs below remain high-level acceptance references.
 
-Status on 2026-11-05: **R0-01 complete**, with [build/test evidence](../app/docs/R0-01-VERIFICATION.md). M0 and all later milestones remain incomplete; R0-02 is next.
+Status on 2026-11-05: **R0-01/R0-02/R0-03 complete**; R0-04 in progress, R0-05 not started. M0 remains incomplete. See [Windows verification](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
 
 ## M0 — Prove the desktop foundation
 

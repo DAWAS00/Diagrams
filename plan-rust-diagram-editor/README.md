@@ -1,6 +1,6 @@
 # Rust diagram editor — implementation plan
 
-Plan date: 2026-11-04. Status updated 2026-11-05. Working label: Diagram Studio. R0-01 is implemented and verified; the native GUI and remaining M0 tasks are pending. See [workspace instructions](../app/README.md) and [verification evidence](../app/docs/R0-01-VERIFICATION.md).
+Plan date: 2026-11-04. Status updated 2026-11-05. Working label: Diagram Studio. R0-01/R0-02/R0-03 are verified on Windows; R0-04 is in progress and R0-05 remains pending. See [workspace instructions](../app/README.md) and [verification evidence](../app/docs/R0-01-VERIFICATION.md).
 
 Build a local Windows desktop modeling tool in Rust, designed to make the basic workflow clear and dependable before expanding diagram coverage.
 
@@ -8,7 +8,7 @@ Build a local Windows desktop modeling tool in Rust, designed to make the basic 
 
 **Progress and next steps:** [what is done and what comes next](PROGRESS-AND-NEXT-STEPS.md).
 
-**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 39 tasks with prerequisites and acceptance conditions; 28 lead through v0.1. R0-01 is complete; R0-02 and R0-03 are in progress; 36 tasks are not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
+**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 39 tasks with prerequisites and acceptance conditions; 28 lead through v0.1. Three tasks are complete; R0-04 is in progress and 35 tasks are not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
 
 ## Recommended decisions
 

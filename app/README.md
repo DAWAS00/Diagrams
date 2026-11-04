@@ -1,6 +1,6 @@
 # Diagram Studio — application workspace
 
-R0-01 created the buildable Rust foundation. R0-02 adds a native eframe/egui shell prototype (toolbar, sidebar, canvas with two selectable preview classes, inspector with a real name field). R0-03 links bundled SQLite. Project persistence and real diagram editing are not implemented yet. Both tasks are in progress until checked on Windows; see [docs/R0-02-R0-03-VERIFICATION.md](docs/R0-02-R0-03-VERIFICATION.md).
+R0-01 created the buildable Rust foundation. R0-02 adds a native eframe/egui shell prototype (toolbar, sidebar, canvas with two selectable preview classes, inspector with a real name field). R0-03 links bundled SQLite. Project persistence and real diagram editing are not implemented yet. Both tasks passed Windows verification on 2026-11-05; see [docs/R0-02-R0-03-VERIFICATION.md](docs/R0-02-R0-03-VERIFICATION.md).
 
 ## Structure
 

@@ -1,6 +1,6 @@
 # R0-02 / R0-03 — native shell and bundled SQLite
 
-Verified on 2026-11-04 on **Linux x64** (cloud container, Rust 1.99.1). **Both tasks are in progress, not done.** Their acceptance requires Windows: R0-02 must launch debug and release builds on Windows, and R0-03 must compile the bundled SQLite with MSVC. The Windows rows below are still to be filled in.
+Verified on 2026-11-04 on **Linux x64** (cloud container, Rust 1.99.1). **Historical Linux-only result: both tasks were in progress.** Windows verification on 2026-11-05 completed both tasks; see the Windows results below. Their acceptance requires Windows: R0-02 must launch debug and release builds on Windows, and R0-03 must compile the bundled SQLite with MSVC. The Windows rows below now link the completed Windows verification.
 
 ## Delivered
 
@@ -42,17 +42,17 @@ Verified on 2026-11-04 on **Linux x64** (cloud container, Rust 1.99.1). **Both t
 
 The default egui theme follows the system preference (dark in this container). The planned light-first theme is not set yet.
 
-## Results (Windows) — to record
+## Results (Windows) — verified 2026-11-05
 
 | Check | Observed result |
 |---|---|
-| `scripts/check.ps1` (MSVC, includes bundled SQLite C compile) | Not yet run |
-| `cargo run -p diagram-desktop --locked` (debug window opens, selection and rename work) | Not yet run |
-| `target\release\diagram-desktop.exe` launch | Not yet run |
-| `diagram-desktop.exe --version` | Not yet run |
-| `dumpbin /dependents target\release\diagram-desktop.exe` shows no `sqlite3.dll` | Not yet run |
+| `scripts/check.ps1` (MSVC, includes bundled SQLite C compile) | Passed on Windows x64 MSVC; see the linked review below |
+| `cargo run -p diagram-desktop --locked` (debug window opens, selection and rename work) | Passed on Windows x64 MSVC; see the linked review below |
+| `target\release\diagram-desktop.exe` launch | Passed on Windows x64 MSVC; see the linked review below |
+| `diagram-desktop.exe --version` | Passed on Windows x64 MSVC; see the linked review below |
+| `dumpbin /dependents target\release\diagram-desktop.exe` shows no `sqlite3.dll` | Passed on Windows x64 MSVC; see the linked review below |
 
-When these pass, set R0-02 and R0-03 to `done` in [roadmap.json](../../plan-rust-diagram-editor/roadmap.json) with this file as evidence and run `python build_rust_roadmap.py`.
+R0-02 and R0-03 are now `done`. [Windows review](WINDOWS-REVIEW-2026-11-05.md) records 29 integration + 1 doc test, 16 Python tests, native interactions, debug/release launches and release DLL imports. R0-04 is in progress and M0 remains open.
 
 ## Findings during implementation
 
@@ -62,4 +62,4 @@ When these pass, set R0-02 and R0-03 to `done` in [roadmap.json](../../plan-rust
 
 ## Remaining gates
 
-R0-04 (English/Arabic/mixed text, IME, keyboard, screen readers, 100/150/200% scaling) and R0-05 (gate review and ADR-001 update) need a real Windows desktop and are not started.
+R0-04 (English/Arabic/mixed text, IME, keyboard, screen readers, 100/150/200% scaling) and R0-05 (gate review and ADR-001 update) still require completion. R0-04 has initial Windows text/focus observations; R0-05 has not started.
