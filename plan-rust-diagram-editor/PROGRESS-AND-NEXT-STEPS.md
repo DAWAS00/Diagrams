@@ -61,9 +61,9 @@ Linux recorded 31 Rust tests; Windows now passes 30 (29 integration + 1 doc test
 3. Apply the planned light default and text sizing with a dark-theme choice, then review longer labels and smaller windows.
 4. Complete R0-05: update ADR-001 using the full results and decide whether the GUI foundation passes.
 
-### B. UX milestone — the complete UI (next task after M0)
-Full plan: [07-UI-PLAN.md](07-UI-PLAN.md). Twelve tasks, built on the existing shell with labeled fixtures (no simulated saving):
-1. **UI-01** design tokens and components. Fix first: the planned border color measures 1.2–1.3:1 on light and 1.9–2.3:1 on dark, below the 3:1 needed for control boundaries.
+### B. UX milestone — the complete UI (in progress)
+Full plan: [07-UI-PLAN.md](07-UI-PLAN.md). Shareable summary of UI work: [app/docs/ui/README.md](../app/docs/ui/README.md). Twelve tasks, built on the existing shell with labeled fixtures (no simulated saving):
+1. **UI-01 — done.** Tokens and components with measured contrast; the failing border color was replaced (now 3.1–4.3:1); live Light/Dark/System switching. [Evidence](../app/docs/ui/UI-01-TOKENS-AND-COMPONENTS.md).
 2. **UI-02** type scale and text roles (right-to-left rules wait for the R0-04 bidi result).
 3. **UI-03** responsive workspace, then **UI-05** navigator/tabs, **UI-07** canvas states, **UI-08** inspector.
 4. **UI-04** welcome/new/open, **UI-06** command catalog, **UI-09** dialogs/status/validation.
