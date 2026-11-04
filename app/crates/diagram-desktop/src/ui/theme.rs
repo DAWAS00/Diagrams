@@ -1,10 +1,12 @@
-//! Design tokens and their mapping to egui styles (UI-01).
+//! Design tokens, text roles and their mapping to egui styles (UI-01, UI-02).
 //!
 //! Every chrome color comes from a [`Palette`]; widgets never use raw RGB
 //! values. Diagram objects on the canvas keep their own document colors so a
 //! theme change never recolors saved diagrams or exported files.
 
-use eframe::egui::{self, Color32, CornerRadius, Stroke, Style, Theme, ThemePreference, Vec2};
+use eframe::egui::{
+    self, Color32, CornerRadius, FontId, Stroke, Style, TextStyle, Theme, ThemePreference, Vec2,
+};
 
 /// Minimum contrast for normal text (WCAG 2.2, 1.4.3).
 pub const TEXT_CONTRAST: f32 = 4.5;
@@ -23,6 +25,65 @@ pub const DIALOG_RADIUS: u8 = 8;
 pub const SPACING: f32 = 8.0;
 /// Gap inside composite controls.
 pub const GAP: f32 = 4.0;
+
+/// Name of the egui text style used for [`TextRole::PageTitle`].
+pub const PAGE_TITLE_STYLE: &str = "page-title";
+
+/// Text roles from the UI plan. Every text size in the shell comes from one
+/// of these, through egui text styles, so sizes are changed in one place.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TextRole {
+    /// Page titles such as the welcome screen heading (24).
+    PageTitle,
+    /// Panel and section titles (16).
+    PanelTitle,
+    /// Body text, messages and list content (15).
+    Body,
+    /// Field labels, button and status text (14).
+    Label,
+    /// Member lines, types and other code-like text (14, monospace).
+    Code,
+}
+
+impl TextRole {
+    /// Every role, from largest to smallest.
+    pub const ALL: [Self; 5] = [
+        Self::PageTitle,
+        Self::PanelTitle,
+        Self::Body,
+        Self::Label,
+        Self::Code,
+    ];
+
+    /// Size in logical points.
+    pub const fn size(self) -> f32 {
+        match self {
+            Self::PageTitle => 24.0,
+            Self::PanelTitle => 16.0,
+            Self::Body => 15.0,
+            Self::Label | Self::Code => 14.0,
+        }
+    }
+
+    /// The egui text style that carries this role.
+    pub fn text_style(self) -> TextStyle {
+        match self {
+            Self::PageTitle => TextStyle::Name(PAGE_TITLE_STYLE.into()),
+            Self::PanelTitle => TextStyle::Heading,
+            Self::Body => TextStyle::Body,
+            Self::Label => TextStyle::Button,
+            Self::Code => TextStyle::Monospace,
+        }
+    }
+
+    /// Font for painting this role directly, for example on the canvas.
+    pub fn font_id(self) -> FontId {
+        match self {
+            Self::Code => FontId::monospace(self.size()),
+            _ => FontId::proportional(self.size()),
+        }
+    }
+}
 
 /// Semantic color tokens for one theme.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -227,7 +288,7 @@ pub fn contrast_pairs(palette: &Palette) -> Vec<ContrastPair> {
     ]
 }
 
-/// Complete egui style for `theme`: colors, spacing and corner radii.
+/// Complete egui style for `theme`: colors, text roles, spacing and corner radii.
 pub fn style(theme: Theme) -> Style {
     let p = palette(theme);
     let mut style = Style::default();
@@ -270,6 +331,11 @@ pub fn style(theme: Theme) -> Style {
     }
 
     style.visuals = visuals;
+    style.text_styles = TextRole::ALL
+        .into_iter()
+        .map(|role| (role.text_style(), role.font_id()))
+        .chain([(TextStyle::Small, FontId::proportional(12.0))])
+        .collect();
     style.spacing.item_spacing = Vec2::new(SPACING, GAP);
     style.spacing.button_padding = Vec2::new(12.0, 6.0);
     style.spacing.interact_size.y = CONTROL_HEIGHT;

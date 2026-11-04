@@ -3,18 +3,45 @@
 //! Each component gives its control an accessible name and the planned
 //! sizes. Tabs arrive with the diagram tab row in UI-05.
 
-use eframe::egui::{self, Button, Label, Response, RichText, TextEdit, Vec2};
+use std::sync::Arc;
 
-use super::theme::{CONTROL_HEIGHT, ROW_HEIGHT};
+use eframe::egui::text::{LayoutJob, TextWrapping};
+use eframe::egui::{
+    self, Button, Color32, FontId, Galley, Label, Response, RichText, TextEdit, Vec2,
+};
+
+use super::theme::{CONTROL_HEIGHT, ROW_HEIGHT, TextRole};
+
+/// Page title such as the welcome screen heading.
+pub fn page_title(ui: &mut egui::Ui, text: &str) -> Response {
+    ui.label(
+        RichText::new(text)
+            .text_style(TextRole::PageTitle.text_style())
+            .strong(),
+    )
+}
 
 /// Panel title such as "Project" or "Selection".
 pub fn panel_title(ui: &mut egui::Ui, text: &str) -> Response {
-    ui.label(RichText::new(text).heading().strong())
+    ui.label(
+        RichText::new(text)
+            .text_style(TextRole::PanelTitle.text_style())
+            .strong(),
+    )
 }
 
 /// Small secondary label naming a section or a field.
 pub fn field_label(ui: &mut egui::Ui, text: &str) -> Response {
-    ui.label(RichText::new(text).weak())
+    ui.label(
+        RichText::new(text)
+            .text_style(TextRole::Label.text_style())
+            .weak(),
+    )
+}
+
+/// Code-like text such as a member line.
+pub fn code_text(ui: &mut egui::Ui, text: &str) -> Response {
+    ui.label(RichText::new(text).text_style(TextRole::Code.text_style()))
 }
 
 /// Labeled single-line text field; the label becomes its accessible name.
@@ -28,9 +55,15 @@ pub fn text_field(ui: &mut egui::Ui, label: &str, value: &mut String) -> Respons
     .labelled_by(label.id)
 }
 
-/// Selectable list row with at least the minimum hit height.
+/// Selectable list row with at least the minimum hit height. Long text is
+/// shortened with an ellipsis on one line; the full text stays the row's
+/// accessible name.
 pub fn list_row(ui: &mut egui::Ui, selected: bool, text: &str) -> Response {
-    ui.add(Button::selectable(selected, text).min_size(Vec2::new(0.0, ROW_HEIGHT)))
+    ui.add(
+        Button::selectable(selected, text)
+            .truncate()
+            .min_size(Vec2::new(0.0, ROW_HEIGHT)),
+    )
 }
 
 /// Toolbar or dialog action. A disabled action always explains why;
@@ -66,5 +99,20 @@ pub fn choice(ui: &mut egui::Ui, selected: bool, text: &str) -> Response {
 
 /// Text that shortens with an ellipsis instead of pushing other controls away.
 pub fn truncated_text(ui: &mut egui::Ui, text: &str) -> Response {
-    ui.add(Label::new(text).truncate())
+    ui.add(Label::new(RichText::new(text).text_style(TextRole::Label.text_style())).truncate())
+}
+
+/// Lays out painted text on one line no wider than `max_width`, ending in an
+/// ellipsis when shortened. Use it for text drawn inside fixed shapes; keep the
+/// full text in the shape's accessible name.
+pub fn one_line_galley(
+    painter: &egui::Painter,
+    text: &str,
+    font: FontId,
+    color: Color32,
+    max_width: f32,
+) -> Arc<Galley> {
+    let mut job = LayoutJob::simple_singleline(text.to_owned(), font, color);
+    job.wrap = TextWrapping::truncate_at_width(max_width);
+    painter.layout_job(job)
 }

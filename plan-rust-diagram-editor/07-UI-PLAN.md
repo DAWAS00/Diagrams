@@ -1,6 +1,6 @@
 # 07 — Complete native UI plan
 
-Status 2026-11-05: UX milestone started; UI-01 is done ([UI progress](../app/docs/ui/README.md)). The running app is the R0-02 prototype (toolbar, sidebar, canvas with two sample classes, inspector, status bar). This document specifies every surface the product needs, how each connects to the model that M1 will build, and the tasks that deliver it. [03-GUI-AND-WORKFLOWS.md](03-GUI-AND-WORKFLOWS.md) remains the interaction direction; this plan makes it complete and testable. [ADR-001](decisions/ADR-001-GUI.md) stays conditional until R0-05.
+Status 2026-11-05: UX milestone started; UI-01 and UI-02 are done ([UI progress](../app/docs/ui/README.md)). The running app is the R0-02 prototype (toolbar, sidebar, canvas with two sample classes, inspector, status bar). This document specifies every surface the product needs, how each connects to the model that M1 will build, and the tasks that deliver it. [03-GUI-AND-WORKFLOWS.md](03-GUI-AND-WORKFLOWS.md) remains the interaction direction; this plan makes it complete and testable. [ADR-001](decisions/ADR-001-GUI.md) stays conditional until R0-05.
 
 ## 1. Goal and boundaries
 
@@ -54,6 +54,17 @@ These are starting design values. Target 4.5:1 for normal text and 3:1 for large
 | **Border** | **1.2 / 1.3 / 1.3** | **2.3 / 2.0 / 1.9** | **Fails 3:1 in both themes** |
 
 The border token is acceptable for decorative panel separators but **not** for input fields, buttons and other essential control boundaries. UI-01 defines a stronger control-border token and keeps the light border only for separators. **Done:** `#8A97AB` was tried and also failed (2.6–3.0:1); the implemented values are `#76839A` (light, 3.3–3.8:1) and `#6E7F98` (dark, 3.1–4.3:1). See [UI-01 evidence](../app/docs/ui/UI-01-TOKENS-AND-COMPONENTS.md). Disabled, hover, selected and pressed states, and text on the accent color, are still unchecked and belong to UI-10.
+
+**Text roles and direction rules (UI-02, done).** Sizes come only from `TextRole` (page title 24, panel title 16, body 15, label 14, code 14 monospace); see [UI-02 evidence](../app/docs/ui/UI-02-TYPE-SCALE-AND-TEXT-ROLES.md).
+
+| Rule | Status |
+|---|---|
+| Names and member text are stored exactly as typed; the app never inserts direction marks | Decided |
+| Application chrome (labels, menus, dialogs) is English and left-to-right in v0.1; mirroring the layout for a right-to-left UI language needs a separate localisation plan | Decided |
+| User text in lists, the status bar and canvas shapes stays on one line and ends in an ellipsis when it does not fit; the inspector field shows it in full | Decided, tested |
+| Shortened text keeps its full value in the accessibility tree | Decided, tested |
+| Display order of Arabic and mixed Arabic/English text | **Open** until R0-04 records the bidi result (egui 0.37 has no bidi reordering) |
+| Alignment of right-to-left text in fields, and which end an ellipsis cuts for right-to-left text | **Open**, same dependency |
 
 Use an 8-unit rhythm, with 4-unit internal gaps; 6-unit control radii and 8-unit dialog radii. Default body text 15 logical pixels, labels 14, panel titles 16, page titles 24. Code/member lines use a readable monospace fallback at 14. Starting control heights: 34–36; hit targets at least 32 units, handles visually smaller but with larger hit regions. No motion is necessary for core workflows; respect reduced-motion settings if transitions are added.
 

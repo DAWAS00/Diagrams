@@ -64,7 +64,7 @@ Linux recorded 31 Rust tests; Windows now passes 30 (29 integration + 1 doc test
 ### B. UX milestone — the complete UI (in progress)
 Full plan: [07-UI-PLAN.md](07-UI-PLAN.md). Shareable summary of UI work: [app/docs/ui/README.md](../app/docs/ui/README.md). Twelve tasks, built on the existing shell with labeled fixtures (no simulated saving):
 1. **UI-01 — done.** Tokens and components with measured contrast; the failing border color was replaced (now 3.1–4.3:1); live Light/Dark/System switching. [Evidence](../app/docs/ui/UI-01-TOKENS-AND-COMPONENTS.md).
-2. **UI-02** type scale and text roles (right-to-left rules wait for the R0-04 bidi result).
+2. **UI-02 — done.** One set of text roles; direction rules written with right-to-left display marked open until R0-04; two long-text defects found and fixed. [Evidence](../app/docs/ui/UI-02-TYPE-SCALE-AND-TEXT-ROLES.md).
 3. **UI-03** responsive workspace, then **UI-05** navigator/tabs, **UI-07** canvas states, **UI-08** inspector.
 4. **UI-04** welcome/new/open, **UI-06** command catalog, **UI-09** dialogs/status/validation.
 5. **UI-10** keyboard/focus/accessibility check, **UI-11** notation contract, **UI-12** review gate.

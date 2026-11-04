@@ -13,7 +13,7 @@ This page is for anyone following the project. It summarises the user-interface 
 | Task | What it delivers | Status |
 |---|---|---|
 | UI-01 | Design tokens and base components | **Done** — [evidence](UI-01-TOKENS-AND-COMPONENTS.md) |
-| UI-02 | Type scale and text roles | Next |
+| UI-02 | Type scale and text roles | **Done** — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md) |
 | UI-03 | Responsive workspace | Not started |
 | UI-04 | Welcome, new-project and open screens | Not started |
 | UI-05 | Navigator and diagram tabs | Not started |
@@ -34,17 +34,24 @@ This page is for anyone following the project. It summarises the user-interface 
 - **Problem found and fixed:** the border colour in the plan was too faint for buttons and fields. It measured 1.2–2.3:1, where 3:1 is needed. New border colours pass in both themes.
 - Reusable components (titles, labels, labeled fields, list rows, buttons that explain why they are disabled, warnings in words rather than colour alone). The shell uses only these.
 - Theme choice (Light, Dark, System) in the status bar, applied instantly. Diagrams keep their own colours, so switching theme never changes how a diagram looks or exports.
-- 8 new automated tests; all 27 desktop tests pass.
+- 8 new automated tests check the colours and the theme switch.
 
 | Light | Dark |
 |---|---|
 | ![Light theme](ui-01-light.png) | ![Dark theme](ui-01-dark.png) |
 
+### UI-02 — Type scale and text roles
+- Five text roles define every text size in one place: page title 24, panel title 16, body 15, labels 14, code 14 (monospace).
+- Rules for text direction are written down. Showing Arabic and mixed Arabic/English text in the right order stays **open** until the R0-04 check, because the GUI library cannot reorder right-to-left text yet.
+- **Two problems found and fixed** by testing a 70-character class name in the smallest window (800×500): list rows wrapped onto several lines, and the name spilled out of its box on the canvas. Both now shorten with "…", and screen readers still hear the full name.
+- 9 new automated tests check sizes and that nothing overlaps or leaves the window at 800×500, 1280×800 and 1440×900.
+
+![Smallest window with a very long class name](ui-02-800x500-long-name.png)
+
 ## What is next
-1. **UI-02 — type scale and text roles:** page title 24, panel title 16, body 15, labels and code 14, applied from one place. Right-to-left text rules wait for the Arabic/bidi result of R0-04.
-2. **UI-06 — command catalog:** one list of commands feeds the toolbar, menus, shortcuts and search, so they can't drift apart. Every disabled command states its reason.
-3. **UI-03 — responsive workspace:** the full header, tab row and tool row; panels that collapse into drawers on small windows (down to 800×500).
-4. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
+1. **UI-06 — command catalog:** one list of commands feeds the toolbar, menus, shortcuts and search, so they can't drift apart. Every disabled command states its reason.
+2. **UI-03 — responsive workspace:** the full header, tab row and tool row; panels that collapse into drawers on small windows (down to 800×500).
+3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it
 From `app/`:

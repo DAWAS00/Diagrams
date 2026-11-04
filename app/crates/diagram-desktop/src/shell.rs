@@ -5,16 +5,17 @@
 //! core model, commands and history.
 
 use eframe::egui::{
-    self, Align, Align2, Color32, CornerRadius, FontId, Frame, Key, Layout, Pos2, Rect, Role,
-    Sense, Stroke, StrokeKind, ThemePreference, Vec2, WidgetInfo,
+    self, Align, Align2, Color32, CornerRadius, Frame, Key, Layout, Pos2, Rect, Role, Sense,
+    Stroke, StrokeKind, ThemePreference, Vec2, WidgetInfo,
 };
 
 use crate::ui::components;
-use crate::ui::theme::{self, Palette};
+use crate::ui::theme::{self, Palette, TextRole};
 
 const CLASS_WIDTH: f32 = 180.0;
 const HEADER_HEIGHT: f32 = 32.0;
 const ATTRIBUTE_HEIGHT: f32 = 20.0;
+const TEXT_INSET: f32 = 10.0;
 const NOT_IMPLEMENTED: &str = "Not available in this prototype yet";
 
 /// Document colors for diagram objects. They do not follow the editor theme,
@@ -151,7 +152,10 @@ fn toolbar(ui: &mut egui::Ui) {
 
 fn status_bar(ui: &mut egui::Ui, state: &mut ShellState) {
     ui.horizontal(|ui| {
-        ui.label("Prototype · nothing is saved");
+        ui.label(
+            egui::RichText::new("Prototype · nothing is saved")
+                .text_style(TextRole::Label.text_style()),
+        );
         ui.separator();
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             // Right-to-left layout: add the options in reverse visual order.
@@ -164,7 +168,7 @@ fn status_bar(ui: &mut egui::Ui, state: &mut ShellState) {
                     state.theme = preference;
                 }
             }
-            ui.label("Theme:");
+            components::field_label(ui, "Theme:");
             ui.separator();
             let selection = match state.selected_class() {
                 Some(class) => format!("Selected: {}", class.display_name()),
@@ -212,7 +216,7 @@ fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
     ui.add_space(theme::SPACING);
     components::field_label(ui, "Attributes");
     for attribute in &class.attributes {
-        ui.monospace(attribute);
+        components::code_text(ui, attribute);
     }
 }
 
@@ -278,24 +282,33 @@ fn paint_class(
         header_bottom,
         Stroke::new(1.0, DOCUMENT_INK),
     );
-    painter.text(
-        Pos2::new(rect.center().x, rect.top() + HEADER_HEIGHT / 2.0),
-        Align2::CENTER_CENTER,
+    // Text stays inside the box; how boxes grow for long names is decided
+    // with the canvas states in UI-07.
+    let text_width = rect.width() - 2.0 * TEXT_INSET;
+    let name = components::one_line_galley(
+        painter,
         class.display_name(),
-        FontId::proportional(15.0),
+        TextRole::Body.font_id(),
         DOCUMENT_INK,
+        text_width,
     );
+    let name_origin = Align2::CENTER_CENTER
+        .anchor_size(
+            Pos2::new(rect.center().x, rect.top() + HEADER_HEIGHT / 2.0),
+            name.size(),
+        )
+        .min;
+    painter.galley(name_origin, name, DOCUMENT_INK);
     for (row, attribute) in class.attributes.iter().enumerate() {
-        painter.text(
-            Pos2::new(
-                rect.left() + 10.0,
-                header_bottom + 6.0 + row as f32 * ATTRIBUTE_HEIGHT,
-            ),
-            Align2::LEFT_TOP,
+        let line = components::one_line_galley(
+            painter,
             attribute,
-            FontId::monospace(13.0),
+            TextRole::Code.font_id(),
             DOCUMENT_INK,
+            text_width,
         );
+        let top = header_bottom + 6.0 + row as f32 * ATTRIBUTE_HEIGHT;
+        painter.galley(Pos2::new(rect.left() + TEXT_INSET, top), line, DOCUMENT_INK);
     }
 
     if selected {
