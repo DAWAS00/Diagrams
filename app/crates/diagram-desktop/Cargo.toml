@@ -1,0 +1,16 @@
+[package]
+name = "diagram-desktop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Native desktop application and orchestration for Diagram Studio"
+
+[dependencies]
+diagram-core.workspace = true
+diagram-canvas.workspace = true
+diagram-storage.workspace = true
+
+[lints]
+workspace = true

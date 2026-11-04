@@ -1,6 +1,6 @@
 # Rust implementation roadmap
 
-Date: 2026-11-04. Status: ready for implementation planning; **no application milestone is complete**. This document adds Rust-specific delivery detail to [05-ROADMAP.md](05-ROADMAP.md), preserving M0–M6 and the existing product scope.
+Plan date: 2026-11-04. Status updated 2026-11-05: R0-01 is complete; **no application milestone is complete**. The [four-crate workspace](../app/README.md) builds and its console bootstrap runs. [Verification evidence](../app/docs/R0-01-VERIFICATION.md) records the limits. This document preserves M0–M6 and the existing product scope.
 
 ## Product path
 
@@ -17,7 +17,7 @@ flowchart LR
 
 The first runnable prototype arrives in **M0**. The first useful class-modeling workflow arrives in **M2**. The first release requires **M3**, including failures, recovery, export, native usability and distribution checks. A window that opens is not a release.
 
-Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadmap.json](roadmap.json) as the editable tracking source, and [rust-backlog.csv](rust-backlog.csv) for spreadsheet/task tracking. Status is `not_started` everywhere until implementation and evidence exist. No remote issues or repository changes are created by this roadmap.
+Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadmap.json](roadmap.json) as the editable tracking source, and [rust-backlog.csv](rust-backlog.csv) for spreadsheet/task tracking. R0-01 is `done` with evidence; other tasks remain `not_started`. No remote issues are created by this tracker.
 
 ## Implementation stack
 
@@ -32,11 +32,11 @@ Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadma
 | Concurrency | UI thread owns mutable document; bounded standard channels to worker-owned I/O |
 | Checks | rustfmt, Clippy, unit/integration/doc tests and native release smoke tests |
 
-Resolve and lock the compatible dependency set in M0. The existing toolchain has rustfmt and Clippy installed. These observations do not replace compiling the GUI or checking the runtime adapter. See [04-TOOLING.md](04-TOOLING.md) for paths and proposed dependencies.
+R0-01 pins Rust 1.99.1, rustfmt and Clippy and locks the initial thiserror dependency set. Resolve GUI and SQLite dependencies as their M0 tasks begin. The console build does not replace compiling the GUI or checking the runtime adapter. See [04-TOOLING.md](04-TOOLING.md) for paths and proposed dependencies.
 
 ## Rust workspace and delivery boundaries
 
-Future source location: `D:\REA visual\app`. Keep the plan and VP evidence outside application source.
+Source location: `D:\REA visual\app`. The four crates now exist; the module tree below is the delivery target, not a claim that every module is implemented. Keep the plan and VP evidence outside application source.
 
 ```text
 app/
@@ -146,7 +146,7 @@ Reporting, PNG/PDF, VP XML/native interoperability, advanced layout, other catal
 
 ## First executable workflow and release gates
 
-The first development action is **R0-01** in [rust-backlog.csv](rust-backlog.csv), followed by R0-02/R0-03 and the native gate. Task prerequisites are explicit in [roadmap.json](roadmap.json). Documentation tasks are complete only when the corresponding implementation evidence exists; every task is currently not started.
+**R0-01 is complete.** Next are **R0-02/R0-03**, then the native gate. Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist; 38 tasks remain not started.
 
 The project-level definition of done combines:
 

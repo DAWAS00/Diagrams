@@ -1,12 +1,12 @@
 # Rust diagram editor — implementation plan
 
-Date: 2026-11-04. Working label: Diagram Studio. Status: proposed implementation plan; application coding has not started.
+Plan date: 2026-11-04. Status updated 2026-11-05. Working label: Diagram Studio. R0-01 is implemented and verified; the native GUI and remaining M0 tasks are pending. See [workspace instructions](../app/README.md) and [verification evidence](../app/docs/R0-01-VERIFICATION.md).
 
 Build a local Windows desktop modeling tool in Rust, designed to make the basic workflow clear and dependable before expanding diagram coverage.
 
 **Product-wide comparison:** read [Visual Paradigm versus our version](comparison/README.md) or the [searchable comparison](comparison/COMPARISON.html) for feature differences, all 101 notation candidates, deliberate omissions, and remaining validation gaps. These compare a shipped suite with an unbuilt Rust plan.
 
-**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 39 tasks with prerequisites and acceptance conditions; 28 lead through v0.1. All tasks are currently not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
+**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 39 tasks with prerequisites and acceptance conditions; 28 lead through v0.1. R0-01 is complete; 38 tasks remain. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
 
 ## Recommended decisions
 
@@ -36,9 +36,9 @@ The GUI choice is a project recommendation, not a claim that one framework guara
 
 Open [the interactive layout concept](GUI-CONCEPT.html) to review the proposed workspace. It is a local HTML planning artifact, not the implementation technology or a working Rust application. Its selection, tab and inspector interactions illustrate the proposed design only.
 
-## First development action
+## Next development action
 
-Complete **M0**, a small native Rust prototype that proves the window, text editing, canvas picking, DPI scaling, keyboard focus and graphics startup on this computer. Then implement the class-diagram vertical slice. Do not start by reproducing every Visual Paradigm menu or all 101 installed API constants.
+Complete **R0-02**, the native shell, after the verified R0-01 workspace. Continue M0 to prove text editing, canvas picking, DPI scaling, keyboard focus, SQLite and graphics startup on this computer. Then implement the class-diagram vertical slice. Do not start by reproducing every Visual Paradigm menu or all 101 installed API constants.
 
 ## Assumptions and scope decisions
 

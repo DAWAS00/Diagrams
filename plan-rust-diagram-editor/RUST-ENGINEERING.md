@@ -77,7 +77,7 @@ Use conservative compiler/Clippy correctness/style/performance checks; explicitl
 
 At library roots require public documentation with `#![deny(missing_docs)]`, including crate/module docs and meaningful public errors/invariants. Keep API surface small instead of exposing internal structs to avoid design work. Enforce no production unwrap/expect at appropriate source boundaries; allow explicit test setup rather than weakening production rules globally.
 
-Planned checks, run from the future `app/` workspace after Cargo.lock exists:
+Checks run from `app/`, where Cargo.lock now exists. [scripts/check.ps1](../app/scripts/check.ps1) provides the repeatable Windows gate; [R0-01 evidence](../app/docs/R0-01-VERIFICATION.md) records the current passed results.
 
 ```powershell
 $cargoExe = 'C:\Users\dawas\.cargo\bin\cargo.exe'
@@ -94,7 +94,7 @@ The explicit doc-test command makes the gate clear; `cargo test` normally includ
 
 `--all-features` is appropriate while features are additive/compatible. If backend combinations become mutually exclusive, document/test supported feature combinations instead of assuming all-features validates them. Review lockfile changes; `--locked` failure is not an instruction to update every dependency blindly. [Clippy usage](https://doc.rust-lang.org/clippy/usage.html).
 
-Use stable rustfmt options; do not add nightly-only formatting requirements to the stable toolchain casually. Clippy and rustfmt availability was rechecked; project-level commands are not passed results because there is no application workspace yet.
+Use stable rustfmt options; do not add nightly-only formatting requirements to the stable toolchain casually. The R0-01 workspace passes these checks with Rust 1.99.1. GUI, SQLite, file handling and editor behavior require their own later verification.
 
 Skill reference: Chapter 2.
 

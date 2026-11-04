@@ -2,6 +2,8 @@
 
 ## Readiness checked on 2026-11-04
 
+**Implementation update, 2026-11-05:** R0-01 created [app/](../app/README.md), installed and pinned the exact Rust 1.99.1 toolchain, resolved thiserror 2.0.21 into Cargo.lock, and passed fmt/check/Clippy/tests/docs/release build plus debug/release console launches. See [verification evidence](../app/docs/R0-01-VERIFICATION.md). GUI and bundled SQLite builds remain R0-02/R0-03; dependency proposals below are not all installed.
+
 | Item | Local observation | Next development step |
 |---|---|---|
 | OS | Local Windows x64 | First supported build/test target |

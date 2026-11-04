@@ -2,7 +2,7 @@
 
 ## Four-crate workspace
 
-Proposed future source layout; this planning pass does not create a Cargo workspace:
+The four-crate workspace now exists under [app/](../app/README.md). R0-01 verifies the boundaries and a console bootstrap; the modules below remain the target layout as their behavior is implemented.
 
 ```text
 D:\REA visual\
@@ -15,7 +15,7 @@ D:\REA visual\
       diagram-canvas\src\       geometry, picking, interactions, scene and SVG export
       diagram-storage\src\      SQLite, snapshots, versioning and migrations
       diagram-desktop\src\      eframe shell, inspectors, palette and OS integration
-    tests\fixtures\             small reference projects and expected invariants
+    fixtures\                   future reference projects; integration tests live in member crates
     assets\                     original icons, licensed fonts and notices
     docs\                       development/run instructions
   plan-rust-diagram-editor\      this implementation plan
