@@ -19,7 +19,7 @@ The first release focuses on a dependable class-modeling workflow: classes and m
 - [Project Rust skills](SKILLS.md)
 - [Current Windows verification and remaining work](app/docs/WINDOWS-REVIEW-2026-11-05.md)
 
-The roadmap has seven milestones. M0 proves the desktop foundation; M1 builds the model and storage; M2 completes class editing; M3 prepares v0.1. M4–M6 cover later diagram families and separately scoped capabilities. Task **R0-01** created the Cargo workspace under `app/`; **R0-02** and **R0-03** add the native shell prototype and bundled SQLite.
+The roadmap has eight milestones. M0 proves the desktop foundation; UX designs every native screen as fixtures ([UI plan](plan-rust-diagram-editor/07-UI-PLAN.md)); M1 builds the model and storage; M2 completes class editing; M3 prepares v0.1. M4–M6 cover later diagram families and separately scoped capabilities. Task **R0-01** created the Cargo workspace under `app/`; **R0-02** and **R0-03** add the native shell prototype and bundled SQLite.
 
 ## Browse the planning dashboards
 

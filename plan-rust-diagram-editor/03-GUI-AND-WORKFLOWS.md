@@ -1,5 +1,7 @@
 # 03 — A simpler GUI
 
+> This page is the interaction direction. The complete UI specification (tokens, every surface and state, action contracts, Rust structure and the UI tasks) is [07-UI-PLAN.md](07-UI-PLAN.md).
+
 ## Interaction direction
 
 Build around the current document and selection. Use a compact toolbar instead of exposing unrelated product areas. Keep simple edits inline and detailed fields in a persistent inspector. This is a proposed improvement to validate with users, not a measured result yet.

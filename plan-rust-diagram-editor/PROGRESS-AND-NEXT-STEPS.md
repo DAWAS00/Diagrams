@@ -61,8 +61,18 @@ Linux recorded 31 Rust tests; Windows now passes 30 (29 integration + 1 doc test
 3. Apply the planned light default and text sizing with a dark-theme choice, then review longer labels and smaller windows.
 4. Complete R0-05: update ADR-001 using the full results and decide whether the GUI foundation passes.
 
-### B. M1 — model, commands and storage (starts after R0-05)
-All headless: no window needed, so it can be tested fully in this environment.
+### B. UX milestone — the complete UI (next task after M0)
+Full plan: [07-UI-PLAN.md](07-UI-PLAN.md). Twelve tasks, built on the existing shell with labeled fixtures (no simulated saving):
+1. **UI-01** design tokens and components. Fix first: the planned border color measures 1.2–1.3:1 on light and 1.9–2.3:1 on dark, below the 3:1 needed for control boundaries.
+2. **UI-02** type scale and text roles (right-to-left rules wait for the R0-04 bidi result).
+3. **UI-03** responsive workspace, then **UI-05** navigator/tabs, **UI-07** canvas states, **UI-08** inspector.
+4. **UI-04** welcome/new/open, **UI-06** command catalog, **UI-09** dialogs/status/validation.
+5. **UI-10** keyboard/focus/accessibility check, **UI-11** notation contract, **UI-12** review gate.
+
+UI-01, UI-02 and UI-06 can start now. Later, UI-13 to UI-17 bind the screens to the real model (M2) and UI-18 is the final review (M3).
+
+### C. M1 — model, commands and storage (starts after R0-05 and UI-12)
+All headless: no window needed, so it can be tested fully in this environment. The tracker gates it on UI-12 as the UI plan specifies; if you prefer to save time, R1-01 to R1-04 can run in parallel with the UX work by removing UI-12 from R1-01's prerequisites.
 1. **R1-01** Typed IDs and document records (classes, members, relations, diagrams, views); invalid geometry is rejected.
 2. **R1-02** Validation: references, ownership, associations, inheritance cycles.
 3. **R1-03** Reversible command transactions; a failed command leaves the document untouched.
@@ -74,9 +84,9 @@ All headless: no window needed, so it can be tested fully in this environment.
 
 R1-01 → R1-02 → R1-03 → R1-04 is one chain; R1-05/R1-06 can run in parallel with R1-03/R1-04.
 
-### C. After M1
-- **M2** (8 tasks): the full class-editing workflow on the real model — add, connect, edit members, multiple views, delete safely.
-- **M3** (7 tasks): reliability, recovery, SVG export, usability checks and the Windows distribution test for **v0.1**.
+### D. After M1
+- **M2** (13 tasks, 5 of them UI bindings): the full class-editing workflow on the real model — add, connect, edit members, multiple views, delete safely.
+- **M3** (8 tasks, 1 of them the final UI review): reliability, recovery, SVG export, usability checks and the Windows distribution test for **v0.1**.
 - **M4–M6**: flowchart and use case, specialised editors, then separately scoped proposals.
 
 ## How to keep this page current

@@ -1,12 +1,13 @@
 # Rust implementation roadmap
 
-Plan date: 2026-11-04. Status updated 2026-11-05: R0-01/R0-02/R0-03 are complete with Windows evidence. R0-04 is in progress; **M0 remains incomplete**. See [progress and next steps](PROGRESS-AND-NEXT-STEPS.md) and [the Windows review](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
+Plan date: 2026-11-04. Status updated 2026-11-05: R0-01/R0-02/R0-03 are complete with Windows evidence. R0-04 is in progress; **M0 remains incomplete**. The roadmap now has a UX milestone for the complete UI ([07-UI-PLAN.md](07-UI-PLAN.md)). See [progress and next steps](PROGRESS-AND-NEXT-STEPS.md) and [the Windows review](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
 
 ## Product path
 
 ```mermaid
 flowchart LR
-    M0[M0 Native prototype gate] --> M1[M1 Model commands and storage]
+    M0[M0 Native prototype gate] --> UX[UX Complete native UI design]
+    UX --> M1[M1 Model commands and storage]
     M1 --> M2[M2 Complete class workflow]
     M2 --> M3[M3 Reliability usability and release]
     M3 --> V1[v0.1 Basic class editor]
@@ -15,9 +16,9 @@ flowchart LR
     M5 --> M6[M6 Separately scoped suite capabilities]
 ```
 
-The first runnable prototype arrives in **M0**. The first useful class-modeling workflow arrives in **M2**. The first release requires **M3**, including failures, recovery, export, native usability and distribution checks. A window that opens is not a release.
+The first runnable prototype arrives in **M0**. The complete UI is designed as native fixtures in **UX** (see [07-UI-PLAN.md](07-UI-PLAN.md)) before the model is built. The first useful class-modeling workflow arrives in **M2**. The first release requires **M3**, including failures, recovery, export, native usability and distribution checks. A window that opens is not a release.
 
-Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadmap.json](roadmap.json) as the editable tracking source, and [rust-backlog.csv](rust-backlog.csv) for spreadsheet/task tracking. R0-01/R0-02/R0-03 are `done`; R0-04 is `in_progress`; 35 tasks remain `not_started`. No remote issues are created by this tracker.
+Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadmap.json](roadmap.json) as the editable tracking source, and [rust-backlog.csv](rust-backlog.csv) for spreadsheet/task tracking. R0-01/R0-02/R0-03 are `done`; R0-04 is `in_progress`; 53 of 57 tasks remain `not_started` (including the 18 UI tasks). No remote issues are created by this tracker.
 
 ## Implementation stack
 
@@ -81,6 +82,17 @@ Dependency rule: desktop → core/canvas/storage; canvas → core; storage → c
 
 **Exit:** debug/release startup works on this computer; text/focus/DPI/accessibility limitations are measured and accepted or fixed; a headless library test and docs check run. Do not mark M0 complete on screenshots alone.
 
+## UX — Complete native UI design
+
+**Deliver:** every screen and state of the v0.1 Class editor as a native egui fixture in light and dark themes, built on the M0 shell before the model exists. Full specification, surfaces, interaction contracts and task list: [07-UI-PLAN.md](07-UI-PLAN.md).
+
+- UI-01 to UI-12: tokens and components, type roles, responsive workspace, welcome/new/open, navigator and tabs, command catalog, canvas states, inspector, dialogs/status/validation, keyboard and accessibility checks, notation capability contract, and the UI-12 review gate.
+- UI-13 to UI-17 (in M2) bind these surfaces to the real model; UI-18 (in M3) is the final visual, accessibility, recovery and export review.
+
+**Rust emphasis:** presentation structs borrow read-only model data and emit owned `UiIntent` values; one command catalog feeds menus, toolbar, shortcuts and search; no second writable document in a view model. Before M1, fixtures only: no simulated save, recovery or undo.
+
+**Exit:** UI-12 records native screenshots at the supported sizes in both themes, every surface in plan section 4 exists, and no essential keyboard, contrast or text failure remains. The input contrast check already found that the planned border color fails 3:1; UI-01 fixes it.
+
 ## M1 — Domain, commands, history and safe storage
 
 **Deliver:** a headless modeling engine that can save and reopen its own data.
@@ -98,6 +110,8 @@ Dependency rule: desktop → core/canvas/storage; canvas → core; storage → c
 
 ## M2 — The first complete class editor
 
+**UI bindings:** UI-13 to UI-17 connect the UX-milestone surfaces to the real model and gate the R2-08 walkthrough ([07-UI-PLAN.md](07-UI-PLAN.md) section 8).
+
 **Deliver:** the full acceptance scenario through the native UI, not only engine tests.
 
 - Canvas world/screen transforms, hit regions, class compartments, cached measurement and scene generation.
@@ -111,6 +125,8 @@ Dependency rule: desktop → core/canvas/storage; canvas → core; storage → c
 **Exit:** Customer/Order/PreferredCustomer, members, associations, inheritance, a second view, shared rename, independent geometry and undo/redo all work. Save/reopen preserves IDs and meaning. Invalid inheritance/self-links do not mutate state.
 
 ## M3 — Reliable and usable v0.1
+
+**UI review:** UI-18 is the final visual, accessibility, recovery and export review and gates R3-07.
 
 **Deliver:** a small deployable application with declared limitations.
 
@@ -146,7 +162,7 @@ Reporting, PNG/PDF, VP XML/native interoperability, advanced layout, other catal
 
 ## First executable workflow and release gates
 
-**R0-01 is complete.** **R0-02/R0-03** are implemented and verified on Linux ([evidence](../app/docs/R0-02-R0-03-VERIFICATION.md)); they stay in progress until the Windows launch and MSVC build are recorded. Then R0-04 and the native gate. Detailed log and ordered next steps: [PROGRESS-AND-NEXT-STEPS.md](PROGRESS-AND-NEXT-STEPS.md). Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist; 36 tasks remain not started.
+**R0-01 to R0-03 are complete** ([Windows evidence](../app/docs/WINDOWS-REVIEW-2026-11-05.md)). Next: finish R0-04 and the native gate, then the UX milestone. Detailed log and ordered next steps: [PROGRESS-AND-NEXT-STEPS.md](PROGRESS-AND-NEXT-STEPS.md). Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist; 53 of 57 tasks remain not started.
 
 The project-level definition of done combines:
 

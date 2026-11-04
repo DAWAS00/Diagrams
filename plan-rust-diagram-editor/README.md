@@ -8,7 +8,7 @@ Build a local Windows desktop modeling tool in Rust, designed to make the basic 
 
 **Progress and next steps:** [what is done and what comes next](PROGRESS-AND-NEXT-STEPS.md).
 
-**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 39 tasks with prerequisites and acceptance conditions; 28 lead through v0.1. Three tasks are complete; R0-04 is in progress and 35 tasks are not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
+**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 57 tasks with prerequisites and acceptance conditions; 46 lead through v0.1. Three tasks are complete; R0-04 is in progress and 53 tasks are not started, including 18 UI tasks. The complete UI plan is [07-UI-PLAN.md](07-UI-PLAN.md). Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
 
 ## Recommended decisions
 
