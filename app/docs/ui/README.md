@@ -4,7 +4,7 @@ This page is for anyone following the project. It summarises the user-interface 
 
 ## Where the project stands
 
-- **Working today:** a native Windows/Linux desktop window (egui) with a toolbar, project sidebar, canvas with two sample classes, inspector and status bar. You can select a class and rename it. Light and dark themes switch instantly.
+- **Working today:** a native Windows/Linux desktop window (egui) with a toolbar, project sidebar, canvas with two sample classes, inspector and status bar. You can select a class and rename it, search commands and classes with Ctrl+K, and switch between light and dark themes instantly.
 - **Not built yet:** the real project model, adding or connecting classes, undo, saving and export. Those buttons are visible but disabled, with an explanation.
 - **Order of work:** finish the native foundation gate (M0) → design every screen as native fixtures (UX milestone, UI-01 to UI-12) → build the model and storage (M1) → connect the screens to the model (M2) → reliability and the v0.1 release (M3).
 
@@ -14,15 +14,15 @@ This page is for anyone following the project. It summarises the user-interface 
 |---|---|---|
 | UI-01 | Design tokens and base components | **Done** — [evidence](UI-01-TOKENS-AND-COMPONENTS.md) |
 | UI-02 | Type scale and text roles | **Done** — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md) |
-| UI-03 | Responsive workspace | Not started |
-| UI-04 | Welcome, new-project and open screens | Not started |
+| UI-03 | Responsive workspace | Next |
+| UI-04 | Welcome, new-project and open screens | Next |
 | UI-05 | Navigator and diagram tabs | Not started |
-| UI-06 | Tool and command catalog | Next |
+| UI-06 | Tool and command catalog | **Done** — [evidence](UI-06-COMMAND-CATALOG.md) |
 | UI-07 | Canvas state presentations | Not started |
 | UI-08 | Contextual inspector | Not started |
 | UI-09 | Dialogs, status bar and validation drawer | Not started |
 | UI-10 | Keyboard, focus and accessibility checks | Not started |
-| UI-11 | Notation capability contract | Not started |
+| UI-11 | Notation capability contract | Next |
 | UI-12 | Native UI review gate | Not started |
 | UI-13 – UI-17 | Bind the screens to the real model (M2) | Not started |
 | UI-18 | Final visual, accessibility, recovery and export review (M3) | Not started |
@@ -48,9 +48,18 @@ This page is for anyone following the project. It summarises the user-interface 
 
 ![Smallest window with a very long class name](ui-02-800x500-long-name.png)
 
+### UI-06 — Tool and command catalog
+- One list of commands now feeds the toolbar, the future menus, keyboard shortcuts and a new **command search** (Ctrl+K or the **Search** button), so they can't drift apart. Every unavailable command says why, for example "Not available yet: this prototype cannot save."
+- Typing in a text field keeps its own keys: Ctrl+Z undoes typing and Escape leaves the field. They don't trigger app commands.
+- The search finds commands and classes; Enter runs the highlighted result and Escape closes it.
+- **Two problems found and fixed:** keyboard focus did not return to where you were after closing the search, and Enter did nothing because the highlight started on an unavailable command.
+- 17 new automated tests.
+
+![Command search](ui-06-command-search.png)
+
 ## What is next
-1. **UI-06 — command catalog:** one list of commands feeds the toolbar, menus, shortcuts and search, so they can't drift apart. Every disabled command states its reason.
-2. **UI-03 — responsive workspace:** the full header, tab row and tool row; panels that collapse into drawers on small windows (down to 800×500).
+1. **UI-03 — responsive workspace:** the full header (with menus drawn from the command catalog), tab row and tool row; panels that collapse into drawers on small windows (down to 800×500).
+2. **UI-04 — welcome, new-project and open screens**, and **UI-11 — notation capability contract** (what each diagram type offers).
 3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it
@@ -60,4 +69,4 @@ From `app/`:
 cargo run -p diagram-desktop --locked
 ```
 
-Click a class or a name in the Model list, rename it in the inspector, and switch Light / Dark / System in the bottom-right corner. Run all checks with `scripts/check.ps1` on Windows, or the commands in the [workspace README](../../README.md).
+Click a class or a name in the Model list, rename it in the inspector, press Ctrl+K to search commands and classes, and switch Light / Dark / System in the bottom-right corner. Run all checks with `scripts/check.ps1` on Windows, or the commands in the [workspace README](../../README.md).

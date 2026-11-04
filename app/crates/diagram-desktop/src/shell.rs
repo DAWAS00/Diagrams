@@ -5,18 +5,19 @@
 //! core model, commands and history.
 
 use eframe::egui::{
-    self, Align, Align2, Color32, CornerRadius, Frame, Key, Layout, Pos2, Rect, Role, Sense,
-    Stroke, StrokeKind, ThemePreference, Vec2, WidgetInfo,
+    self, Align, Align2, Button, Color32, CornerRadius, Frame, Id, Key, Layout, Modal, Pos2, Rect,
+    Role, ScrollArea, Sense, Stroke, StrokeKind, ThemePreference, Vec2, WidgetInfo,
 };
 
+use crate::ui::commands::{self, Availability, CommandContext, CommandId};
 use crate::ui::components;
+use crate::ui::palette::{self, PaletteEntry, PaletteState};
 use crate::ui::theme::{self, Palette, TextRole};
 
 const CLASS_WIDTH: f32 = 180.0;
 const HEADER_HEIGHT: f32 = 32.0;
 const ATTRIBUTE_HEIGHT: f32 = 20.0;
 const TEXT_INSET: f32 = 10.0;
-const NOT_IMPLEMENTED: &str = "Not available in this prototype yet";
 
 /// Document colors for diagram objects. They do not follow the editor theme,
 /// so switching themes never changes how a diagram looks when exported.
@@ -62,6 +63,10 @@ pub struct ShellState {
     pub selected: Option<usize>,
     /// Light, dark or follow the operating system. Light is the default.
     pub theme: ThemePreference,
+    /// The command and object search, while it is open.
+    pub palette: Option<PaletteState>,
+    /// Widget to focus at the start of the next frame, after a dialog closes.
+    pending_focus: Option<Id>,
     /// Theme preference currently installed in the egui context.
     applied_theme: Option<ThemePreference>,
     /// Whether a text field had keyboard focus at the end of the last frame.
@@ -82,6 +87,8 @@ impl Default for ShellState {
             ],
             selected: None,
             theme: ThemePreference::Light,
+            palette: None,
+            pending_focus: None,
             applied_theme: None,
             text_had_focus: false,
         }
@@ -103,6 +110,36 @@ impl ShellState {
     pub fn clear_selection(&mut self) {
         self.selected = None;
     }
+
+    /// The state that decides which commands are available.
+    pub fn command_context(&self) -> CommandContext {
+        CommandContext {
+            has_selection: self.selected_class().is_some(),
+        }
+    }
+}
+
+/// Runs `id` if it is available now; unavailable commands do nothing.
+fn run(state: &mut ShellState, ctx: &egui::Context, id: CommandId) {
+    if !commands::availability(id, state.command_context()).is_enabled() {
+        return;
+    }
+    match id {
+        CommandId::ClearSelection => state.clear_selection(),
+        CommandId::SearchCommands => {
+            if state.palette.is_none() {
+                let focused = ctx.memory(|memory| memory.focused());
+                state.palette = Some(PaletteState::new(focused));
+            }
+        }
+        // Always unavailable until the project model exists (M1/M2).
+        CommandId::Undo
+        | CommandId::Redo
+        | CommandId::AddClass
+        | CommandId::Connect
+        | CommandId::Save
+        | CommandId::Export => {}
+    }
 }
 
 /// Draws the complete shell into `ui` and applies the user's interactions to `state`.
@@ -112,15 +149,28 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         state.applied_theme = Some(state.theme);
     }
     let palette = *theme::palette(ui.ctx().theme());
+    // egui keeps the closed modal's layer on top for one more frame, and
+    // widgets behind a modal give up focus. Return focus once it is gone.
+    if let Some(id) = state.pending_focus {
+        if ui.ctx().memory(|memory| memory.top_modal_layer()).is_none() {
+            ui.ctx().memory_mut(|memory| memory.request_focus(id));
+            state.pending_focus = None;
+        } else {
+            ui.ctx().request_repaint();
+        }
+    }
 
-    // egui drops text focus as soon as Escape is pressed, so use the focus
-    // from the previous frame: Escape first leaves the field, then deselects.
-    if !state.text_had_focus && ui.input(|input| input.key_pressed(Key::Escape)) {
-        state.clear_selection();
+    // Shortcuts use the text focus of the previous frame: egui drops focus in
+    // the frame Escape is pressed, and Escape must first leave the field.
+    let text_had_focus = state.text_had_focus;
+    if let Some(id) = ui.input_mut(|input| commands::take_shortcut(input, text_had_focus)) {
+        run(state, ui.ctx(), id);
     }
 
     let bar = Frame::side_top_panel(ui.style()).fill(palette.workspace);
-    egui::Panel::top("toolbar").frame(bar).show(ui, toolbar);
+    egui::Panel::top("toolbar")
+        .frame(bar)
+        .show(ui, |ui| toolbar(ui, state));
     egui::Panel::bottom("status")
         .frame(bar)
         .show(ui, |ui| status_bar(ui, state));
@@ -137,17 +187,133 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     egui::CentralPanel::default()
         .frame(Frame::central_panel(ui.style()).fill(palette.workspace))
         .show(ui, |ui| canvas(ui, state, &palette));
+    command_palette(ui.ctx(), state);
     state.text_had_focus = ui.ctx().egui_wants_keyboard_input();
 }
 
-fn toolbar(ui: &mut egui::Ui) {
+fn toolbar(ui: &mut egui::Ui, state: &mut ShellState) {
+    let context = state.command_context();
+    let mut clicked = None;
     ui.horizontal(|ui| {
         ui.strong(crate::APPLICATION_NAME);
         ui.separator();
-        for label in ["Undo", "Redo", "Add class", "Connect", "Save", "Export"] {
-            components::action_button(ui, label, Some(NOT_IMPLEMENTED), None);
+        for spec in commands::toolbar() {
+            let hint = spec
+                .shortcut
+                .map(|shortcut| format!("Shortcut: {}", ui.ctx().format_shortcut(&shortcut)));
+            let availability = commands::availability(spec.id, context);
+            let response =
+                components::action_button(ui, spec.label, availability.reason(), hint.as_deref());
+            if response.clicked() {
+                clicked = Some(spec.id);
+            }
         }
     });
+    if let Some(id) = clicked {
+        run(state, ui.ctx(), id);
+    }
+}
+
+/// Command and object search. Enter runs the highlighted result, arrows move
+/// the highlight, Escape or a click outside closes it, and focus returns to
+/// where it was.
+fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
+    let Some(mut search) = state.palette.take() else {
+        return;
+    };
+    let names: Vec<String> = state
+        .classes
+        .iter()
+        .map(|class| class.display_name().to_owned())
+        .collect();
+    let names: Vec<&str> = names.iter().map(String::as_str).collect();
+    let context = state.command_context();
+    let results = palette::entries(&search.query, &names);
+    let (down, up, enter) = ctx.input(|input| {
+        (
+            input.key_pressed(Key::ArrowDown),
+            input.key_pressed(Key::ArrowUp),
+            input.key_pressed(Key::Enter),
+        )
+    });
+    let entry_availability = |entry: PaletteEntry| match entry {
+        PaletteEntry::Command(id) => commands::availability(id, context),
+        PaletteEntry::Object(_) => Availability::Enabled,
+    };
+    if search.highlight_pending {
+        search.highlighted =
+            palette::first_available(&results, |entry| entry_availability(entry).is_enabled());
+        search.highlight_pending = false;
+    }
+    search.highlighted = palette::move_highlight(search.highlighted, results.len(), down, up);
+    let mut chosen = if enter {
+        results.get(search.highlighted).copied()
+    } else {
+        None
+    };
+
+    let modal = Modal::new(Id::unique("command-palette")).show(ctx, |ui| {
+        ui.set_width(480.0);
+        components::panel_title(ui, "Search commands and objects");
+        let field = components::text_field(ui, "Find a command or object", &mut search.query);
+        if !search.focused_once {
+            field.request_focus();
+            search.focused_once = true;
+        }
+        if field.changed() {
+            search.highlight_pending = true;
+        }
+        ui.add_space(theme::GAP);
+        if results.is_empty() {
+            ui.label("No commands or objects match.");
+        }
+        ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
+            for (index, entry) in results.iter().copied().enumerate() {
+                let availability = entry_availability(entry);
+                let mut row = Button::selectable(
+                    index == search.highlighted,
+                    palette::entry_label(entry, &names),
+                )
+                .truncate()
+                .min_size(Vec2::new(ui.available_width(), theme::ROW_HEIGHT));
+                if let PaletteEntry::Command(id) = entry
+                    && let Some(shortcut) = id.spec().shortcut
+                {
+                    row = row.shortcut_text(ctx.format_shortcut(&shortcut));
+                }
+                let response = ui.add_enabled(availability.is_enabled(), row);
+                if index == search.highlighted && (down || up) {
+                    response.scroll_to_me(None);
+                }
+                if let Some(reason) = availability.reason() {
+                    components::field_label(ui, reason);
+                }
+                if response.clicked() {
+                    chosen = Some(entry);
+                }
+            }
+        });
+    });
+
+    let close_requested = modal.should_close();
+    let ran = match chosen {
+        Some(entry) if !entry_availability(entry).is_enabled() => false,
+        Some(PaletteEntry::Command(id)) => {
+            run(state, ctx, id);
+            true
+        }
+        Some(PaletteEntry::Object(index)) => {
+            state.select(index);
+            true
+        }
+        None => false,
+    };
+    if ran || close_requested {
+        state.pending_focus = search.restore_focus;
+        ctx.request_repaint();
+    } else {
+        state.palette = Some(search);
+    }
 }
 
 fn status_bar(ui: &mut egui::Ui, state: &mut ShellState) {

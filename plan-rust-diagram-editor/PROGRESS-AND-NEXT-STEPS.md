@@ -66,10 +66,10 @@ Full plan: [07-UI-PLAN.md](07-UI-PLAN.md). Shareable summary of UI work: [app/do
 1. **UI-01 — done.** Tokens and components with measured contrast; the failing border color was replaced (now 3.1–4.3:1); live Light/Dark/System switching. [Evidence](../app/docs/ui/UI-01-TOKENS-AND-COMPONENTS.md).
 2. **UI-02 — done.** One set of text roles; direction rules written with right-to-left display marked open until R0-04; two long-text defects found and fixed. [Evidence](../app/docs/ui/UI-02-TYPE-SCALE-AND-TEXT-ROLES.md).
 3. **UI-03** responsive workspace, then **UI-05** navigator/tabs, **UI-07** canvas states, **UI-08** inspector.
-4. **UI-04** welcome/new/open, **UI-06** command catalog, **UI-09** dialogs/status/validation.
+4. **UI-06 — done.** One command catalog for the toolbar, menus, search and shortcuts; Ctrl+K command and object search; two defects found and fixed. [Evidence](../app/docs/ui/UI-06-COMMAND-CATALOG.md). Still to do: **UI-04** welcome/new/open and **UI-09** dialogs/status/validation.
 5. **UI-10** keyboard/focus/accessibility check, **UI-11** notation contract, **UI-12** review gate.
 
-UI-01, UI-02 and UI-06 can start now. Later, UI-13 to UI-17 bind the screens to the real model (M2) and UI-18 is the final review (M3).
+UI-01, UI-02 and UI-06 are done; UI-03, UI-04 and UI-11 are unblocked next. Later, UI-13 to UI-17 bind the screens to the real model (M2) and UI-18 is the final review (M3).
 
 ### C. M1 — model, commands and storage (starts after R0-05 and UI-12)
 All headless: no window needed, so it can be tested fully in this environment. The tracker gates it on UI-12 as the UI plan specifies; if you prefer to save time, R1-01 to R1-04 can run in parallel with the UX work by removing UI-12 from R1-01's prerequisites.

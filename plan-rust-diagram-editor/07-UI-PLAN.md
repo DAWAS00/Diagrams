@@ -1,6 +1,6 @@
 # 07 — Complete native UI plan
 
-Status 2026-11-05: UX milestone started; UI-01 and UI-02 are done ([UI progress](../app/docs/ui/README.md)). The running app is the R0-02 prototype (toolbar, sidebar, canvas with two sample classes, inspector, status bar). This document specifies every surface the product needs, how each connects to the model that M1 will build, and the tasks that deliver it. [03-GUI-AND-WORKFLOWS.md](03-GUI-AND-WORKFLOWS.md) remains the interaction direction; this plan makes it complete and testable. [ADR-001](decisions/ADR-001-GUI.md) stays conditional until R0-05.
+Status 2026-11-05: UX milestone started; UI-01, UI-02 and UI-06 are done ([UI progress](../app/docs/ui/README.md)). The running app is the R0-02 prototype (toolbar, sidebar, canvas with two sample classes, inspector, status bar). This document specifies every surface the product needs, how each connects to the model that M1 will build, and the tasks that deliver it. [03-GUI-AND-WORKFLOWS.md](03-GUI-AND-WORKFLOWS.md) remains the interaction direction; this plan makes it complete and testable. [ADR-001](decisions/ADR-001-GUI.md) stays conditional until R0-05.
 
 ## 1. Goal and boundaries
 
@@ -114,7 +114,9 @@ Each visible action has an intent, prerequisites, effect owner, pending/success/
 
 Shortcut priority: modal/native dialog → focused text field → active gesture → focused canvas → application commands. Preserve Ctrl+A/C/V/Z and selection editing in text fields. Ctrl+N/O/S, Ctrl+Shift+S/Z, F2, Delete, Escape, Space+drag and zoom/fit have visible menu/help equivalents. No single-letter creation shortcut fires while typing. Keyboard users can select/reveal objects through the navigator and issue every essential action through named controls.
 
-**Implementation rule learned in R0-02:** egui drops text focus in the same frame an Escape is pressed. Every shortcut must therefore decide using the text-focus state from the **previous** frame, as the shell's Escape handling does. Apply this to F2, Delete, Ctrl+Z and every other key that a text field also uses, and cover each with a headless test that types in a field first.
+**Implementation rule learned in R0-02:** egui drops text focus in the same frame an Escape is pressed. Every shortcut must therefore decide using the text-focus state from the **previous** frame, as the shell's Escape handling does. Apply this to F2, Delete, Ctrl+Z and every other key that a text field also uses, and cover each with a headless test that types in a field first. The UI-06 command catalog applies this rule centrally (`commands::take_shortcut`).
+
+**Implementation rule learned in UI-06:** egui keeps a closed modal's layer on top for one more frame, and a widget behind a modal gives up focus. Return focus to the remembered widget only once `top_modal_layer()` is empty, and test that focus really returns. Every dialog in UI-09 follows this.
 
 ## 6. Rust structure for the UI
 

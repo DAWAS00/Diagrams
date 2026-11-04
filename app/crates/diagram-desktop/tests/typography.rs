@@ -10,7 +10,15 @@ use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
 
 const LONG_NAME: &str = "PreferredCustomerAccountWithLoyaltyProgrammeAndRegionalBillingSettings";
-const TOOLBAR: [&str; 6] = ["Undo", "Redo", "Add class", "Connect", "Save", "Export"];
+const TOOLBAR: [&str; 7] = [
+    "Undo",
+    "Redo",
+    "Add class",
+    "Connect",
+    "Save",
+    "Export",
+    "Search",
+];
 const SUPPORTED_SIZES: [(f32, f32); 3] = [(800.0, 500.0), (1280.0, 800.0), (1440.0, 900.0)];
 
 fn harness_at(width: f32, height: f32, state: ShellState) -> Harness<'static, ShellState> {
