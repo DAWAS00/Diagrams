@@ -33,8 +33,11 @@ assert set(mapping)==set(names),(set(names)-set(mapping),set(mapping)-set(names)
 entries=[{'constant':name,'family':mapping[name],'evidence':'installed public API constant','ce_runtime_status':'not established by API presence'} for name in names]
 (ROOT/'ce-evidence/diagram-families.json').write_text(json.dumps(entries,indent=2),encoding='utf-8')
 doc=ROOT/'DIAGRAM-CATALOG.md'
-with doc.open('a',encoding='utf-8') as f:
-    f.write('\n## Exhaustive public-constant coverage appendix\n\nAll 101 installed constants appear exactly once below. Family assignment is an analytical grouping, not the original application\'s menu taxonomy. Constant names are retained verbatim, with the common `DIAGRAM_TYPE_` prefix omitted for readability.\n\n')
-    for group,values in groups.items():
-        f.write('### '+group+'\n\n'+', '.join('`'+x+'`' for x in values.split())+'.\n\n')
+APPENDIX_HEADING='\n## Exhaustive public-constant coverage appendix\n'
+appendix=APPENDIX_HEADING+'\nAll 101 installed constants appear exactly once below. Family assignment is an analytical grouping, not the original application\'s menu taxonomy. Constant names are retained verbatim, with the common `DIAGRAM_TYPE_` prefix omitted for readability.\n\n'
+appendix+='\n'.join('### '+group+'\n\n'+', '.join('`'+x+'`' for x in values.split())+'.\n' for group,values in groups.items())
+# Replace any previous appendix (it is always the last section) so reruns stay idempotent.
+existing=doc.read_text(encoding='utf-8')
+head,_,_=existing.partition(APPENDIX_HEADING)
+doc.write_text(head.rstrip('\n')+'\n'+appendix,encoding='utf-8')
 print(f'Validated {len(entries)} constants in {len(groups)} families; wrote diagram-families.json and catalog appendix.')
