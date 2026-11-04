@@ -1,6 +1,6 @@
 # Rust implementation roadmap
 
-Plan date: 2026-11-04. Status updated 2026-11-05: R0-01 is complete; **no application milestone is complete**. The [four-crate workspace](../app/README.md) builds and its console bootstrap runs. [Verification evidence](../app/docs/R0-01-VERIFICATION.md) records the limits. This document preserves M0–M6 and the existing product scope.
+Plan date: 2026-11-04. Status updated 2026-11-04: R0-01 is complete, R0-02 and R0-03 are implemented and awaiting Windows checks; **no application milestone is complete**. See [PROGRESS-AND-NEXT-STEPS.md](PROGRESS-AND-NEXT-STEPS.md) for what was done and what comes next. The [four-crate workspace](../app/README.md) now opens a native egui shell prototype. [Verification evidence](../app/docs/R0-01-VERIFICATION.md) records the limits. This document preserves M0–M6 and the existing product scope.
 
 ## Product path
 
@@ -146,7 +146,7 @@ Reporting, PNG/PDF, VP XML/native interoperability, advanced layout, other catal
 
 ## First executable workflow and release gates
 
-**R0-01 is complete.** **R0-02/R0-03** are implemented and verified on Linux ([evidence](../app/docs/R0-02-R0-03-VERIFICATION.md)); they stay in progress until the Windows launch and MSVC build are recorded. Then R0-04 and the native gate. Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist; 36 tasks remain not started.
+**R0-01 is complete.** **R0-02/R0-03** are implemented and verified on Linux ([evidence](../app/docs/R0-02-R0-03-VERIFICATION.md)); they stay in progress until the Windows launch and MSVC build are recorded. Then R0-04 and the native gate. Detailed log and ordered next steps: [PROGRESS-AND-NEXT-STEPS.md](PROGRESS-AND-NEXT-STEPS.md). Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist; 36 tasks remain not started.
 
 The project-level definition of done combines:
 

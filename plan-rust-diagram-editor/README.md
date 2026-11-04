@@ -6,6 +6,8 @@ Build a local Windows desktop modeling tool in Rust, designed to make the basic 
 
 **Product-wide comparison:** read [Visual Paradigm versus our version](comparison/README.md) or the [searchable comparison](comparison/COMPARISON.html) for feature differences, all 101 notation candidates, deliberate omissions, and remaining validation gaps. These compare a shipped suite with an unbuilt Rust plan.
 
+**Progress and next steps:** [what is done and what comes next](PROGRESS-AND-NEXT-STEPS.md).
+
 **Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 39 tasks with prerequisites and acceptance conditions; 28 lead through v0.1. R0-01 is complete; R0-02 and R0-03 are in progress; 36 tasks are not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
 
 ## Recommended decisions
