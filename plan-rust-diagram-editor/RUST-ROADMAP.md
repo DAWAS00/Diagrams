@@ -146,7 +146,7 @@ Reporting, PNG/PDF, VP XML/native interoperability, advanced layout, other catal
 
 ## First executable workflow and release gates
 
-**R0-01 is complete.** Next are **R0-02/R0-03**, then the native gate. Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist; 38 tasks remain not started.
+**R0-01 is complete.** **R0-02/R0-03** are implemented and verified on Linux ([evidence](../app/docs/R0-02-R0-03-VERIFICATION.md)); they stay in progress until the Windows launch and MSVC build are recorded. Then R0-04 and the native gate. Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist; 36 tasks remain not started.
 
 The project-level definition of done combines:
 

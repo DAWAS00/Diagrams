@@ -1,6 +1,6 @@
 # Diagram Studio — application workspace
 
-R0-01 creates the buildable Rust foundation. The executable currently prints a console bootstrap message. The native GUI is R0-02; project persistence is not implemented yet.
+R0-01 created the buildable Rust foundation. R0-02 adds a native eframe/egui shell prototype (toolbar, sidebar, canvas with two selectable preview classes, inspector with a real name field). R0-03 links bundled SQLite. Project persistence and real diagram editing are not implemented yet. Both tasks are in progress until checked on Windows; see [docs/R0-02-R0-03-VERIFICATION.md](docs/R0-02-R0-03-VERIFICATION.md).
 
 ## Structure
 
@@ -12,8 +12,8 @@ app/
   crates/
     diagram-core/               Validated project name; future models/commands/history
     diagram-canvas/             Future geometry, interactions, scenes and SVG
-    diagram-storage/            Future SQLite, migrations and recovery
-    diagram-desktop/            Executable and future native UI/worker orchestration
+    diagram-storage/            Bundled SQLite (R0-03); future schema, migrations and recovery
+    diagram-desktop/            Native eframe shell prototype (R0-02) and executable
   scripts/check.ps1             Repeatable Windows quality checks
   docs/                         Implementation evidence and development guidance
 ```
@@ -22,7 +22,7 @@ Dependency direction: desktop → core/canvas/storage; canvas → core; storage 
 
 ## Prerequisites and run
 
-Windows x64 with Rustup and Visual Studio C++ Build Tools / Windows SDK. Rustup reads the pinned toolchain from this directory; a machine may download it on first use. Compilation for other platforms has not been verified.
+Windows x64 with Rustup and Visual Studio C++ Build Tools / Windows SDK (also used to compile the bundled SQLite C source). Rustup reads the pinned toolchain from this directory; a machine may download it on first use. Linux x64 builds and tests were also checked (needs a C compiler, and at run time libxkbcommon-x11 plus a Vulkan or GL driver).
 
 From `app/`:
 
@@ -37,7 +37,7 @@ Set-Location 'D:\REA visual\app'
 & 'C:\Users\dawas\.cargo\bin\cargo.exe' run -p diagram-desktop --locked
 ```
 
-The bootstrap uses a validated project name and exits. It does not open a window or save anything.
+This opens the native window. Nothing is saved. `cargo run -p diagram-desktop --locked -- --version` prints the application and bundled SQLite versions without opening a window. If the window cannot start, the program prints the cause and a hint, then exits with code 1.
 
 ## Checks
 
@@ -60,8 +60,8 @@ cargo doc --workspace --no-deps --locked
 cargo build -p diagram-desktop --release --locked
 ```
 
-Tests: `diagram-core/tests/project_name.rs` covers name validation, display, equality and the error message; `diagram-desktop/tests/bootstrap.rs` covers the bootstrap text, writer failures and the real executable. The roadmap validator has Python tests: from the repository root run `python -m unittest discover -s plan-rust-diagram-editor`.
+Tests: `diagram-core/tests/project_name.rs` covers name validation, display, equality and the error message; `diagram-desktop/tests/shell.rs` drives the shell headlessly through its accessibility tree (egui_kittest): layout, disabled actions, canvas and list selection, Escape, renaming and the blank-name warning; `diagram-desktop/tests/diagnostics.rs` covers `--version`, usage errors, window settings and launch-failure messages; `diagram-storage/tests/sqlite_smoke.rs` writes, closes, reopens, reads and deletes a temporary database. The roadmap validator has Python tests: from the repository root run `python -m unittest discover -s plan-rust-diagram-editor`.
 
 All member crates inherit the workspace lints. Public library APIs require documentation; owned project names are validated once and borrowed as `&str`. Production unwrap/expect/panic and unsafe code are forbidden by the current lint policy. Build output stays in the ignored `app/target/` directory. Add dependencies when a task first uses them, and review/commit the resulting lockfile changes.
 
-Next: [R0-02 native shell](../plan-rust-diagram-editor/RUST-ROADMAP.md). The GUI and database prerequisites remain unverified until their own tasks pass.
+Next: record the Windows results for R0-02/R0-03, then [R0-04 text, focus and accessibility](../plan-rust-diagram-editor/RUST-ROADMAP.md).

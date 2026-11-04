@@ -19,6 +19,10 @@ diagram-core = { path = "crates/diagram-core" }
 diagram-canvas = { path = "crates/diagram-canvas" }
 diagram-storage = { path = "crates/diagram-storage" }
 thiserror = "2.0.21"
+eframe = "0.37.0"
+egui_kittest = "0.37.0"
+rusqlite = { version = "0.41.1", features = ["bundled"] }
+tempfile = "3"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

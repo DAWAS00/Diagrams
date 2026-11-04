@@ -6,7 +6,7 @@ Build a local Windows desktop modeling tool in Rust, designed to make the basic 
 
 **Product-wide comparison:** read [Visual Paradigm versus our version](comparison/README.md) or the [searchable comparison](comparison/COMPARISON.html) for feature differences, all 101 notation candidates, deliberate omissions, and remaining validation gaps. These compare a shipped suite with an unbuilt Rust plan.
 
-**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 39 tasks with prerequisites and acceptance conditions; 28 lead through v0.1. R0-01 is complete; 38 tasks remain. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
+**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 39 tasks with prerequisites and acceptance conditions; 28 lead through v0.1. R0-01 is complete; R0-02 and R0-03 are in progress; 36 tasks are not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
 
 ## Recommended decisions
 
@@ -38,7 +38,7 @@ Open [the interactive layout concept](GUI-CONCEPT.html) to review the proposed w
 
 ## Next development action
 
-Complete **R0-02**, the native shell, after the verified R0-01 workspace. Continue M0 to prove text editing, canvas picking, DPI scaling, keyboard focus, SQLite and graphics startup on this computer. Then implement the class-diagram vertical slice. Do not start by reproducing every Visual Paradigm menu or all 101 installed API constants.
+Record the Windows results for **R0-02** (native shell) and **R0-03** (bundled SQLite), then run R0-04. Continue M0 to prove text editing, canvas picking, DPI scaling, keyboard focus, SQLite and graphics startup on this computer. Then implement the class-diagram vertical slice. Do not start by reproducing every Visual Paradigm menu or all 101 installed API constants.
 
 ## Assumptions and scope decisions
 

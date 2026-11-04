@@ -11,6 +11,10 @@ description = "Native desktop application and orchestration for Diagram Studio"
 diagram-core.workspace = true
 diagram-canvas.workspace = true
 diagram-storage.workspace = true
+eframe.workspace = true
+
+[dev-dependencies]
+egui_kittest.workspace = true
 
 [lints]
 workspace = true
