@@ -160,6 +160,11 @@ impl AppState {
     pub fn command_context(&self) -> CommandContext {
         CommandContext {
             has_selection: self.selected_class().is_some(),
+            selection_count: usize::from(self.selected_class().is_some()),
+            has_content: !self.classes.is_empty(),
+            tab_count: 1,
+            can_zoom_in: false,
+            can_zoom_out: false,
         }
     }
 
