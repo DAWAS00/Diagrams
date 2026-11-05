@@ -50,10 +50,11 @@ Only one place is shared: **`roadmap.json`**. Edit only your own task objects, r
 | Merge order | — | B's contract additions merge **before** A's views that use them. If A is ahead, A keeps the fixture, then swaps to the real field after B merges. | — |
 | Integration | A | When B adds a working feature, A removes the matching fixture and adds the state to `ui_audit.rs`. | — |
 
-**Decisions the user must confirm before B changes the catalog:**
-- **D1:** Command search shortcut. Recommended: keep Ctrl+K and add Ctrl+Shift+P as a second binding.
-- **D2:** Remove the **Note** tool from the tool row for v0.1. Recommended: yes, because the spec says unsupported tools must be absent.
-- **D3:** Rename **Pan** to **Hand** (shortcut H, with Space+drag for temporary panning). Recommended: yes.
+**Decisions confirmed by the user on 2026-11-05:**
+- **D1, yes:** command search keeps Ctrl+K and also gets Ctrl+Shift+P.
+- **D2, yes:** the **Note** tool is removed from v0.1 (`AddNote` leaves the catalog and the tool row).
+- **D3, yes:** **Pan** is renamed **Hand** (shortcut H, plus Space+drag for temporary panning).
+- **Model gate relaxed, yes:** B starts the real model (B-12+, R1 then R2) now, in parallel with A's screens. R1-01 no longer waits for R0-05 or UI-12. If B's features are ready before A's new screens, **B tests them in the UI that exists at that time**: the existing shell already draws every catalog command, so enabling a command makes its current button work. B proves this with `journeys.rs` and the audit, never by editing A's files. A later moves the same commands onto the new screens.
 
 Agent A draws whatever the catalog contains, so these decisions never block A.
 

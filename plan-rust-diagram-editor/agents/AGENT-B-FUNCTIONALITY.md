@@ -51,10 +51,11 @@ Only one place is shared: **`roadmap.json`**. Edit only your own task objects, r
 | Merge order | — | B's contract additions merge **before** A's views that use them. If A is ahead, A keeps the fixture, then swaps to the real field after B merges. | — |
 | Integration | A | When B adds a working feature, A removes the matching fixture and adds the state to `ui_audit.rs`. | — |
 
-**Decisions the user must confirm before B changes the catalog:**
-- **D1:** Command search shortcut. Recommended: keep Ctrl+K and add Ctrl+Shift+P as a second binding.
-- **D2:** Remove the **Note** tool from the tool row for v0.1. Recommended: yes, because the spec says unsupported tools must be absent.
-- **D3:** Rename **Pan** to **Hand** (shortcut H, with Space+drag for temporary panning). Recommended: yes.
+**Decisions confirmed by the user on 2026-11-05:**
+- **D1, yes:** command search keeps Ctrl+K and also gets Ctrl+Shift+P.
+- **D2, yes:** the **Note** tool is removed from v0.1 (`AddNote` leaves the catalog and the tool row).
+- **D3, yes:** **Pan** is renamed **Hand** (shortcut H, plus Space+drag for temporary panning).
+- **Model gate relaxed, yes:** B starts the real model (B-12+, R1 then R2) now, in parallel with A's screens. R1-01 no longer waits for R0-05 or UI-12. If B's features are ready before A's new screens, **B tests them in the UI that exists at that time**: the existing shell already draws every catalog command, so enabling a command makes its current button work. B proves this with `journeys.rs` and the audit, never by editing A's files. A later moves the same commands onto the new screens.
 
 Agent A draws whatever the catalog contains, so these decisions never block A.
 
@@ -72,7 +73,7 @@ Do this first, in one small pull request with no visible change:
 - Tell A when it is merged, through the status column in section 6.
 
 ### B1 — Command catalog to the new design (finish UI-06)
-- Apply decisions D1–D3 once the user confirms them.
+- Apply the confirmed decisions D1–D3: add the Ctrl+Shift+P binding, remove `AddNote`, rename `PanTool` to Hand.
 - Add the missing commands from spec §8 and the function map, each with a group, placement, shortcut, `text_field_owns_shortcut`, search aliases and an availability reason:
   - Open, Save As, Close project
   - Add diagram, Rename diagram, Close tab, Next tab, Previous tab, Delete diagram
@@ -115,7 +116,7 @@ Everything that needs the real model stays **disabled with a reason**: Add class
 - One `Notation` description lists the display name, tools, inspector sections, relationship kinds and capabilities. v0.1 has Class only.
 - The tool row and the "Add diagram" picker are built from it, so unsupported families never appear.
 
-### B4 — Real model and binding (needs the user's approval; see the gate note below)
+### B4 — Real model and binding (approved to start now)
 These follow the roadmap order, R1 then R2 then UI-13 to UI-17. They cover:
 - `diagram-core`: typed IDs; model, view and viewport separation; validation including generalization cycles and multiplicity grammar; atomic reversible commands with labels; history; and saved-state identity.
 - `diagram-storage`: the `.dgram` schema, atomic save, and recovery.
@@ -124,7 +125,7 @@ These follow the roadmap order, R1 then R2 then UI-13 to UI-17. They cover:
 
 For each, switch the matching catalog entry from Disabled to the real behavior. Fill the `Presentation` fields that A already draws from fixtures: action labels on Undo and Redo, save state, validation issues, and impact counts.
 
-**Gate note:** in `roadmap.json`, R1-01 depends on `R0-05` and `UI-12`. B may **not** start B4 while those are open, unless the user explicitly relaxes the gate. If the user does relax it, B updates `depends_on` and the validator in the same commit, and writes down why.
+**Gate note (relaxed by the user, 2026-11-05):** in `roadmap.json`, R1-01 now depends only on R0-01, so B may start B4 immediately. Keep `diagram-core` and `diagram-storage` free of egui. Until A's new screens exist, bind each finished feature to the current shell controls through the catalog and `Presentation`, and add its journey (J5–J7) to `journeys.rs` against the UI that exists then.
 
 ### Button → behavior table (A draws it; B makes it work)
 

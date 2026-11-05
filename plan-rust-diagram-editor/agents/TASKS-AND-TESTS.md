@@ -66,7 +66,7 @@ The ID prefixes are **A-** (UI agent), **B-** (functionality agent) and **I-** (
 |---|---|---|---|---|
 | B-0 | Phase 0: move `ShellState`, `run()` and `command_context()` into `app_state.rs` and `dispatch.rs`; add `presentation.rs` and `intent.rs` (`Presentation`, `UiIntent`, `InputContext`); `shell.rs` calls `build` then `apply`. No visible change. | — | UI-06 | All existing tests and the audit, plus new `presentation.rs` and `contract.rs` |
 | B-1 | Create `common_state` helpers and the `routing.rs` skeleton looping over the catalog | B-0 | UI-06 | `routing.rs` |
-| B-2 | Apply decisions D1–D3 and add every missing command from AGENT-B §B1 with reasons and aliases | B-0, user confirms D1–D3 | UI-06 | `contract.rs`, `routing.rs`, `commands.rs` |
+| B-2 | Apply decisions D1–D3 and add every missing command from AGENT-B §B1 with reasons and aliases | B-0 (D1–D3 confirmed: yes) | UI-06 | `contract.rs`, `routing.rs`, `commands.rs` |
 | B-3 | Input dispatch priority and `InputContext` handling (IME, text, modal, region) | B-0 | UI-06 / UI-10 | `shortcuts.rs` |
 | B-4 | Tool and gesture state machine: Select, Hand, Space+drag, plus placement and connect previews that cancel cleanly | B-0 | UI-07 | `editor_state.rs` |
 | B-5 | Viewport (transform, zoom, Fit) and picking in `diagram-canvas`, with each tab keeping its own viewport | B-4 | UI-07 | `transform.rs`, `picking.rs`, `editor_state.rs` |
@@ -76,7 +76,7 @@ The ID prefixes are **A-** (UI agent), **B-** (functionality agent) and **I-** (
 | B-9 | Split command search and object search; tab switching for fixture diagrams; preferences (theme, grid, snap) | B-2 | UI-05 / UI-06 | `presentation.rs`, `routing.rs` |
 | B-10 | Notation contract (Class only) feeding the tool row and the Add diagram picker | B-2 | UI-11 | `contract.rs` |
 | B-11 | Write `journeys.rs` journeys J1–J4 (section 5) | B-6, B-7, B-8, A-3 | UI-17 (pre-model part) | `journeys.rs`, `ui_audit.rs` |
-| B-12+ | Model work: R1-01 … R1-08, then R2, then switch each disabled command on; journeys J5–J7 | Gate: R0-05 and UI-12 done, **or** the user relaxes the gate | R1/R2, UI-13 to UI-17 | `diagram-core/tests`, `routing.rs`, `journeys.rs` |
+| B-12+ | Model work: R1-01 … R1-08, then R2, then switch each disabled command on; journeys J5–J7 | B-0 (gate relaxed by the user on 2026-11-05; may run alongside B-1 to B-11) | R1/R2, UI-13 to UI-17 | `diagram-core/tests`, `routing.rs`, `journeys.rs` |
 
 ### Agent A (UI)
 
@@ -104,7 +104,7 @@ The ID prefixes are **A-** (UI agent), **B-** (functionality agent) and **I-** (
 | I-1 | After B-0 and A-0 | A's fixtures compile against B's real types. The app looks exactly as before (screenshot compared at 1280×800). The whole suite passes. |
 | I-2 | After B-2 to B-4 and A-1, A-3, A-10 | `ui_routing.rs` and `routing.rs` both pass for **every** catalog command, so the routing chain H1–H5 is proved for every command. |
 | I-3 | After B-11 | Journeys J1–J4 pass. The audit passes at every journey checkpoint. Real-window screenshots at 800×500 and 1280×800 in both themes are saved. Then UI-12 review can begin. |
-| I-4 | After each model feature (B-12+) | The matching command switches from disabled to working; `routing.rs`, `presentation.rs`, `journeys.rs` and the audit all pass; A has removed the related fixture. |
+| I-4 | After each model feature (B-12+) | The matching command switches from disabled to working **in whatever UI exists at that time** (the current shell if A's screens aren't merged yet); `routing.rs`, `presentation.rs`, `journeys.rs` and the audit all pass; A has removed the related fixture. |
 
 ## 4. Non-command intents: what each control must emit (H2 and H4)
 
