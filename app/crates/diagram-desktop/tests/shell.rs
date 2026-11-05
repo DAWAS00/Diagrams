@@ -2,10 +2,18 @@
 //! a screen reader or keyboard user would reach each control.
 
 use diagram_desktop::shell::{self, BLANK_NAME_WARNING, ShellState};
+use diagram_desktop::ui::commands::{self, CommandContext, CommandSpec, Placement};
 use eframe::egui::accesskit::Toggled;
 use eframe::egui::{Key, Vec2};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
+
+/// Commands with a button in the header, tab row or tool row, from the catalog.
+fn placed_commands() -> impl Iterator<Item = &'static CommandSpec> {
+    [Placement::Header, Placement::TabRow, Placement::ToolRow]
+        .into_iter()
+        .flat_map(commands::placed)
+}
 
 fn harness() -> Harness<'static, ShellState> {
     Harness::builder()
@@ -22,19 +30,8 @@ fn is_pressed(harness: &Harness<'_, ShellState>, label: &str) -> bool {
 fn shell_should_show_toolbar_sidebar_canvas_inspector_and_status() {
     let harness = harness();
 
-    for label in [
-        "Undo",
-        "Redo",
-        "Save",
-        "Export",
-        "Pan",
-        "Class",
-        "Association",
-        "Note",
-        "Arrange",
-        "New diagram",
-    ] {
-        harness.get_by_label(label);
+    for spec in placed_commands() {
+        harness.get_by_label(spec.label);
     }
     harness.get_by_label("Project");
     // The open diagram is both a tab and a row in the project panel.
@@ -49,21 +46,18 @@ fn shell_should_show_toolbar_sidebar_canvas_inspector_and_status() {
 fn unimplemented_toolbar_actions_should_be_disabled() {
     let harness = harness();
 
-    for label in [
-        "Undo",
-        "Redo",
-        "Save",
-        "Export",
-        "Pan",
-        "Class",
-        "Association",
-        "Note",
-        "Arrange",
-        "New diagram",
-    ] {
-        assert!(
-            harness.get_by_label(label).accesskit_node().is_disabled(),
-            "{label} is enabled"
+    // The catalog decides which commands are unavailable; every one of them
+    // must be drawn disabled, and every available one enabled.
+    for spec in placed_commands() {
+        let disabled = !commands::availability(spec.id, CommandContext::default()).is_enabled();
+        assert_eq!(
+            harness
+                .get_by_label(spec.label)
+                .accesskit_node()
+                .is_disabled(),
+            disabled,
+            "{}",
+            spec.label
         );
     }
 }

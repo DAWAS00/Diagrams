@@ -5,176 +5,17 @@
 //! height, does not partly overlap another control, and enabled controls are
 //! reachable with the Tab key. New screens must be added here.
 
-use std::collections::HashSet;
+mod common_ui;
 
+use common_ui::WIDE;
+use common_ui::{LARGE, SMALL, audit_layout, audit_tab_order, controls, report, visible};
 use diagram_desktop::shell::{self, ShellState};
-use eframe::egui::accesskit::{Action, Rect, Role};
+use diagram_desktop::ui::{fixtures, header};
 use eframe::egui::{
     Button, Key, Modifiers, Pos2, Rect as EguiRect, Role as WidgetRole, Sense, Vec2, WidgetInfo,
 };
 use egui_kittest::Harness;
-use egui_kittest::kittest::{NodeT, Queryable};
-
-/// Plan: "hit targets at least 32 units".
-const MIN_HIT_HEIGHT: f64 = 32.0;
-
-#[derive(Debug, Clone)]
-struct Control {
-    name: String,
-    role: Role,
-    rect: Rect,
-    enabled: bool,
-}
-
-/// Roles a person operates. Plain text labels (selectable text) and egui's
-/// own scroll bars are not controls in this sense.
-fn is_control(role: Role) -> bool {
-    matches!(
-        role,
-        Role::Button
-            | Role::TextInput
-            | Role::MultilineTextInput
-            | Role::CheckBox
-            | Role::RadioButton
-            | Role::Switch
-            | Role::Tab
-            | Role::MenuItem
-            | Role::MenuItemCheckBox
-            | Role::MenuItemRadio
-            | Role::ComboBox
-            | Role::Link
-            | Role::ListBoxOption
-            | Role::Slider
-            | Role::SpinButton
-            | Role::Canvas
-    )
-}
-
-fn controls<S>(harness: &Harness<'_, S>) -> Vec<Control> {
-    harness
-        .query_all_by(|node| {
-            let data = node.data();
-            !node.is_hidden()
-                && is_control(node.role())
-                && (data.supports_action(Action::Click) || data.supports_action(Action::Focus))
-        })
-        .map(|node| {
-            let access = node.accesskit_node();
-            Control {
-                name: access
-                    .label()
-                    .filter(|label| !label.trim().is_empty())
-                    .or_else(|| access.value())
-                    .unwrap_or_default(),
-                role: access.role(),
-                rect: access
-                    .bounding_box()
-                    .unwrap_or_else(|| Rect::new(-1.0, -1.0, -1.0, -1.0)),
-                enabled: !access.is_disabled(),
-            }
-        })
-        .collect()
-}
-
-fn visible(rect: Rect, (width, height): (f32, f32)) -> bool {
-    rect.x1 > 0.0 && rect.y1 > 0.0 && rect.x0 < f64::from(width) && rect.y0 < f64::from(height)
-}
-
-fn contains(outer: Rect, inner: Rect) -> bool {
-    outer.x0 <= inner.x0 + 0.5
-        && outer.y0 <= inner.y0 + 0.5
-        && outer.x1 + 0.5 >= inner.x1
-        && outer.y1 + 0.5 >= inner.y1
-}
-
-fn overlap(first: Rect, second: Rect) -> bool {
-    first.x0 + 0.5 < second.x1
-        && second.x0 + 0.5 < first.x1
-        && first.y0 + 0.5 < second.y1
-        && second.y0 + 0.5 < first.y1
-}
-
-/// Static checks of one screen state. `floating` screens (dialogs, menus,
-/// windows) cover other controls by design, so overlap is not checked.
-fn audit_layout<S>(
-    scene: &str,
-    harness: &Harness<'_, S>,
-    size: (f32, f32),
-    floating: bool,
-) -> Vec<String> {
-    let mut findings = Vec::new();
-    let all = controls(harness);
-    let shown: Vec<&Control> = all.iter().filter(|c| visible(c.rect, size)).collect();
-    for control in &shown {
-        let what = format!("{scene}: {:?} \"{}\"", control.role, control.name);
-        if control.name.trim().is_empty() {
-            findings.push(format!("{what} has no accessible name"));
-        }
-        let rect = control.rect;
-        if rect.x0 < -0.5
-            || rect.y0 < -0.5
-            || rect.x1 > f64::from(size.0) + 0.5
-            || rect.y1 > f64::from(size.1) + 0.5
-        {
-            findings.push(format!("{what} extends outside the window: {rect:?}"));
-        }
-        if rect.height() < MIN_HIT_HEIGHT - 0.5 {
-            findings.push(format!(
-                "{what} is {:.0} high, below the {MIN_HIT_HEIGHT} hit target",
-                rect.height()
-            ));
-        }
-    }
-    if !floating {
-        for (index, first) in shown.iter().enumerate() {
-            for second in &shown[index + 1..] {
-                if overlap(first.rect, second.rect)
-                    && !contains(first.rect, second.rect)
-                    && !contains(second.rect, first.rect)
-                {
-                    findings.push(format!(
-                        "{scene}: \"{}\" overlaps \"{}\"",
-                        first.name, second.name
-                    ));
-                }
-            }
-        }
-    }
-    findings
-}
-
-/// Presses Tab through the screen and reports enabled controls never focused.
-/// `pointer_only` lists controls with a documented keyboard alternative.
-fn audit_tab_order<S>(
-    scene: &str,
-    harness: &mut Harness<'_, S>,
-    size: (f32, f32),
-    pointer_only: &[&str],
-) -> Vec<String> {
-    let expected: HashSet<String> = controls(harness)
-        .into_iter()
-        .filter(|c| c.enabled && visible(c.rect, size) && c.role != Role::Canvas)
-        .map(|c| c.name)
-        .filter(|name| !pointer_only.iter().any(|allowed| name.starts_with(allowed)))
-        .collect();
-    let mut reached = HashSet::new();
-    for _ in 0..(expected.len() * 2 + 4) {
-        harness.key_press(Key::Tab);
-        harness.run();
-        if let Some(node) = harness.query_by(|node| node.is_focused()) {
-            let access = node.accesskit_node();
-            if let Some(name) = access.label().or_else(|| access.value()) {
-                reached.insert(name);
-            }
-        }
-    }
-    let mut missing: Vec<_> = expected.difference(&reached).cloned().collect();
-    missing.sort();
-    missing
-        .into_iter()
-        .map(|name| format!("{scene}: \"{name}\" cannot be reached with Tab"))
-        .collect()
-}
+use egui_kittest::kittest::Queryable;
 
 fn harness_at(size: (f32, f32), state: ShellState) -> Harness<'static, ShellState> {
     let mut harness = Harness::builder()
@@ -183,18 +24,6 @@ fn harness_at(size: (f32, f32), state: ShellState) -> Harness<'static, ShellStat
     harness.run();
     harness
 }
-
-fn report(findings: Vec<String>) {
-    assert!(
-        findings.is_empty(),
-        "{} usability finding(s):\n{}",
-        findings.len(),
-        findings.join("\n")
-    );
-}
-
-const LARGE: (f32, f32) = (1280.0, 800.0);
-const SMALL: (f32, f32) = (800.0, 500.0);
 
 /// Canvas boxes are reached through the project panel's Model list instead.
 const POINTER_ONLY: [&str; 1] = ["Class "];
@@ -342,6 +171,56 @@ fn audit_should_see_every_screen_s_controls() {
 
     // Welcome: New, Open, Continue, Review, Dismiss, search, 2 recent, Remove, 3 theme.
     assert!(count(&welcome) >= 12, "{}", count(&welcome));
-    // Workspace: menu, 5 header, 2 tab row, 8 tool row, rows, canvas, classes, theme.
+    // Workspace: Project menu, header commands, tab row, tool row, rows,
+    // canvas, classes, theme.
     assert!(count(&workspace) >= 22, "{}", count(&workspace));
+}
+
+/// Workspace states that A-10's view composition must keep usable: a long
+/// class name, an empty project and both docked panels hidden, at every
+/// supported size.
+#[test]
+fn workspace_states_should_pass_the_audit_at_every_size() {
+    let mut long = fixtures::selected_state(0);
+    long.classes[0].name = fixtures::LONG_NAME.to_owned();
+    let mut empty = fixtures::sample_state();
+    empty.classes.clear();
+    let mut hidden = fixtures::sample_state();
+    hidden.panels.navigator_visible = false;
+    hidden.panels.inspector_visible = false;
+    let mut findings = Vec::new();
+    for (name, state) in [
+        ("long name", long),
+        ("empty project", empty),
+        ("panels hidden", hidden),
+    ] {
+        for size in [SMALL, LARGE, WIDE] {
+            let scene = format!("{name} at {}x{}", size.0, size.1);
+            let mut harness = harness_at(size, state.clone());
+            findings.extend(audit_layout(&scene, &harness, size, false));
+            findings.extend(audit_tab_order(&scene, &mut harness, size, &POINTER_ONLY));
+        }
+    }
+    report(findings);
+}
+
+#[test]
+fn open_project_menu_should_pass_the_audit() {
+    for size in [SMALL, LARGE] {
+        let mut harness = harness_at(size, ShellState::default());
+        harness.get_by_label(header::PROJECT_MENU).click();
+        harness.run();
+        report(audit_layout("project menu", &harness, size, true));
+        // Each group's submenu, with its disabled reasons as visible text.
+        for group in ["File", "Edit", "View", "Tools", "Navigate"] {
+            harness.get_by_label(group).hover();
+            harness.run();
+            report(audit_layout(
+                &format!("project menu, {group}"),
+                &harness,
+                size,
+                true,
+            ));
+        }
+    }
 }
