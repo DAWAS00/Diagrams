@@ -5,4 +5,5 @@ pub mod components;
 pub mod palette;
 pub mod showcase;
 pub mod theme;
+pub mod welcome;
 pub mod workspace;

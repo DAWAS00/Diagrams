@@ -89,22 +89,26 @@ pub fn action_button(
 
 /// Labeled text field with a problem: a danger-colored border and the
 /// message as text below it. The field keeps its normal focus highlight.
+///
+/// The border is changed in place rather than in a nested scope: a scope
+/// would give the field a different id, so it would lose keyboard focus the
+/// moment the error appears.
 pub fn text_field_with_error(
     ui: &mut egui::Ui,
     label: &str,
     value: &mut String,
     error: &str,
 ) -> Response {
-    let response = ui
-        .scope(|ui| {
-            let danger = ui.visuals().error_fg_color;
-            let widgets = &mut ui.visuals_mut().widgets;
-            for state in [&mut widgets.inactive, &mut widgets.hovered] {
-                state.bg_stroke = egui::Stroke::new(1.5, danger);
-            }
-            text_field(ui, label, value)
-        })
-        .inner;
+    let danger = ui.visuals().error_fg_color;
+    let saved = ui.visuals().widgets.clone();
+    {
+        let widgets = &mut ui.visuals_mut().widgets;
+        for state in [&mut widgets.inactive, &mut widgets.hovered] {
+            state.bg_stroke = egui::Stroke::new(1.5, danger);
+        }
+    }
+    let response = text_field(ui, label, value);
+    ui.visuals_mut().widgets = saved;
     error_text(ui, error);
     response
 }

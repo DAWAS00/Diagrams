@@ -4,7 +4,7 @@ This page is for anyone following the project. It summarises the user-interface 
 
 ## Where the project stands
 
-- **Working today:** a native Windows/Linux desktop window (egui) with a toolbar, project sidebar, canvas with two sample classes, inspector and status bar. You can select a class and rename it, search commands and classes with Ctrl+K, and switch between light and dark themes instantly.
+- **Working today:** a native Windows/Linux desktop window (egui) with a toolbar, project sidebar, canvas with two sample classes, inspector and status bar. It opens on a welcome screen where you can start a new (empty) project or the sample project; in the sample you can select and rename classes, search commands and classes with Ctrl+K, open the panels as drawers on small windows, and switch between light and dark themes instantly.
 - **Not built yet:** the real project model, adding or connecting classes, undo, saving and export. Those buttons are visible but disabled, with an explanation.
 - **Order of work:** finish the native foundation gate (M0) → design every screen as native fixtures (UX milestone, UI-01 to UI-12) → build the model and storage (M1) → connect the screens to the model (M2) → reliability and the v0.1 release (M3).
 
@@ -15,7 +15,7 @@ This page is for anyone following the project. It summarises the user-interface 
 | UI-01 | Design tokens, components and states | **Done** — [evidence](UI-01-TOKENS-AND-COMPONENTS.md) |
 | UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
 | UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
-| UI-04 | Welcome, new-project and open screens | Next |
+| UI-04 | Welcome, new-project and open screens | **Done** — [evidence](UI-04-WELCOME-AND-ENTRY.md) |
 | UI-05 | Navigator and diagram tabs | Not started |
 | UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |
 | UI-07 | Canvas state presentations | Not started |
@@ -73,9 +73,20 @@ This page is for anyone following the project. It summarises the user-interface 
 |---|---|
 | ![Docked](ui-03-docked-1280x800.png) | ![Inspector drawer](ui-03-narrow-inspector-drawer.png) |
 
+### UI-04 — Welcome and project entry screens
+- The app now opens on a **welcome screen**: New project, Open project (disabled until project storage exists, and it says so), Continue with the sample project, a searchable list of recent projects and a recovery notice. Both the list and the notice are clearly labeled as sample entries.
+- **New project** asks for a name, checked by the same rule the core uses. A blank name shows the error right beside the field. **Create** opens an empty diagram with that exact name; **Cancel** or Escape goes back.
+- **Four problems found and fixed:** the app would have **crashed on start** (a text style was missing on the very first frame); the name field **lost keyboard focus** as soon as its error appeared; the recovery notice looked like a real recovery; and "No selection" showed on the welcome screen.
+- 17 new automated tests.
+
+| Welcome | Invalid name | Created project |
+|---|---|---|
+| ![Welcome](ui-04-welcome.png) | ![Name error](ui-04-new-project-error.png) | ![Empty diagram](ui-04-created-empty-diagram.png) |
+
 ## What is next
-1. **UI-04 — welcome, new-project and open screens.**
-2. **UI-11 — notation capability contract** needs UI-08 (the inspector) first, in the tracker's order.
+1. **UI-05 — navigator and diagram tabs:** project-panel search, empty and no-match states, tab overflow and keyboard selection.
+2. **UI-06 — finish the command catalog:** typed UI intents and a written prerequisite / effect / test contract for every action.
+3. **UI-08 — contextual inspector**, then **UI-11 — notation capability contract** (which needs UI-06 and UI-08 in the tracker's order).
 3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it

@@ -65,7 +65,7 @@ Linux recorded 31 Rust tests; Windows now passes 30 (29 integration + 1 doc test
 
 ### B. UX — full native presentation before domain implementation
 
-UI-02 and UI-06 are **in progress**: text roles, the command catalog and Ctrl+K search are built and tested; their remaining items are listed in the [UI progress page](../app/docs/ui/README.md). UI-01 (tokens, controls, states and component showcase) and UI-03 (responsive workspace with docked panels and drawers) are **done**. Next: UI-04 entry screens; complete UI-04–UI-11 surfaces, states, accessible focus paths and notation capability definitions. UI-12 requires these and R0-05. Keep unimplemented application actions disabled; presentation fixtures are clearly labeled.
+UI-02 and UI-06 are **in progress**: text roles, the command catalog and Ctrl+K search are built and tested; their remaining items are listed in the [UI progress page](../app/docs/ui/README.md). UI-01 (tokens, controls, states and component showcase) and UI-03 (responsive workspace with docked panels and drawers) are **done**. UI-04 (welcome and new-project screens; the app now starts there) is **done**. Next: UI-05 navigator and tabs, finishing UI-06, then UI-08 and UI-11; complete UI-05–UI-11 surfaces, states, accessible focus paths and notation capability definitions. UI-12 requires these and R0-05. Keep unimplemented application actions disabled; presentation fixtures are clearly labeled.
 
 ### C. M1 — model, commands and storage (starts after UI-12)
 All headless: no window needed, so it can be tested fully in this environment.

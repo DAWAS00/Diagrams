@@ -15,6 +15,7 @@ use crate::ui::components;
 use crate::ui::palette::{self, PaletteEntry, PaletteState};
 use crate::ui::showcase::{self, ShowcaseState};
 use crate::ui::theme::{self, Palette, TextRole};
+use crate::ui::welcome::{self, EntryAction, EntryScreen, EntryState};
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
 
 const CLASS_WIDTH: f32 = 180.0;
@@ -26,6 +27,9 @@ const TEXT_INSET: f32 = 10.0;
 /// so switching themes never changes how a diagram looks when exported.
 const DOCUMENT_FILL: Color32 = Color32::from_rgb(0xFA, 0xFC, 0xFF);
 const DOCUMENT_INK: Color32 = Color32::from_rgb(0x22, 0x31, 0x47);
+
+/// Name of the built-in sample project.
+pub const SAMPLE_PROJECT: &str = "Sample project";
 
 /// Message shown when a class name has no visible characters.
 pub const BLANK_NAME_WARNING: &str = "A class name must contain a non-whitespace character.";
@@ -76,6 +80,10 @@ pub struct ShellState {
     pub layout: LayoutMode,
     /// Widget to focus when the open drawer closes (usually its toggle).
     drawer_return: Option<Id>,
+    /// The welcome or new-project screen, while one is shown instead of the workspace.
+    pub entry: Option<EntryState>,
+    /// Name of the open project, shown in the header.
+    pub project_name: String,
     /// The component showcase window, while it is open.
     pub showcase: Option<ShowcaseState>,
     /// Widget to focus when the showcase closes.
@@ -108,6 +116,8 @@ impl Default for ShellState {
             drawer: None,
             layout: LayoutMode::Docked,
             drawer_return: None,
+            entry: None,
+            project_name: String::from(SAMPLE_PROJECT),
             showcase: None,
             showcase_return: None,
             pending_focus: None,
@@ -118,6 +128,14 @@ impl Default for ShellState {
 }
 
 impl ShellState {
+    /// State at application start: the welcome screen.
+    pub fn welcome() -> Self {
+        Self {
+            entry: Some(EntryState::default()),
+            ..Self::default()
+        }
+    }
+
     /// The currently selected class, if the selection index is valid.
     pub fn selected_class(&self) -> Option<&PreviewClass> {
         self.selected.and_then(|index| self.classes.get(index))
@@ -230,6 +248,89 @@ fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
     }
 }
 
+/// Welcome and new-project screens, shown instead of the workspace.
+fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
+    let Some(mut entry) = state.entry.take() else {
+        return;
+    };
+    // Escape leaves the name field first, then cancels the form.
+    let cancel_by_escape = entry.screen == EntryScreen::NewProject
+        && !state.text_had_focus
+        && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape));
+
+    let bar = Frame::side_top_panel(ui.style()).fill(palette.workspace);
+    egui::Panel::top("header")
+        .frame(bar)
+        .exact_size(workspace::HEADER_HEIGHT)
+        .show(ui, |ui| {
+            ui.horizontal_centered(|ui| ui.strong(crate::APPLICATION_NAME));
+        });
+    egui::Panel::bottom("status")
+        .frame(bar)
+        .show(ui, |ui| status_bar(ui, state, false));
+    let action = egui::CentralPanel::default()
+        .frame(
+            Frame::new()
+                .fill(palette.panel)
+                .inner_margin(2.0 * theme::SPACING),
+        )
+        .show(ui, |ui| {
+            ScrollArea::vertical()
+                .auto_shrink([false, false])
+                .show(ui, |ui| {
+                    ui.set_max_width(560.0);
+                    match entry.screen {
+                        EntryScreen::Welcome => welcome::welcome(ui, &mut entry),
+                        EntryScreen::NewProject => welcome::new_project(ui, &mut entry),
+                    }
+                })
+                .inner
+        })
+        .inner;
+    let action = if cancel_by_escape {
+        Some(EntryAction::CancelNewProject)
+    } else {
+        action
+    };
+
+    match action {
+        Some(EntryAction::StartNewProject) => {
+            entry.screen = EntryScreen::NewProject;
+            entry.new_name.clear();
+            entry.name_touched = false;
+            entry.focus_name = true;
+        }
+        Some(EntryAction::CancelNewProject) => {
+            entry.screen = EntryScreen::Welcome;
+            state.pending_focus = entry.new_button;
+        }
+        Some(EntryAction::CreateProject(name)) => {
+            if welcome::name_error(&name).is_none() {
+                state.project_name = name;
+                state.classes.clear();
+                state.selected = None;
+                return;
+            }
+            entry.name_touched = true;
+        }
+        Some(EntryAction::OpenSample) => {
+            let sample = ShellState::default();
+            state.project_name = sample.project_name;
+            state.classes = sample.classes;
+            state.selected = None;
+            return;
+        }
+        Some(EntryAction::RemoveRecent(index)) => {
+            if index < entry.recent.len() {
+                entry.recent.remove(index);
+            }
+        }
+        Some(EntryAction::DismissRecovery) => entry.recovery_visible = false,
+        None => {}
+    }
+    state.entry = Some(entry);
+}
+
 /// Whether a panel's toggle shows as pressed.
 fn panel_shown(state: &ShellState, which: Drawer) -> bool {
     match (state.layout, which) {
@@ -243,6 +344,10 @@ fn panel_shown(state: &ShellState, which: Drawer) -> bool {
 pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     if state.applied_theme != Some(state.theme) {
         theme::apply(ui.ctx(), state.theme);
+        // This frame's root Ui was created before the styles were installed;
+        // update it too, or named text roles (page title) are missing on the
+        // first frame and egui panics.
+        ui.set_style(ui.ctx().global_style());
         state.applied_theme = Some(state.theme);
     }
     let palette = *theme::palette(ui.ctx().theme());
@@ -255,6 +360,12 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         } else {
             ui.ctx().request_repaint();
         }
+    }
+
+    if state.entry.is_some() {
+        entry_screens(ui, state, &palette);
+        state.text_had_focus = ui.ctx().text_edit_focused();
+        return;
     }
 
     let layout = workspace::layout_mode(ui.max_rect().width());
@@ -291,7 +402,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         .show(ui, |ui| header(ui, state));
     egui::Panel::bottom("status")
         .frame(bar)
-        .show(ui, |ui| status_bar(ui, state));
+        .show(ui, |ui| status_bar(ui, state, true));
     if state.layout == LayoutMode::Docked {
         if state.panels.navigator_visible {
             egui::Panel::left("navigator")
@@ -405,7 +516,10 @@ fn header(ui: &mut egui::Ui, state: &mut ShellState) {
             ui.allocate_ui_with_layout(
                 ui.available_size(),
                 Layout::left_to_right(Align::Center),
-                |ui| components::truncated_text(ui, "Sample project · not saved"),
+                |ui| {
+                    let title = format!("{} · not saved", state.project_name);
+                    components::truncated_text(ui, &title)
+                },
             );
         });
     });
@@ -635,7 +749,8 @@ fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
     }
 }
 
-fn status_bar(ui: &mut egui::Ui, state: &mut ShellState) {
+/// Status bar. `in_workspace` adds the selection, which entry screens do not have.
+fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace: bool) {
     ui.horizontal(|ui| {
         ui.label(
             egui::RichText::new("Prototype · nothing is saved")
@@ -654,12 +769,14 @@ fn status_bar(ui: &mut egui::Ui, state: &mut ShellState) {
                 }
             }
             components::field_label(ui, "Theme:");
-            ui.separator();
-            let selection = match state.selected_class() {
-                Some(class) => format!("Selected: {}", class.display_name()),
-                None => String::from("No selection"),
-            };
-            components::truncated_text(ui, &selection);
+            if in_workspace {
+                ui.separator();
+                let selection = match state.selected_class() {
+                    Some(class) => format!("Selected: {}", class.display_name()),
+                    None => String::from("No selection"),
+                };
+                components::truncated_text(ui, &selection);
+            }
         });
     });
 }
@@ -709,6 +826,15 @@ fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) -> Rect 
     let (background, painter) = ui.allocate_painter(ui.available_size(), Sense::click());
     background.widget_info(|| WidgetInfo::labeled(Role::Canvas, true, "Diagram canvas"));
     painter.rect_filled(background.rect, CornerRadius::ZERO, palette.canvas);
+    if state.classes.is_empty() {
+        painter.text(
+            background.rect.center(),
+            Align2::CENTER_CENTER,
+            "This diagram is empty. Adding classes arrives with the project model.",
+            TextRole::Body.font_id(),
+            palette.text_secondary,
+        );
+    }
     let origin = background.rect.min;
 
     let mut clicked_class = None;
@@ -817,10 +943,18 @@ fn paint_class(
     }
 }
 
-/// eframe application wrapper around [`ShellState`].
-#[derive(Debug, Default)]
+/// eframe application wrapper around [`ShellState`]; starts on the welcome screen.
+#[derive(Debug)]
 pub struct ShellApp {
     state: ShellState,
+}
+
+impl Default for ShellApp {
+    fn default() -> Self {
+        Self {
+            state: ShellState::welcome(),
+        }
+    }
 }
 
 impl eframe::App for ShellApp {
