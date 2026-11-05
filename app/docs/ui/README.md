@@ -2,6 +2,10 @@
 
 This page is for anyone following the project. It summarises the user-interface work, links the evidence for each finished task, and lists what comes next. The full specification is the [UI plan](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md). Task status lives in the [roadmap tracker](../../../plan-rust-diagram-editor/roadmap.json), and the [dashboard](../../../plan-rust-diagram-editor/ROADMAP.html) shows it.
 
+## How UI work is checked
+
+Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULES.md): visible labels, keyboard access, reasons for disabled controls, errors in words, measured contrast, and layouts checked at 800×500 to 1440×900. An automated **usability audit** (`tests/ui_audit.rs`) checks every screen for unnamed controls, controls too small to hit, overlapping or off-window controls, and controls Tab cannot reach. A self-test proves the audit catches each of these.
+
 ## Where the project stands
 
 - **Working today:** a native Windows/Linux desktop window (egui) with a toolbar, project sidebar, canvas with two sample classes, inspector and status bar. It opens on a welcome screen where you can start a new (empty) project or the sample project; in the sample you can select and rename classes, search commands and classes with Ctrl+K, open the panels as drawers on small windows, and switch between light and dark themes instantly.

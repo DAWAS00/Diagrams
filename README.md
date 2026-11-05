@@ -23,7 +23,7 @@ The roadmap has eight milestones. M0 proves the desktop foundation; UX delivers 
 
 ## UI-first design revision
 
-The [complete UI specification](plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md) defines the final v0.1 workspace, all screen states, technology and command contracts. Open the [interactive UI design](plan-rust-diagram-editor/UI-DESIGN.html) locally to compare themes and scenarios. Eighteen new UI tasks prioritize native presentation before M1, with real functional bindings in M2/M3. Progress on the UI work, with screenshots and what is next: [app/docs/ui/README.md](app/docs/ui/README.md).
+The [complete UI specification](plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md) defines the final v0.1 workspace, all screen states, technology and command contracts. Open the [interactive UI design](plan-rust-diagram-editor/UI-DESIGN.html) locally to compare themes and scenarios. Eighteen new UI tasks prioritize native presentation before M1, with real functional bindings in M2/M3. Progress on the UI work, with screenshots and what is next: [app/docs/ui/README.md](app/docs/ui/README.md). Every UI change follows the [UI rules](plan-rust-diagram-editor/UI-RULES.md), which include an automated usability audit.
 
 ## Browse the planning dashboards
 
