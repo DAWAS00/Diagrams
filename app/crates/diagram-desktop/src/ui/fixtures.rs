@@ -99,6 +99,37 @@ pub fn many_tabs() -> Presentation {
     view
 }
 
+/// The sample project with the object search open and `query` typed,
+/// reached through B's dispatcher exactly as Ctrl+F and typing would.
+pub fn object_search(query: &str) -> Presentation {
+    use crate::intent::{InputContext, SearchScope, UiIntent};
+    use crate::ui::commands::CommandId;
+    let mut state = sample_state();
+    state.support.object_search = true;
+    crate::dispatch::apply(
+        &mut state,
+        &InputContext::default(),
+        [
+            UiIntent::Command(CommandId::FindObject),
+            UiIntent::Search {
+                scope: SearchScope::Objects,
+                query: query.to_owned(),
+            },
+        ],
+    );
+    presentation::build(&state)
+}
+
+/// The Resolve edit dialog for a blank class name.
+pub fn resolve_edit() -> crate::presentation::DialogView {
+    crate::presentation::DialogView::ResolveEdit {
+        message: format!(
+            "The Name field has an edit that cannot be kept: {}",
+            crate::app_state::BLANK_NAME_WARNING
+        ),
+    }
+}
+
 /// Every named workspace state, for the view tests and the audit.
 pub fn states() -> Vec<(&'static str, Presentation)> {
     vec![

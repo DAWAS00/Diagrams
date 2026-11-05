@@ -224,3 +224,24 @@ fn open_project_menu_should_pass_the_audit() {
         }
     }
 }
+
+/// The object search open in the docked project panel. At 800×500 it sits
+/// in the project drawer, whose list then continues below the window inside
+/// the drawer's scroll area; the audit cannot see scroll viewports, so that
+/// case is recorded as open in app/docs/ui/A-VIEWS-EVIDENCE.md instead.
+#[test]
+fn object_search_in_the_shell_should_pass_the_audit() {
+    for size in [LARGE, WIDE] {
+        let mut harness = harness_at(size, ShellState::default());
+        harness.key_press_modifiers(Modifiers::COMMAND, Key::F);
+        harness.run();
+        harness
+            .get_by_label("Name of a class or diagram")
+            .type_text("Order");
+        harness.run();
+        let scene = format!("object search at {}x{}", size.0, size.1);
+        let mut findings = audit_layout(&scene, &harness, size, false);
+        findings.extend(audit_tab_order(&scene, &mut harness, size, &POINTER_ONLY));
+        report(findings);
+    }
+}

@@ -396,3 +396,69 @@ fn theme_choice_should_emit_set_theme() {
         );
     }
 }
+
+#[test]
+fn clicking_another_tab_should_emit_activate_tab_and_the_active_one_nothing() {
+    let view = fixtures::many_tabs();
+    let mut harness = harness(common_ui::WIDE, ThemePreference::Light, view.clone(), rows);
+    let active = view
+        .tabs
+        .tabs
+        .iter()
+        .position(|tab| tab.active)
+        .unwrap_or(0);
+    let other = if active == 0 { 1 } else { 0 };
+
+    assert_eq!(
+        click(&mut harness, &view.tabs.tabs[other].label),
+        [UiIntent::ActivateTab(other)]
+    );
+    assert!(click(&mut harness, &view.tabs.tabs[active].label).is_empty());
+}
+
+#[test]
+fn board_should_report_its_size_once_per_change() {
+    let mut harness = light(fixtures::sample(), board);
+    let resized: Vec<_> = harness
+        .state_mut()
+        .take()
+        .into_iter()
+        .filter(|intent| matches!(intent, UiIntent::CanvasResized { .. }))
+        .collect();
+    assert_eq!(resized.len(), 1, "{resized:?}");
+    harness.run();
+    assert!(
+        !harness
+            .state_mut()
+            .take()
+            .iter()
+            .any(|intent| matches!(intent, UiIntent::CanvasResized { .. })),
+        "size sent again without a change"
+    );
+    harness.set_size(Vec2::new(1000.0, 700.0));
+    harness.run();
+    assert!(
+        harness
+            .state_mut()
+            .take()
+            .iter()
+            .any(|intent| matches!(intent, UiIntent::CanvasResized { .. })),
+        "new size not reported"
+    );
+}
+
+#[test]
+fn space_over_the_board_should_toggle_temporary_pan() {
+    let mut harness = light(fixtures::sample(), board);
+    harness.hover_at(egui::Pos2::new(700.0, 500.0));
+    harness.run();
+    harness.state_mut().take();
+
+    harness.key_down(Key::Space);
+    let down = common_ui::intents_after(&mut harness);
+    harness.key_up(Key::Space);
+    let up = common_ui::intents_after(&mut harness);
+
+    assert!(down.contains(&UiIntent::TemporaryPan(true)), "{down:?}");
+    assert!(up.contains(&UiIntent::TemporaryPan(false)), "{up:?}");
+}

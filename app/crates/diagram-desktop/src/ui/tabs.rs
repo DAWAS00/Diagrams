@@ -9,8 +9,9 @@
 //! tree, under "New diagram" and outside the window. The audit found it.)
 //!
 //! The active tab is drawn pressed *and* underlined, so it is shown by more
-//! than color, and reports itself as selected. Switching and closing tabs
-//! need intents from Agent B (request 2 in AGENT-A-UI.md §6).
+//! than color, and reports itself as selected. Clicking another tab pushes
+//! `ActivateTab`; closing tabs needs an intent from Agent B (request 2 in
+//! AGENT-A-UI.md §6).
 
 use eframe::egui::{self, Align, Id, Layout, Stroke, TextStyle, Vec2};
 
@@ -119,7 +120,9 @@ pub fn show(ui: &mut egui::Ui, view: &TabsView, out: &mut Vec<UiIntent>) {
                     ui.spacing_mut().item_spacing.x = GAP;
                     for (index, tab) in view.tabs.iter().enumerate().take(end).skip(first) {
                         let focus = strip.focus == Some(index);
-                        tab_button(ui, strip_id, index, tab, focus);
+                        if tab_button(ui, strip_id, index, tab, focus) && !tab.active {
+                            out.push(UiIntent::ActivateTab(index));
+                        }
                         if focus {
                             strip.focus = None;
                         }
@@ -132,7 +135,7 @@ pub fn show(ui: &mut egui::Ui, view: &TabsView, out: &mut Vec<UiIntent>) {
 }
 
 /// One tab. The active tab is bold, pressed and underlined in the accent color.
-fn tab_button(ui: &mut egui::Ui, strip: Id, index: usize, tab: &TabView, focus: bool) {
+fn tab_button(ui: &mut egui::Ui, strip: Id, index: usize, tab: &TabView, focus: bool) -> bool {
     let text = if tab.active {
         egui::RichText::new(&tab.label).strong()
     } else {
@@ -154,4 +157,5 @@ fn tab_button(ui: &mut egui::Ui, strip: Id, index: usize, tab: &TabView, focus: 
     if focus {
         response.request_focus();
     }
+    response.clicked()
 }

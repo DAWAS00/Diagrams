@@ -24,6 +24,8 @@ use crate::presentation::{CanvasView, NodeView};
 const TEXT_INSET: f32 = 10.0;
 /// Size of a selection handle. Handles mark selection by shape, not color alone.
 const HANDLE: f32 = 8.0;
+/// Grid spacing in world units (spec §4: "Start with a 16-world-unit grid").
+const GRID_WORLD_UNITS: f32 = 16.0;
 
 /// Draws the board into all of `ui`'s available space.
 pub fn show(ui: &mut egui::Ui, view: &CanvasView, out: &mut Vec<UiIntent>) {
@@ -31,6 +33,10 @@ pub fn show(ui: &mut egui::Ui, view: &CanvasView, out: &mut Vec<UiIntent>) {
     let (board, painter) = ui.allocate_painter(ui.available_size(), Sense::click_and_drag());
     board.widget_info(|| WidgetInfo::labeled(Role::Canvas, true, view.accessible_name));
     painter.rect_filled(board.rect, CornerRadius::ZERO, palette.canvas);
+    report_size(ui, board.rect.size(), out);
+    if view.grid {
+        paint_grid(&painter, board.rect, view.zoom_percent, &palette);
+    }
     if let Some(text) = view.empty_text {
         let galley = components::one_line_galley(
             &painter,
@@ -64,6 +70,19 @@ pub fn show(ui: &mut egui::Ui, view: &CanvasView, out: &mut Vec<UiIntent>) {
         }
         paint_node(&painter, rect, node, response.hovered(), &palette);
     }
+
+    if let Some((from, to)) = view.marquee {
+        // The marquee is an editor overlay: accent outline plus a light fill.
+        let rect = Rect::from_two_pos(origin + from.to_vec2(), origin + to.to_vec2());
+        painter.rect(
+            rect,
+            CornerRadius::ZERO,
+            palette.selection_fill.gamma_multiply(0.4),
+            Stroke::new(1.5, palette.accent),
+            StrokeKind::Inside,
+        );
+    }
+    temporary_pan(ui, &board, out);
 
     let modifiers = ui.input(|input| input.modifiers);
     let hit_at = |position: Pos2| -> Option<Target> {
@@ -119,6 +138,60 @@ pub fn show(ui: &mut egui::Ui, view: &CanvasView, out: &mut Vec<UiIntent>) {
             hit: hit_at(position),
         })
     }));
+}
+
+/// Reports the board's size when it changes (local widget state remembers
+/// the last size sent), so B can fit and zoom around the real canvas.
+fn report_size(ui: &egui::Ui, size: Vec2, out: &mut Vec<UiIntent>) {
+    let id = ui.scope_id().with("board-size");
+    let last: Option<Vec2> = ui.data(|data| data.get_temp(id));
+    if last.is_none_or(|last| (last - size).length() > 0.5) {
+        ui.data_mut(|data| data.insert_temp(id, size));
+        out.push(UiIntent::CanvasResized {
+            width: size.x,
+            height: size.y,
+        });
+    }
+}
+
+/// Space held over the board pans while it is held. Never while a text
+/// field has focus, so typing a space stays in the field.
+fn temporary_pan(ui: &egui::Ui, board: &egui::Response, out: &mut Vec<UiIntent>) {
+    if ui.ctx().text_edit_focused() || !(board.hovered() || board.has_focus()) {
+        return;
+    }
+    let (pressed, released) = ui.input(|input| {
+        (
+            input.key_pressed(egui::Key::Space),
+            input.key_released(egui::Key::Space),
+        )
+    });
+    if pressed {
+        out.push(UiIntent::TemporaryPan(true));
+    }
+    if released {
+        out.push(UiIntent::TemporaryPan(false));
+    }
+}
+
+/// Grid of 16 world units, drawn in the separator token: an editor overlay,
+/// never part of the document or of exported artwork.
+fn paint_grid(painter: &egui::Painter, rect: Rect, zoom_percent: u32, palette: &Palette) {
+    let spacing = GRID_WORLD_UNITS * zoom_percent as f32 / 100.0;
+    if spacing < 4.0 {
+        return;
+    }
+    let stroke = Stroke::new(1.0, palette.separator);
+    let mut x = rect.left() + spacing;
+    while x < rect.right() {
+        painter.vline(x, rect.y_range(), stroke);
+        x += spacing;
+    }
+    let mut y = rect.top() + spacing;
+    while y < rect.bottom() {
+        painter.hline(rect.x_range(), y, stroke);
+        y += spacing;
+    }
 }
 
 fn paint_node(

@@ -17,6 +17,7 @@ pub use crate::app_state::{
 };
 
 use crate::dispatch;
+use crate::editor_state::ShellSupport;
 use crate::intent::{InputContext, SearchScope, Surface, Target, UiIntent};
 use crate::presentation::{self, Presentation};
 use crate::ui::commands::{self, Availability};
@@ -26,7 +27,9 @@ use crate::ui::showcase;
 use crate::ui::theme::{self, Palette, TextRole};
 use crate::ui::welcome::{self, EntryAction, EntryScreen};
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR};
-use crate::ui::{canvas_view, header, inspector, navigator, status, tabs, toolbar};
+use crate::ui::{
+    canvas_view, dialogs, header, inspector, navigator, search_view, status, tabs, toolbar,
+};
 
 /// This frame's UI facts, with `opener` as the widget focus returns to.
 fn input_context(ctx: &egui::Context, state: &AppState, opener: Option<Id>) -> InputContext {
@@ -202,6 +205,8 @@ pub fn show(ui: &mut egui::Ui, state: &mut AppState) {
         return;
     }
 
+    // What this shell really draws, so B enables the matching commands.
+    state.support = SUPPORT;
     dispatch::set_layout(state, workspace::layout_mode(ui.max_rect().width()));
     let ctx = ui.ctx().clone();
     let mut view = presentation::build(state);
@@ -250,7 +255,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut AppState) {
                 .size_range(NAVIGATOR.min..=NAVIGATOR.max)
                 .show(ui, |ui| {
                     scrolling(ui, "navigator", |ui| {
-                        collect(|out| navigator::show(ui, &view.navigator, out))
+                        collect(|out| project_panel(ui, &view, out))
                     })
                 })
                 .inner;
@@ -308,11 +313,34 @@ pub fn show(ui: &mut egui::Ui, state: &mut AppState) {
         let intents = drawer(&ctx, which, &view, canvas_rect, &palette);
         commit(&ctx, state, &mut view, intents, None);
     }
+    let intents = collect(|out| dialogs::show(ui, view.dialog.as_ref(), out));
+    commit(&ctx, state, &mut view, intents, None);
     showcase_window(&ctx, state);
     command_palette(&ctx, state);
     // Only a focused text field keeps editing keys; a focused button must not
     // swallow Escape (egui_wants_keyboard_input is true for any focus).
     state.text_had_focus = ctx.text_edit_focused();
+}
+
+/// The surfaces this shell draws (B enables their commands from these).
+///
+/// - `draft_events` and `resolve_dialog` stay off although the inspector
+///   sends CommitDraft/CancelDraft and `ui::dialogs` draws Resolve edit:
+///   Agent B's `journeys.rs` (J2) and A's older shell tests still expect a
+///   name to commit as it is typed. They switch on together with those tests.
+/// - `region_focus` is off: the shell keeps egui's own focus.
+const SUPPORT: ShellSupport = ShellSupport {
+    draft_events: false,
+    resolve_dialog: false,
+    grid: true,
+    object_search: true,
+    region_focus: false,
+};
+
+/// The project panel: the object search while it is open, then the lists.
+fn project_panel(ui: &mut egui::Ui, view: &Presentation, out: &mut Vec<UiIntent>) {
+    search_view::object_search(ui, &view.object_search, out);
+    navigator::show(ui, &view.navigator, out);
 }
 
 /// Height of the command search's result list.
@@ -374,7 +402,7 @@ fn drawer(
                 ui.separator();
                 out = scrolling(ui, "drawer", |ui| {
                     collect(|out| match which {
-                        Drawer::Navigator => navigator::show(ui, &view.navigator, out),
+                        Drawer::Navigator => project_panel(ui, view, out),
                         Drawer::Inspector => inspector::show(ui, &view.inspector, out),
                     })
                 });

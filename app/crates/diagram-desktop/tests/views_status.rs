@@ -34,3 +34,23 @@ fn status_should_pass_the_audit_at_every_size_and_theme() {
     audit_view_everywhere("status", &fixtures::sample(), draw, &[]);
     audit_view_everywhere("status, long selection", &fixtures::long_name(), draw, &[]);
 }
+
+#[test]
+fn zoom_grid_and_snap_should_be_shown_in_words() {
+    let view = fixtures::sample();
+    let harness = light(view.clone(), draw);
+
+    assert!(shows_text(&harness, &view.status.zoom_text));
+    let grid = if view.status.grid {
+        "Grid on"
+    } else {
+        "Grid off"
+    };
+    let snap = if view.status.snap {
+        "Snap on"
+    } else {
+        "Snap off"
+    };
+    assert!(shows_text(&harness, grid));
+    assert!(shows_text(&harness, snap));
+}
