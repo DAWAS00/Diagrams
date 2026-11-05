@@ -2,6 +2,7 @@
 //! focus return and retained panel preferences.
 
 use diagram_desktop::shell::{self, ShellState};
+use diagram_desktop::ui::header;
 use diagram_desktop::ui::workspace::{
     self, Drawer, INSPECTOR, LayoutMode, MIN_CANVAS_WIDTH, NAVIGATOR,
 };
@@ -57,7 +58,7 @@ fn rows_should_stack_header_tabs_tools_then_canvas() {
     let harness = harness_at(1280.0, 800.0);
     let middle = |rect: Rect| (rect.y0 + rect.y1) / 2.0;
 
-    assert!(middle(bounds(&harness, "Menu")) < 48.0);
+    assert!(middle(bounds(&harness, header::PROJECT_MENU)) < 48.0);
     let tabs = middle(bounds(&harness, "New diagram"));
     assert!((48.0..86.0).contains(&tabs), "tab row at {tabs}");
     let tools = middle(bounds(&harness, "Select"));
@@ -108,7 +109,7 @@ fn inspector_drawer_should_cover_only_the_canvas() {
         "{drawer:?} above the canvas {canvas:?}"
     );
     for control in [
-        "Menu",
+        header::PROJECT_MENU,
         "Save",
         "Select",
         "Inspector",
@@ -251,7 +252,7 @@ fn menu_should_list_every_group_and_run_commands() {
     harness.state_mut().select(0);
     harness.run();
 
-    harness.get_by_label("Menu").click();
+    harness.get_by_label(header::PROJECT_MENU).click();
     harness.run();
     for group in ["File", "Edit", "View", "Tools", "Navigate"] {
         harness.get_by_label(group);

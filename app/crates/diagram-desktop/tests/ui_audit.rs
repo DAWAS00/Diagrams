@@ -7,8 +7,10 @@
 
 mod common_ui;
 
+use common_ui::WIDE;
 use common_ui::{LARGE, SMALL, audit_layout, audit_tab_order, controls, report, visible};
 use diagram_desktop::shell::{self, ShellState};
+use diagram_desktop::ui::{fixtures, header};
 use eframe::egui::{
     Button, Key, Modifiers, Pos2, Rect as EguiRect, Role as WidgetRole, Sense, Vec2, WidgetInfo,
 };
@@ -169,6 +171,56 @@ fn audit_should_see_every_screen_s_controls() {
 
     // Welcome: New, Open, Continue, Review, Dismiss, search, 2 recent, Remove, 3 theme.
     assert!(count(&welcome) >= 12, "{}", count(&welcome));
-    // Workspace: menu, 5 header, 2 tab row, 8 tool row, rows, canvas, classes, theme.
+    // Workspace: Project menu, header commands, tab row, tool row, rows,
+    // canvas, classes, theme.
     assert!(count(&workspace) >= 22, "{}", count(&workspace));
+}
+
+/// Workspace states that A-10's view composition must keep usable: a long
+/// class name, an empty project and both docked panels hidden, at every
+/// supported size.
+#[test]
+fn workspace_states_should_pass_the_audit_at_every_size() {
+    let mut long = fixtures::selected_state(0);
+    long.classes[0].name = fixtures::LONG_NAME.to_owned();
+    let mut empty = fixtures::sample_state();
+    empty.classes.clear();
+    let mut hidden = fixtures::sample_state();
+    hidden.panels.navigator_visible = false;
+    hidden.panels.inspector_visible = false;
+    let mut findings = Vec::new();
+    for (name, state) in [
+        ("long name", long),
+        ("empty project", empty),
+        ("panels hidden", hidden),
+    ] {
+        for size in [SMALL, LARGE, WIDE] {
+            let scene = format!("{name} at {}x{}", size.0, size.1);
+            let mut harness = harness_at(size, state.clone());
+            findings.extend(audit_layout(&scene, &harness, size, false));
+            findings.extend(audit_tab_order(&scene, &mut harness, size, &POINTER_ONLY));
+        }
+    }
+    report(findings);
+}
+
+#[test]
+fn open_project_menu_should_pass_the_audit() {
+    for size in [SMALL, LARGE] {
+        let mut harness = harness_at(size, ShellState::default());
+        harness.get_by_label(header::PROJECT_MENU).click();
+        harness.run();
+        report(audit_layout("project menu", &harness, size, true));
+        // Each group's submenu, with its disabled reasons as visible text.
+        for group in ["File", "Edit", "View", "Tools", "Navigate"] {
+            harness.get_by_label(group).hover();
+            harness.run();
+            report(audit_layout(
+                &format!("project menu, {group}"),
+                &harness,
+                size,
+                true,
+            ));
+        }
+    }
 }

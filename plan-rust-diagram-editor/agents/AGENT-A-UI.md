@@ -149,6 +149,15 @@ Every item uses only `theme.rs` tokens and text roles, and `components.rs` contr
 | # | Date | Need (field, intent or command) | Why | Status |
 |---|---|---|---|---|
 | 0 (from B) | 2026-11-05 | B asked A to stop hard-coding "Pan" and "Note" in `tests/shell.rs` and `tests/typography.rs` before D2/D3 land. | Catalog is the single source of truth. | Done in commit `A-req-B:`: labels and the disabled set now come from `commands::placed` and `commands::availability`; nothing asserts Hand is disabled. |
+| 1 | 2026-11-05 | `HeaderView`: save state as its own field (words plus a tone such as Unsaved / Saving… / Saved / Save failed) instead of inside `title`; Undo/Redo labels with the pending action ("Undo Rename class"). | §A2 save badge in words; history labels. | open |
+| 2 | 2026-11-05 | `TabView`: a diagram identity; intents to activate a tab and to close one (`CloseTab(id)`, never deleting the diagram). | §A3 tab switching and "Close tab Class overview" buttons. The view draws tabs but cannot switch or close them yet. | open |
+| 3 | 2026-11-05 | `ToolsView`: the relationship-kind chooser (current kind plus options) and the Arrange menu (Align ×6, Distribute ×2) as `CommandView`s. | §A4 kind chooser and Arrange menu button. | open |
+| 4 | 2026-11-05 | `NavigatorView`: Diagrams/Model tab state and an intent to switch it; the object search field (query, shortcut text) and results with type and location; list states (loading, empty, no match, error); per-row actions as `CommandView`s with an intent that names the row's target (e.g. `CommandOn { command, target }`). | §A5. Today's rows have only a label. | open |
+| 5 | 2026-11-05 | `CanvasView`: document style (fill/ink), edges with kind and route points, marquee, placement preview, connect source/target feedback with text, zoom; `Target` variants for edges, models and diagrams. | §A6. The view paints nodes and empty text only; it uses `theme::DOCUMENT_DEFAULT_*` until a document style arrives. | open |
+| 6 | 2026-11-05 | `InspectorKind`: Relationship, Multiple (count, Mixed values, align/distribute), Mixed; member rows with Up/Down/Remove/Edit `CommandView`s; geometry fields; more `DraftField` variants; problem severity (error vs warning) on `FieldView`. | §A7. Only Nothing and Class exist. | open |
+| 7 | 2026-11-05 | `StatusView`: Grid, Snap, Zoom −/+, 100%, Fit and Issues as `CommandView`s, the zoom percent text and the file path. | §A8. | open |
+| 8 | 2026-11-05 | `DialogView` variants for Unsaved changes, Delete everywhere (impact counts), Resolve edit, Save failed, Open failed, Recovery, New diagram; a dialog-choice intent; a validation drawer view (severity, message, location, Go to object, freshness). | §A9 / A-8. No dialog types exist yet, so A-8 has not started. | open |
+| 9 | 2026-11-05 | `CommandSearchView`: the result rows (label, group, shortcut text, availability) and the highlighted row, plus separate object-search results. | §A10 / A-9: the search modal still lives in `shell.rs` because its results are computed there. | open |
 
 ## 7. Task progress (Agent A only)
 
@@ -156,4 +165,14 @@ Task IDs come from [TASKS-AND-TESTS.md §3](TASKS-AND-TESTS.md#3-task-list). Add
 
 | Task | State | Branch / commit | Notes |
 |---|---|---|---|
-| A-0 | done | `agent-a/new-ui` | `ui/fixtures.rs` (private contract copy until B-0, fixture `Presentation` per screen state), `tests/common_ui/` (harness at 3 sizes × 2 themes, intent recorder, find-by-name, shared audit), `ui_routing.rs` skeleton looping over every command. |
+| A-0 | done | `agent-a/new-ui` | `ui/fixtures.rs` (private contract copy until B-0, fixture `Presentation` per screen state), `tests/common_ui/` (harness at 3 sizes × 2 themes, intent recorder, find-by-name, shared audit), `ui_routing.rs` skeleton looping over every command. After merging B-0 the private copy was deleted; fixtures are now built by `presentation::build`. |
+| A-1 | in progress | `agent-a/new-ui` | `ui/header.rs` on B's `HeaderView`: Project menu (submenus per group, shortcut text, disabled reasons as visible text), truncating title, header commands with group separators. `views_header.rs`. Remaining: save badge and history labels (request 1). |
+| A-2 | in progress | `agent-a/new-ui` | `ui/tabs.rs`: tabs pressed + underlined when active, hidden-scroll strip with a "More tabs" menu that reveals and focuses a tab. `views_tabs.rs`. Remaining: switching and close buttons (request 2). |
+| A-3 | in progress | `agent-a/new-ui` | `ui/toolbar.rs`: toggles at the ends, tools pressed when active, "More tools" overflow keeps every tool reachable. `views_toolbar.rs`. Remaining: kind chooser and Arrange menu (request 3). |
+| A-4 | in progress | `agent-a/new-ui` | `ui/navigator.rs`: Diagrams and Model sections, truncated rows with full names, empty states, Select/Shift toggle. `views_navigator.rs`. Remaining: tabs, Find object, row actions, list states (request 4). |
+| A-5 | in progress | `agent-a/new-ui` | `ui/canvas_view.rs`: nodes as accessible buttons at the presented rectangles, selection handles, empty text, Select on click, Pointer Down/Move/Up/Zoom with hit. Document colors moved to `theme::DOCUMENT_DEFAULT_*`. `views_canvas.rs`. Remaining: edges, marquee, previews, feedback (request 5). |
+| A-6 | in progress | `agent-a/new-ui` | `ui/inspector.rs`: guidance, scope label, Name draft field (DraftChanged / CommitDraft / CancelDraft, focus kept when its problem appears). Fixed: CommitDraft was emitted twice per Enter (regression test in `ui_routing.rs`, failed before the fix). `views_inspector.rs`. Remaining: other selection kinds and members (request 6). |
+| A-7 | in progress | `agent-a/new-ui` | `ui/status.rs`: save state and selection in words, theme chooser. `views_status.rs`. Remaining: Grid/Snap/zoom/Fit/Issues (request 7). |
+| A-8 | not started | — | Blocked on request 8 (no dialog types in the contract). |
+| A-9 | not started | — | Blocked on request 9 (search results are not in the presentation). |
+| A-10 | in progress | `agent-a/new-ui` | `shell.rs` composes only: header, tabs, tool row, navigator, board, inspector and status are drawn by the view modules; local drawing code and hard-coded document colors removed. The command search modal and drawer frame stay in `shell.rs` until requests 8–9. |

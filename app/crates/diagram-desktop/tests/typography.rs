@@ -3,9 +3,9 @@
 
 use diagram_desktop::shell::{self, ShellState};
 use diagram_desktop::ui::commands::{self, Placement};
-use diagram_desktop::ui::components;
 use diagram_desktop::ui::theme::{self, TextRole};
 use diagram_desktop::ui::workspace::{Drawer, LayoutMode};
+use diagram_desktop::ui::{components, header};
 use eframe::egui::accesskit::Rect;
 use eframe::egui::{Color32, FontFamily, LayerId, Painter, TextStyle, Theme, Vec2};
 use egui_kittest::Harness;
@@ -16,7 +16,7 @@ const LONG_NAME: &str = "PreferredCustomerAccountWithLoyaltyProgrammeAndRegional
 /// catalog so catalog changes (such as D2 and D3) need no edit here. ("Class
 /// diagram 1" is left out: it is both a tab and a project-panel row.)
 fn chrome() -> Vec<&'static str> {
-    std::iter::once("Menu")
+    std::iter::once(header::PROJECT_MENU)
         .chain(
             [
                 Placement::Header,

@@ -12,7 +12,7 @@
 
 use std::collections::HashSet;
 
-use diagram_desktop::ui::fixtures::contract::UiIntent;
+use diagram_desktop::intent::UiIntent;
 use diagram_desktop::ui::theme;
 use eframe::egui::accesskit::{Action, Rect, Role, Toggled};
 use eframe::egui::{self, Key, ThemePreference, Vec2};
@@ -326,6 +326,27 @@ pub fn report(findings: Vec<String>) {
         findings.len(),
         findings.join("\n")
     );
+}
+
+/// Audits `view` drawn by `draw` at every supported size in both themes:
+/// names, hit height, inside the window, no overlap, and Tab reaches every
+/// enabled control except those starting with a `pointer_only` prefix.
+pub fn audit_view_everywhere<V: Clone + 'static>(
+    scene: &str,
+    view: &V,
+    draw: Draw<V>,
+    pointer_only: &[&str],
+) {
+    let mut findings = Vec::new();
+    for size in SIZES {
+        for theme in THEMES {
+            let scene = format!("{scene} at {}x{} {theme:?}", size.0, size.1);
+            let mut harness = harness(size, theme, view.clone(), draw);
+            findings.extend(audit_layout(&scene, &harness, size, false));
+            findings.extend(audit_tab_order(&scene, &mut harness, size, pointer_only));
+        }
+    }
+    report(findings);
 }
 
 /// Draws a view in a top row of exactly `height`, as the shell will.

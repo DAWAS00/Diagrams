@@ -10,8 +10,9 @@ use eframe::egui::{
     self, Button, Color32, FontId, Galley, Label, Response, RichText, TextEdit, Vec2,
 };
 
-use super::fixtures::contract::{CommandView, MenuSection, StatusText, Tone};
 use super::theme::{CONTROL_HEIGHT, ROW_HEIGHT, TextRole};
+use crate::presentation::CommandView;
+use crate::ui::commands::CommandId;
 
 /// Page title such as the welcome screen heading.
 pub fn page_title(ui: &mut egui::Ui, text: &str) -> Response {
@@ -168,15 +169,17 @@ pub fn command_button_named(
     text: &str,
     accessible_name: Option<&str>,
 ) -> bool {
-    let button = Button::selectable(command.active, text)
+    let pressed = command.active == Some(true);
+    let button = Button::selectable(pressed, text)
         .frame_when_inactive(true)
         .min_size(Vec2::new(0.0, CONTROL_HEIGHT));
-    let response = ui.add_enabled(command.enabled(), button);
+    let response = ui.add_enabled(command.is_enabled(), button);
     if let Some(name) = accessible_name {
-        let (enabled, active) = (command.enabled(), command.active);
+        let enabled = command.is_enabled();
         let name = name.to_owned();
-        response
-            .widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, enabled, active, &name));
+        response.widget_info(|| {
+            egui::WidgetInfo::selected(egui::Role::Button, enabled, pressed, &name)
+        });
     }
     command_hover(response, command).clicked()
 }
@@ -218,78 +221,37 @@ pub fn dropdown_button<R>(
     (response, inner.map(|inner| inner.inner))
 }
 
-/// Draws a menu's sections: titles as labels, destructive sections after a
-/// separator, disabled items with their reason as visible text. Returns the
-/// command chosen, and closes the menu when one is.
-pub fn menu_sections(ui: &mut egui::Ui, sections: &[MenuSection]) -> Option<CommandView> {
+/// Menu items for catalog commands: label, right-aligned shortcut text,
+/// and for a disabled item its reason as visible text below it. Returns the
+/// command chosen and closes the menu when one is.
+pub fn menu_items(ui: &mut egui::Ui, items: &[CommandView]) -> Option<CommandId> {
     let mut chosen = None;
-    for (index, section) in sections.iter().enumerate() {
-        if index > 0 || section.destructive {
-            ui.separator();
+    for item in items {
+        let mut button = Button::selectable(item.active == Some(true), item.label.as_str())
+            .min_size(Vec2::new(ui.available_width(), ROW_HEIGHT));
+        if let Some(shortcut) = &item.shortcut_text {
+            button = button.shortcut_text(shortcut.as_str());
         }
-        if let Some(title) = &section.title {
-            field_label(ui, title);
+        let response = ui.add_enabled(item.is_enabled(), button);
+        let response = command_hover(response, item);
+        if let Some(reason) = item.availability.reason() {
+            ui.add(
+                Label::new(
+                    RichText::new(reason)
+                        .text_style(TextRole::Label.text_style())
+                        .weak(),
+                )
+                .wrap(),
+            );
         }
-        for item in &section.items {
-            if menu_item(ui, item, section.destructive) {
-                chosen = Some(item.clone());
-            }
+        if response.clicked() {
+            chosen = Some(item.id);
         }
     }
     if chosen.is_some() {
         ui.close();
     }
     chosen
-}
-
-/// One menu item: label, right-aligned shortcut text, a check for an
-/// active item and the disabled reason as visible text below it.
-fn menu_item(ui: &mut egui::Ui, item: &CommandView, destructive: bool) -> bool {
-    let mut text = RichText::new(&item.label);
-    if destructive {
-        text = text.color(ui.visuals().error_fg_color);
-    }
-    let mut button =
-        Button::selectable(item.active, text).min_size(Vec2::new(ui.available_width(), ROW_HEIGHT));
-    if let Some(shortcut) = &item.shortcut_text {
-        button = button.shortcut_text(shortcut.as_str());
-    }
-    let response = ui.add_enabled(item.enabled(), button);
-    let response = command_hover(response, item);
-    if let Some(reason) = item.availability.reason() {
-        ui.add(
-            Label::new(
-                RichText::new(reason)
-                    .text_style(TextRole::Label.text_style())
-                    .weak(),
-            )
-            .wrap(),
-        );
-    }
-    response.clicked()
-}
-
-/// Color of a status tone. Tones always come with words.
-pub fn tone_color(visuals: &egui::Visuals, tone: Tone) -> Color32 {
-    match tone {
-        Tone::Neutral | Tone::Progress => visuals.text_color(),
-        Tone::Success => visuals.hyperlink_color,
-        Tone::Warning => visuals.warn_fg_color,
-        Tone::Danger => visuals.error_fg_color,
-    }
-}
-
-/// A status in words, colored by its tone and kept on one line.
-pub fn status_text(ui: &mut egui::Ui, status: &StatusText) -> Response {
-    let color = tone_color(ui.visuals(), status.tone);
-    ui.add(
-        Label::new(
-            RichText::new(&status.text)
-                .text_style(TextRole::Label.text_style())
-                .color(color),
-        )
-        .truncate(),
-    )
 }
 
 /// Lays out painted text on one line no wider than `max_width`, ending in an
