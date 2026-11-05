@@ -134,6 +134,9 @@ fn typing_in_the_name_field_should_rename_the_class_everywhere() {
     harness.key_press_modifiers(eframe::egui::Modifiers::COMMAND, Key::A);
     name.type_text("Client عميل");
     harness.run();
+    // Enter commits the draft (it also commits when names commit live).
+    harness.key_press(Key::Enter);
+    harness.run();
 
     assert_eq!(harness.state().classes[0].name, "Client عميل");
     harness.get_by_label("Class Client عميل");

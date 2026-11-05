@@ -21,14 +21,14 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 | Task | What it delivers | Status |
 |---|---|---|
 | UI-01 | Design tokens, components and states | **Done** — [evidence](UI-01-TOKENS-AND-COMPONENTS.md) |
-| UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
+| UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); Noto Sans and Noto Sans Arabic bundled as fallbacks with licenses ([views evidence](A-VIEWS-EVIDENCE.md)); Noto as primary face remains |
 | UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
 | UI-04 | Welcome, new-project and open screens | **Done** — [evidence](UI-04-WELCOME-AND-ENTRY.md) |
-| UI-05 | Navigator and diagram tabs | Not started |
+| UI-05 | Navigator and diagram tabs | In progress — [views evidence](A-VIEWS-EVIDENCE.md); Diagrams/Model tabs, row actions and tab close remain |
 | UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |
-| UI-07 | Canvas state presentations | Not started |
-| UI-08 | Contextual inspector | Not started |
-| UI-09 | Dialogs, status bar and validation drawer | Not started |
+| UI-07 | Canvas state presentations | In progress — [views evidence](A-VIEWS-EVIDENCE.md); edges and connect/placement previews remain |
+| UI-08 | Contextual inspector | In progress — [views evidence](A-VIEWS-EVIDENCE.md); relationship, multiple and member layouts remain |
+| UI-09 | Dialogs, status bar and validation drawer | In progress — [views evidence](A-VIEWS-EVIDENCE.md); Resolve edit only; other dialogs and the validation drawer remain |
 | UI-10 | Keyboard, focus and accessibility checks | Not started |
 | UI-11 | Notation capability contract | Not started (needs UI-06 and UI-08) |
 | UI-12 | Native UI review gate | Not started |
