@@ -181,3 +181,9 @@ Task IDs come from [TASKS-AND-TESTS.md §3](TASKS-AND-TESTS.md#3-task-list). Add
 | B-8 | done | same | `CommandId::Cancel` owns Escape: Resolve question → draft → gesture → tool → selection, one per press. F6/Shift+F6 cycle visible regions (hidden ones skipped); enabled when the shell sets `ShellSupport::region_focus`. |
 | B-9 | done | same | Command search results (commands only) and object search (`ObjectSearchView`, empty and no-match texts) are separate; tabs (switch, next/previous, close-tab-never-deletes) on `AppState::with_second_diagram()`; grid/snap preferences never touch the document. Grid, snap and Find object are enabled when the shell sets `ShellSupport`. |
 | B-10 | done | same | `diagram-core::notation`: Class only is creatable; planned notations record their needs (sequence needs its own interaction strategy); `Presentation::diagram_types`; `commands::tool_command` maps notation tools to tool-row commands. The tool row is built from the Class notation since the D2/D3 commit. |
+| B-12 (R1-01) | done | R1 commit | Typed IDs (`compile_fail` doc tests), model/view records, finite geometry, explicit order. |
+| B-12 (R1-02) | done | R1 commit | `DomainError`, cycle/self/duplicate generalization checks, multiplicity grammar, document check with severities. |
+| B-12 (R1-03) | done | R1 commit | `Command` → `ChangeSet` patches; all-or-nothing apply with rollback; exact inverse; delete-everywhere impact. |
+| B-12 (R1-04) | done | R1 commit | `Session`: undo/redo labels, SessionId/Revision/StateId, saved state across undo/redo/branching, 500-transaction bound. |
+| B-11 | in_progress | — | J1 is in `journeys.rs` against today's shell. J2–J4 need A's inspector drafts (`ShellSupport::draft_events`), region focus and drawer flows on the new shell. |
+| R1-05/R1-06, UI-13 to UI-17 | not started | — | Storage schema and save are next; then `Session` binding switches Undo, Add class, Connect and members on. |
