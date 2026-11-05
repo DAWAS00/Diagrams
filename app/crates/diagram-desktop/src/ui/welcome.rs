@@ -216,14 +216,15 @@ pub fn welcome(ui: &mut egui::Ui, state: &mut EntryState) -> Option<EntryAction>
             }
             RecentStatus::Missing => {
                 components::truncated_text(ui, &label);
-                components::error_text(
-                    ui,
-                    "File not found at this path. It may have been moved or deleted.",
-                );
-                let remove = format!("Remove {} from the list", project.name);
-                if components::action_button(ui, &remove, None, None).clicked() {
-                    action = Some(EntryAction::RemoveRecent(index));
-                }
+                // The error and its action share a line (wrapping when
+                // narrow), so the list still fits at 800×500.
+                ui.horizontal_wrapped(|ui| {
+                    components::error_text(ui, "File not found; it may have moved.");
+                    let remove = format!("Remove {} from the list", project.name);
+                    if components::action_button(ui, &remove, None, None).clicked() {
+                        action = Some(EntryAction::RemoveRecent(index));
+                    }
+                });
             }
         }
     }

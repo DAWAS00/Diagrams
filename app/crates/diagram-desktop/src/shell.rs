@@ -23,7 +23,7 @@ use crate::ui::commands::{self, Availability};
 use crate::ui::components;
 use crate::ui::palette::{self, PaletteEntry};
 use crate::ui::showcase;
-use crate::ui::theme::{self, Palette};
+use crate::ui::theme::{self, Palette, TextRole};
 use crate::ui::welcome::{self, EntryAction, EntryScreen};
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR};
 use crate::ui::{canvas_view, header, inspector, navigator, status, tabs, toolbar};
@@ -315,6 +315,9 @@ pub fn show(ui: &mut egui::Ui, state: &mut AppState) {
     state.text_had_focus = ctx.text_edit_focused();
 }
 
+/// Height of the command search's result list.
+const SEARCH_LIST_HEIGHT: f32 = 280.0;
+
 /// Runs a view and returns the intents it pushed.
 fn collect(draw: impl FnOnce(&mut Vec<UiIntent>)) -> Vec<UiIntent> {
     let mut out = Vec::new();
@@ -442,8 +445,32 @@ fn command_palette(ctx: &egui::Context, state: &mut AppState) {
         if results.is_empty() {
             ui.label("No commands or objects match.");
         }
-        ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
-            for (index, entry) in results.iter().copied().enumerate() {
+        // Only the rows in view are laid out (show_rows), so rows scrolled
+        // out of the list never sit in the accessibility tree at positions
+        // outside the window. Every row reserves a line for its reason, so
+        // all rows have the same height.
+        let reason_height = ui.text_style_height(&TextRole::Label.text_style());
+        let spacing = ui.spacing().item_spacing.y;
+        let row_height = theme::ROW_HEIGHT + spacing + reason_height;
+        let offset_id = Id::unique("command-search-offset");
+        let mut scroll = ScrollArea::vertical()
+            .id_salt("command-search-results")
+            .max_height(SEARCH_LIST_HEIGHT);
+        if down || up {
+            let offset: f32 = ui.data(|data| data.get_temp(offset_id).unwrap_or(0.0));
+            let top = search.highlighted as f32 * (row_height + spacing);
+            let bottom = top + row_height;
+            if top < offset {
+                scroll = scroll.vertical_scroll_offset(top);
+            } else if bottom > offset + SEARCH_LIST_HEIGHT {
+                scroll = scroll.vertical_scroll_offset(bottom - SEARCH_LIST_HEIGHT);
+            }
+        }
+        let output = scroll.show_rows(ui, row_height, results.len(), |ui, range| {
+            for index in range {
+                let Some(entry) = results.get(index).copied() else {
+                    continue;
+                };
                 let availability = entry_availability(entry);
                 let mut row = Button::selectable(
                     index == search.highlighted,
@@ -457,17 +484,23 @@ fn command_palette(ctx: &egui::Context, state: &mut AppState) {
                     row = row.shortcut_text(commands::shortcut_text(&shortcut));
                 }
                 let response = ui.add_enabled(availability.is_enabled(), row);
-                if index == search.highlighted && (down || up) {
-                    response.scroll_to_me(None);
-                }
-                if let Some(reason) = availability.reason() {
-                    components::field_label(ui, reason);
-                }
+                let response = match availability.reason() {
+                    Some(reason) => response.on_disabled_hover_text(reason),
+                    None => response,
+                };
+                // The reason is visible text, on one line; the full reason
+                // is also the row's hover text.
+                ui.allocate_ui(Vec2::new(ui.available_width(), reason_height), |ui| {
+                    if let Some(reason) = availability.reason() {
+                        components::truncated_text(ui, reason);
+                    }
+                });
                 if response.clicked() {
                     chosen = Some(entry);
                 }
             }
         });
+        ui.data_mut(|data| data.insert_temp(offset_id, output.state.clamped_offset().y));
     });
 
     let close_requested = modal.should_close();

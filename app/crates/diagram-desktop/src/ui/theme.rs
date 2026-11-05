@@ -413,9 +413,52 @@ pub fn style(theme: Theme) -> Style {
     style
 }
 
-/// Installs the light and dark styles and selects `preference`. Safe to call
-/// again: a changed preference takes effect without restarting.
+/// Name of the bundled Noto Sans font in egui's font definitions.
+pub const NOTO_SANS: &str = "Noto Sans";
+/// Name of the bundled Noto Sans Arabic font in egui's font definitions.
+pub const NOTO_SANS_ARABIC: &str = "Noto Sans Arabic";
+
+/// egui's default fonts with the bundled Noto Sans and Noto Sans Arabic
+/// registered as the first fallbacks after egui's primary font, for both
+/// proportional and monospace text. See `assets/fonts/README.md` for
+/// sources and licenses.
+///
+/// Noto Sans is not yet the *primary* face: its line height is about three
+/// points taller at 14 points, which pushes the welcome screen past 800×500.
+/// Switching it to primary waits for that layout work (UI-02, A-11).
+/// egui does not shape Arabic or apply bidi; that is tracked in R0-04.
+pub fn fonts() -> egui::FontDefinitions {
+    let mut fonts = egui::FontDefinitions::default();
+    for (name, bytes) in [
+        (
+            NOTO_SANS,
+            &include_bytes!("../../assets/fonts/NotoSans-Regular.ttf")[..],
+        ),
+        (
+            NOTO_SANS_ARABIC,
+            &include_bytes!("../../assets/fonts/NotoSansArabic-Regular.ttf")[..],
+        ),
+    ] {
+        fonts.font_data.insert(
+            name.to_owned(),
+            std::sync::Arc::new(egui::FontData::from_static(bytes)),
+        );
+    }
+    let bundled = [NOTO_SANS.to_owned(), NOTO_SANS_ARABIC.to_owned()];
+    for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
+        if let Some(family) = fonts.families.get_mut(&family) {
+            let after_primary = family.len().min(1);
+            family.splice(after_primary..after_primary, bundled.clone());
+        }
+    }
+    fonts
+}
+
+/// Installs the bundled fonts and the light and dark styles, and selects
+/// `preference`. Safe to call again: a changed preference takes effect
+/// without restarting. Fonts take effect from the next pass.
 pub fn apply(ctx: &egui::Context, preference: ThemePreference) {
+    ctx.set_fonts(fonts());
     for theme in [Theme::Light, Theme::Dark] {
         ctx.set_style_of(theme, style(theme));
     }

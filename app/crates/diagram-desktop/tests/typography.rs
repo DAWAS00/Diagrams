@@ -245,3 +245,30 @@ fn painted_class_text_should_fit_its_box_width() {
     assert!(long.elided);
     assert!(!short.elided);
 }
+
+#[test]
+fn bundled_noto_fonts_should_be_registered_after_the_primary_font() {
+    let fonts = theme::fonts();
+    for name in [theme::NOTO_SANS, theme::NOTO_SANS_ARABIC] {
+        assert!(fonts.font_data.contains_key(name), "{name} not bundled");
+    }
+    for family in [FontFamily::Proportional, FontFamily::Monospace] {
+        let order = &fonts.families[&family];
+        assert_eq!(order[1], theme::NOTO_SANS, "{family:?}: {order:?}");
+        assert_eq!(order[2], theme::NOTO_SANS_ARABIC, "{family:?}: {order:?}");
+    }
+}
+
+#[test]
+fn arabic_and_latin_extended_glyphs_should_come_from_the_bundled_fonts() {
+    // Glyph coverage only: egui does not shape Arabic or apply bidi (R0-04).
+    let mut harness = Harness::new_ui(|ui| {
+        theme::apply(ui.ctx(), eframe::egui::ThemePreference::Light);
+        ui.label("ready");
+    });
+    harness.run();
+    let font = TextRole::Body.font_id();
+    let covered = |text: &str| harness.ctx.fonts_mut(|fonts| fonts.has_glyphs(&font, text));
+    assert!(covered("بيانات"), "Arabic letters missing");
+    assert!(covered("ŁŐŻĦ"), "Latin Extended letters missing");
+}
