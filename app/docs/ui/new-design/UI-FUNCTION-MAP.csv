@@ -1,0 +1,29 @@
+﻿action,primary_location,alternate_route,prerequisite,required_feedback,tasks,status
+New project,Project menu + welcome,Ctrl+N,No blocking dialog,Blank project or clear validation error,UI-04 / UI-13,planned requirement; not an implementation claim
+Open project,Project menu + welcome,Ctrl+O,Current dirty project resolved before replacing session,Loading; cancel; unsupported schema or path error preserves current project,UI-04 / UI-13,planned requirement; not an implementation claim
+Add diagram,Navigator + Diagram,Command search,Implemented notation available,New tab and focused name; unsupported families absent,UI-05 / UI-13,planned requirement; not an implementation claim
+Find object,Navigator search,Command search object results,Project open,Scoped matches with path; no matches state; reveal without geometry mutation,UI-05 / UI-13,planned requirement; not an implementation claim
+Switch diagram,Diagram tab row,Navigator,Diagram exists,Viewport restored; model dirty state unchanged,UI-05 / UI-13,planned requirement; not an implementation claim
+Add class,Labeled Class tool,Blank-state action; command search,Editable Class diagram,Placement preview; focus name; cancel adds nothing,UI-06 / UI-07 / UI-15,planned requirement; not an implementation claim
+Rename class,Inspector Name,F2 or direct name editing,Model selected and editable,Shared-edit scope; draft validation; explicit commit/cancel,UI-08 / UI-14,planned requirement; not an implementation claim
+Add attribute,Inspector Members,Context menu or command search,Class selected,New row; typed validation; one accepted command,UI-08 / UI-14,planned requirement; not an implementation claim
+Add operation,Inspector Members,Command search,Class selected,Name/parameters/result editor with validation,UI-08 / UI-14,planned requirement; not an implementation claim
+Edit/reorder member,Inspector member row actions,Up/Down buttons rather than drag alone,Member selected,Order visible; no silent failed edit,UI-08 / UI-14,planned requirement; not an implementation claim
+Connect association,Relationship tool and kind selector,Select source then target; endpoint chooser,Two compatible models,Kind/target preview; rejection reason; one transaction,UI-06 / UI-07 / UI-15,planned requirement; not an implementation claim
+Add generalization,Relationship kind selector,Command search with endpoint chooser,Compatible classes without inheritance cycle,Direction visible; invalid cycle rejected without partial change,UI-07 / UI-15,planned requirement; not an implementation claim
+Edit relation ends,Relation inspector,Select relation in object list,Relationship selected,Explicit source/target roles and multiplicities; validated result,UI-08 / UI-14,planned requirement; not an implementation claim
+Move/resize views,Canvas handles,Geometry controls; keyboard movement,Editable views selected,Preview and snap cues; cancel discards; one undo per gesture,UI-07 / UI-15,planned requirement; not an implementation claim
+Change appearance,Inspector Appearance,Context menu,One or more views selected,This-view scope; mixed values explicit; export styling unchanged by chrome theme,UI-08 / UI-14,planned requirement; not an implementation claim
+Align selected views,Arrange menu,Command search,Enough editable views selected,Availability reason; whole action undoable,UI-06 / UI-15,planned requirement; not an implementation claim
+Show existing model in diagram,Model list action,Inspector Show in another diagram,Model exists; target notation compatible,Reused identity indicated; independent view geometry,UI-05 / UI-13,planned requirement; not an implementation claim
+Duplicate model,Model action menu,Command search,Eligible model selected,Independent-copy wording; new identity,UI-05 / UI-13,planned requirement; not an implementation claim
+Remove view,Selection action menu,Delete outside a text field,View selected,Diagram-only removal scope; recover with Undo,UI-06 / UI-15,planned requirement; not an implementation claim
+Delete model everywhere,Explicit Model action,Command search,Model selected,Dependent-view/relation impact summary; confirmation; undo,UI-09 / UI-14,planned requirement; not an implementation claim
+Undo/Redo,Named header controls,Ctrl+Z / Ctrl+Shift+Z outside text editing,History permits action,Action name and disabled reason; field editing keeps local undo,UI-06 / UI-15,planned requirement; not an implementation claim
+Pan/zoom/fit,Canvas and visible zoom controls,Fit selection through navigator,Diagram open,Scale and location feedback; no document mutation,UI-03 / UI-07 / UI-15,planned requirement; not an implementation claim
+Save/Save As,Header Save and Project menu,Ctrl+S / Ctrl+Shift+S,Valid writable snapshot available,Saving; saved snapshot state; later edits remain dirty; persistent retry/error,UI-09 / UI-16,planned requirement; not an implementation claim
+Export SVG,Header Export,Project menu or command search,Exportable diagram open,Bounds/background summary; cancel/failure/success; no false unsupported format,UI-09 / UI-18,planned requirement; not an implementation claim
+Reveal validation issue,Validation drawer,Status issue count,Issue exists for current revision,Severity/text; reveal affected view; discard stale results,UI-09 / UI-16,planned requirement; not an implementation claim
+Close dirty project,Project close or window close,Project menu,Unsaved changes exist,Save/Discard/Cancel; failed save cannot silently close,UI-09 / UI-18,planned requirement; not an implementation claim
+Recover project,Startup recovery entry,Welcome,Recoverable snapshot exists,Source/time and explicit choice; previous file preserved,UI-09 / UI-18,planned requirement; not an implementation claim
+Theme/text scale/shortcuts,Settings menu,Command search,No blocking operation,Immediate readable preview; preferences separate from project dirty state,UI-01 / UI-02 / UI-10,planned requirement; not an implementation claim

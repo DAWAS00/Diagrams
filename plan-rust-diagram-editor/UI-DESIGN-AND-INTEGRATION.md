@@ -4,6 +4,10 @@ Date: 2026-11-05. Proposed v0.1 design baseline. This extends the roadmap at the
 
 ## 1. The intended final workspace
 
+For detailed per-function behavior, implementation ownership, draft/focus rules and proposed Windows shortcuts, use [NEW-DESIGN-FUNCTIONAL-SPEC.md](../app/docs/ui/new-design/NEW-DESIGN-FUNCTIONAL-SPEC.md). It refines this baseline after the FigJam review; illustrative Note controls are deferred beyond the first Class-editor scope.
+
+**Research checkpoint:** read [UI-RESEARCH.md](../app/docs/ui/new-design/UI-RESEARCH.md) and [UI-FUNCTION-MAP.csv](../app/docs/ui/new-design/UI-FUNCTION-MAP.csv) before implementing these surfaces. Validate discoverability, non-drag connection paths, model/view scope and draft/focus rules before freezing the visual design. This specification remains the starting hypothesis.
+
 One focused desktop workspace, with a light default and a supported dark theme. A new user sees labeled tools and a blank diagram; an experienced user can use shortcuts and a command palette. The UI stays consistent when the active notation changes.
 
 ```text

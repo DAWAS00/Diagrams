@@ -4,6 +4,8 @@ Plan date: 2026-11-04. Status updated 2026-11-05. Working label: Diagram Studio.
 
 Build a local Windows desktop modeling tool in Rust, designed to make the basic workflow clear and dependable before expanding diagram coverage.
 
+**Research before UI implementation:** [UI research and recommendations](../app/docs/ui/new-design/UI-RESEARCH.md) audits the current prototype against documented editor patterns and accessibility guidance. The [function discoverability map](../app/docs/ui/new-design/UI-FUNCTION-MAP.csv) covers 28 v0.1 action groups and the report defines the user-validation protocol. Design proposals remain hypotheses until tested.
+
 **Product-wide comparison:** read [Visual Paradigm versus our version](comparison/README.md) or the [searchable comparison](comparison/COMPARISON.html) for feature differences, all 101 notation candidates, deliberate omissions, and remaining validation gaps. These compare a shipped suite with an unbuilt Rust plan.
 
 **Progress and next steps:** [what is done and what comes next](PROGRESS-AND-NEXT-STEPS.md).
@@ -11,6 +13,8 @@ Build a local Windows desktop modeling tool in Rust, designed to make the basic 
 **Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 57 tasks with prerequisites and acceptance conditions; 46 lead through v0.1. Three tasks are complete; R0-04 is in progress and 53 tasks are not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
 
 **UI-first revision:** [complete UI specification](UI-DESIGN-AND-INTEGRATION.md), [interactive final design preview](UI-DESIGN.html), and 18 new UI tasks. UX design/native presentation now precedes M1; real feature binding remains in M2/M3. Existing completed tasks retain their evidence. UI progress: [app/docs/ui/README.md](../app/docs/ui/README.md). **Every UI change follows [UI-RULES.md](UI-RULES.md).**
+
+**New design reference:** [functionality, Rust implementation and keyboard shortcuts](../app/docs/ui/new-design/NEW-DESIGN-FUNCTIONAL-SPEC.md) specifies every planned v0.1 surface, action, edit/cancel rule, model-versus-view behavior and failure state, plus the proposed Windows shortcut map and acceptance workflows informed by the FigJam review.
 
 ## Recommended decisions
 
