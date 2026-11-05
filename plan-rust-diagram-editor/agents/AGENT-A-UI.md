@@ -148,7 +148,7 @@ Every item uses only `theme.rs` tokens and text roles, and `components.rs` contr
 
 | # | Date | Need (field, intent or command) | Why | Status |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| 0 (from B) | 2026-11-05 | B asked A to stop hard-coding "Pan" and "Note" in `tests/shell.rs` and `tests/typography.rs` before D2/D3 land. | Catalog is the single source of truth. | Done in commit `A-req-B:`: labels and the disabled set now come from `commands::placed` and `commands::availability`; nothing asserts Hand is disabled. |
 
 ## 7. Task progress (Agent A only)
 

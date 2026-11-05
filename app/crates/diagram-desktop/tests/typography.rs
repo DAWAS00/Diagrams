@@ -2,6 +2,7 @@
 //! inside the window at the supported sizes.
 
 use diagram_desktop::shell::{self, ShellState};
+use diagram_desktop::ui::commands::{self, Placement};
 use diagram_desktop::ui::components;
 use diagram_desktop::ui::theme::{self, TextRole};
 use diagram_desktop::ui::workspace::{Drawer, LayoutMode};
@@ -11,25 +12,24 @@ use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
 
 const LONG_NAME: &str = "PreferredCustomerAccountWithLoyaltyProgrammeAndRegionalBillingSettings";
-/// Every control in the header, tab row and tool row. ("Class diagram 1"
-/// is left out: it is both a tab and a project-panel row.)
-const CHROME: [&str; 15] = [
-    "Menu",
-    "Undo",
-    "Redo",
-    "Search",
-    "Save",
-    "Export",
-    "New diagram",
-    "Project panel",
-    "Select",
-    "Pan",
-    "Class",
-    "Association",
-    "Note",
-    "Arrange",
-    "Inspector",
-];
+/// Every control in the header, tab row and tool row, taken from the command
+/// catalog so catalog changes (such as D2 and D3) need no edit here. ("Class
+/// diagram 1" is left out: it is both a tab and a project-panel row.)
+fn chrome() -> Vec<&'static str> {
+    std::iter::once("Menu")
+        .chain(
+            [
+                Placement::Header,
+                Placement::TabRow,
+                Placement::ToolRow,
+                Placement::PanelToggle,
+            ]
+            .into_iter()
+            .flat_map(commands::placed)
+            .map(|spec| spec.label),
+        )
+        .collect()
+}
 /// Bottom of the tool row: header 48 + tab row 38 + tool row 40.
 const ROWS_BOTTOM: f64 = 126.0;
 const SUPPORTED_SIZES: [(f32, f32); 3] = [(800.0, 500.0), (1280.0, 800.0), (1440.0, 900.0)];
@@ -117,9 +117,8 @@ fn shell_should_render_with_the_role_sizes() {
 fn chrome_should_fit_without_overlap_at_every_supported_size() {
     for (width, height) in SUPPORTED_SIZES {
         let harness = harness_at(width, height, ShellState::default());
-        let labels: Vec<&str> = CHROME
-            .iter()
-            .copied()
+        let labels: Vec<&str> = chrome()
+            .into_iter()
             .chain(["Light", "Dark", "System", "No selection"])
             .collect();
         let rects: Vec<Rect> = labels.iter().map(|label| bounds(&harness, label)).collect();
