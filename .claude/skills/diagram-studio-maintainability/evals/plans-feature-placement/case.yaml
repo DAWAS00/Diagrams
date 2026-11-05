@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: plans-feature-placement
+expected_outcome: |
+  A plan that routes the button through the command catalog and a UiIntent
+  handled by the coordinator, keeps new drawing code out of shell.rs, keeps the
+  model-changing command unavailable until the project model exists (or states
+  how availability is decided), and lists unit, headless UI and usability-audit
+  tests plus running the maintainability check.

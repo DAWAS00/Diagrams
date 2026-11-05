@@ -128,6 +128,8 @@ Before M1, use explicitly labeled in-memory presentation fixtures and determinis
 
 The shell reserves one notation definition for display name, tools, inspector sections, allowable relationships and capabilities. v0.1 delivers Class only. Flowchart and Use Case follow in M4, then ER/activity/state/requirements/sequence in M5. A planned-family catalog may appear in documentation; a user-facing type picker contains only implemented families. Model → view navigation, save status, validation and shortcuts remain shared. A sequence editor may replace canvas interactions and inspector sections while retaining project/tab/dialog infrastructure.
 
+**Implemented contract (UI-11):** the notation table in `app/crates/diagram-desktop/src/ui/notation.rs` defines tools, inspector sections, relationships and interaction model per notation; see [UI-11 evidence](../app/docs/ui/UI-11-NOTATION-CONTRACT.md).
+
 ## 8. New tasks and order
 
 The machine-readable tracker adds **18 UI tasks**. Existing completion evidence remains unchanged.

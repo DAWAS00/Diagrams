@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: splits-status-bar-safely
+expected_outcome: |
+  The status bar drawing moves to its own ui/ module with no behaviour change:
+  tests are green before and after with no test edits, shell.rs gets shorter,
+  the maintainability check shows no new FAIL or WARN, and the change is a
+  structure-only commit.

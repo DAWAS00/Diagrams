@@ -169,7 +169,10 @@ fn new_project_form_should_focus_the_name_and_offer_only_class_diagrams() {
     assert_eq!(screen(&harness), Some(EntryScreen::NewProject));
     assert!(harness.get_by_label("Project name").is_focused());
     harness.get_by_label("Class diagram");
-    assert_eq!(welcome::CREATABLE_TYPES, ["Class diagram"]);
+    let creatable: Vec<_> = diagram_desktop::ui::notation::creatable()
+        .map(|notation| notation.name)
+        .collect();
+    assert_eq!(creatable, ["Class diagram"]);
     assert!(harness.query_by_label("Sequence diagram").is_none());
     assert!(disabled(&harness, "Create project"), "nothing typed yet");
     assert!(

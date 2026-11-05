@@ -8,7 +8,7 @@ The [new design documentation](new-design/README.md) contains the complete propo
 
 ## How UI work is checked
 
-Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULES.md): visible labels, keyboard access, reasons for disabled controls, errors in words, measured contrast, and layouts checked at 800×500 to 1440×900. An automated **usability audit** (`tests/ui_audit.rs`) checks every screen for unnamed controls, controls too small to hit, overlapping or off-window controls, and controls Tab cannot reach. A self-test proves the audit catches each of these.
+Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULES.md): visible labels, keyboard access, reasons for disabled controls, errors in words, measured contrast, and layouts checked at 800×500 to 1440×900. An automated **usability audit** (`tests/ui_audit.rs`) checks every screen for unnamed controls, controls too small to hit, overlapping or off-window controls, and controls Tab cannot reach. A self-test proves the audit catches each of these. Code structure follows the [maintainability skill](../../../.claude/skills/diagram-studio-maintainability/SKILL.md), whose check script measures the structural rules on every change.
 
 ## Where the project stands
 
@@ -24,13 +24,13 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 | UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
 | UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
 | UI-04 | Welcome, new-project and open screens | **Done** — [evidence](UI-04-WELCOME-AND-ENTRY.md) |
-| UI-05 | Navigator and diagram tabs | Not started |
-| UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |
+| UI-05 | Navigator and diagram tabs | **Done** — [evidence](UI-05-NAVIGATOR-AND-TABS.md) |
+| UI-06 | Tool and command catalog | **Done** — [evidence](UI-06-COMMAND-CATALOG.md) |
 | UI-07 | Canvas state presentations | Not started |
-| UI-08 | Contextual inspector | Not started |
+| UI-08 | Contextual inspector | **Done** — [evidence](UI-08-CONTEXTUAL-INSPECTOR.md) |
 | UI-09 | Dialogs, status bar and validation drawer | Not started |
 | UI-10 | Keyboard, focus and accessibility checks | Not started |
-| UI-11 | Notation capability contract | Not started (needs UI-06 and UI-08) |
+| UI-11 | Notation capability contract | **Done** — [evidence](UI-11-NOTATION-CONTRACT.md) |
 | UI-12 | Native UI review gate | Not started |
 | UI-13 – UI-17 | Bind the screens to the real model (M2) | Not started |
 | UI-18 | Final visual, accessibility, recovery and export review (M3) | Not started |
@@ -91,10 +91,37 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 |---|---|---|
 | ![Welcome](ui-04-welcome.png) | ![Name error](ui-04-new-project-error.png) | ![Empty diagram](ui-04-created-empty-diagram.png) |
 
+### UI-05 — Project panel and diagram tabs
+- The project panel has a **search** and two sections: **Diagrams** (views of the model) and **Model** (classes shared by all diagrams). Each section says clearly when it is empty or when nothing matches.
+- Picking a class that isn't on the current diagram **opens a diagram that shows it**. The inspector says which diagrams show the class, so it's clear that renaming changes it everywhere.
+- **Tabs:** one per open diagram, each with a labeled Close button. Each tab remembers its own selection; closing a tab never deletes anything. Tabs that don't fit go into a **More tabs** menu.
+- 15 new automated tests, plus new usability-audit scenes.
+
+| Two tabs, dark theme | Search with no matches |
+|---|---|
+| ![Two tabs](ui-05-two-tabs-dark.png) | ![No matches](ui-05-search-no-match.png) |
+
+- **Completed later (UI-06):** buttons, menus, tabs and lists no longer change anything directly. They send typed **intents** that one coordinator applies, which keeps behaviour consistent and testable. Every command also has a written **contract**: what it needs, what it changes, who carries it out and how it interacts with undo, plus the test that covers it. A test fails if any contract points to a test that doesn't exist.
+
+### UI-08 — Contextual inspector
+- Editing in the inspector is now **safe**: a change is a draft until you press **Enter** (or move to another field), **Escape** cancels it, and an invalid value stays in the field with its error instead of being saved.
+- The inspector adapts to what's selected: the **diagram** when nothing is selected; a **class** with its members, collapsed Appearance and Advanced sections; **several classes**, showing which values differ and refusing edits that would silently apply to all; or a **relationship**, with each end's role and multiplicity (checked: `1`, `0..*`, `2..5` and so on).
+- **Ctrl+click** adds classes to the selection; the sample now has a relationship ("Customer places Order") drawn on the canvas.
+- **Five problems found and fixed**, including the name field changing the class on every keystroke, an arrow symbol missing from the font, and relationship labels drawn on top of each other.
+- 14 new automated tests and new usability-audit scenes.
+
+| Relationship (dark) | Several classes | Invalid name |
+|---|---|---|
+| ![Relationship](ui-08-relation-dark.png) | ![Mixed](ui-08-mixed.png) | ![Invalid draft](ui-08-invalid.png) |
+
+### UI-11 — Notation contract
+- One table now says what each diagram type offers: its tools, inspector sections, allowed relationships, and how its canvas behaves. The tool row, the inspector and the new-project form all read it.
+- Only **Class diagram** can be created today. Flowchart and Use Case (M4), and Entity-relationship and Sequence (M5), are described for planning but never offered. Sequence diagrams keep their own written rules (messages ordered top to bottom, aligned lifelines), so they won't be forced into the free-form class canvas.
+- 8 new automated tests.
+
 ## What is next
-1. **UI-05 — navigator and diagram tabs:** project-panel search, empty and no-match states, tab overflow and keyboard selection.
-2. **UI-06 — finish the command catalog:** typed UI intents and a written prerequisite / effect / test contract for every action.
-3. **UI-08 — contextual inspector**, then **UI-11 — notation capability contract** (which needs UI-06 and UI-08 in the tracker's order).
+1. **UI-07 — canvas states:** blank, selection, move/resize/connect previews, invalid targets, zoom and fit.
+2. **UI-09 — dialogs, status bar and validation drawer**, then **UI-02** font files and **UI-10** keyboard and accessibility checks (with R0-04 on Windows).
 3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it

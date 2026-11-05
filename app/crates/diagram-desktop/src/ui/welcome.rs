@@ -15,8 +15,6 @@ pub const NEEDS_STORAGE: &str =
     "Not available yet: opening project files arrives with project storage.";
 /// Explains why recovery cannot be reviewed yet.
 pub const NEEDS_RECOVERY: &str = "Not available yet: recovery arrives with project storage.";
-/// The diagram types that can be created today.
-pub const CREATABLE_TYPES: [&str; 1] = ["Class diagram"];
 
 /// Which entry screen is shown.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -253,8 +251,9 @@ pub fn new_project(ui: &mut egui::Ui, state: &mut EntryState) -> Option<EntryAct
 
     ui.add_space(super::theme::SPACING);
     components::field_label(ui, "Diagram type");
-    for (index, kind) in CREATABLE_TYPES.into_iter().enumerate() {
-        let _ = components::choice(ui, index == 0, kind);
+    // Only delivered notations are offered (UI-11 notation contract).
+    for (index, notation) in super::notation::creatable().enumerate() {
+        let _ = components::choice(ui, index == 0, notation.name);
     }
     components::field_label(
         ui,
