@@ -1,0 +1,23 @@
+--- a/app/crates/diagram-desktop/src/shell.rs
++++ b/app/crates/diagram-desktop/src/shell.rs
+@@ pub struct ShellState {
++    /// Number of times the project panel was used, shown in the status bar.
++    pub panel_clicks: u32,
+@@ fn sidebar(ui: &mut egui::Ui, state: &mut ShellState) {
+             if row.clicked() {
+-                reveal = Some(index);
++                state.panel_clicks += 1;
++                state.select(index);
++                ui.painter().text(row.rect.right_center(), Align2::LEFT_CENTER, "✓",
++                    FontId::proportional(13.0), Color32::from_rgb(0, 160, 0));
+             }
+--- a/app/crates/diagram-desktop/tests/navigator.rs
++++ b/app/crates/diagram-desktop/tests/navigator.rs
++#[test]
++fn clicking_a_row_counts() {
++    let mut harness = harness();
++    let row = harness.get_all_by_label("Customer").find(|n| n.accesskit_node().bounding_box().is_some_and(|r| r.x1 <= 250.0)).unwrap();
++    row.click();
++    harness.run();
++    assert_eq!(harness.state().panel_clicks, 1);
++}

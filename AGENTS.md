@@ -13,4 +13,12 @@ Read and follow **[plan-rust-diagram-editor/UI-RULES.md](plan-rust-diagram-edito
 - Add headless tests and add the screen to `tests/ui_audit.rs`. Every bug fix gets a test proven to fail without the fix. Check the real window and save screenshots.
 - Before committing, run fmt, clippy `-D warnings`, test and doc from `app/`, and the tracker validator if a status changed. Mark a task `done` only when its acceptance text and the UI rules hold.
 
+## Maintainability (mandatory for any code change in app/)
+
+Follow the project skill **[.claude/skills/diagram-studio-maintainability/SKILL.md](.claude/skills/diagram-studio-maintainability/SKILL.md)**. It covers the frame flow (widgets queue a `UiIntent`; only the coordinator changes state), where new code goes, the testing layers, a review checklist and the current debts. Before committing, run its check and fix every FAIL:
+
+```sh
+python .claude/skills/diagram-studio-maintainability/scripts/maintainability_check.py
+```
+
 Shared UI progress page: `app/docs/ui/README.md`. Plan and task definitions: `plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md` and `roadmap.json`.

@@ -4,7 +4,7 @@ This page is for anyone following the project. It summarises the user-interface 
 
 ## How UI work is checked
 
-Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULES.md): visible labels, keyboard access, reasons for disabled controls, errors in words, measured contrast, and layouts checked at 800×500 to 1440×900. An automated **usability audit** (`tests/ui_audit.rs`) checks every screen for unnamed controls, controls too small to hit, overlapping or off-window controls, and controls Tab cannot reach. A self-test proves the audit catches each of these.
+Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULES.md): visible labels, keyboard access, reasons for disabled controls, errors in words, measured contrast, and layouts checked at 800×500 to 1440×900. An automated **usability audit** (`tests/ui_audit.rs`) checks every screen for unnamed controls, controls too small to hit, overlapping or off-window controls, and controls Tab cannot reach. A self-test proves the audit catches each of these. Code structure follows the [maintainability skill](../../../.claude/skills/diagram-studio-maintainability/SKILL.md), whose check script measures the structural rules on every change.
 
 ## Where the project stands
 

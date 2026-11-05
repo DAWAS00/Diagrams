@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: review-flags-direct-state-write
+expected_outcome: |
+  A review that flags the direct state writes in a drawing function (should be
+  UiIntents), the new public field on ShellState, the raw colour and font size
+  and the check-mark glyph, the coordinate literal in the test, the lost reveal
+  behaviour, and recommends running maintainability_check.py.
+context:
+  scaffold_script: place-files.sh

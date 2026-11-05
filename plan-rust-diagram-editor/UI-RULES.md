@@ -34,6 +34,12 @@ cargo test --workspace --locked
 cargo doc --workspace --no-deps --locked
 ```
 
+Also run the structure check from the repository root (0 FAIL required; see the [maintainability skill](../.claude/skills/diagram-studio-maintainability/SKILL.md)):
+
+```sh
+python .claude/skills/diagram-studio-maintainability/scripts/maintainability_check.py
+```
+
 If a task status changed, run `python build_rust_roadmap.py` in `plan-rust-diagram-editor/` **before committing**. It rejects a `done` task whose prerequisites are not done. Never commit a tracker the validator rejects.
 
 ## 4. Documentation for each UI task
