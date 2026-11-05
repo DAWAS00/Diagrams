@@ -1,6 +1,6 @@
 # UI-02 — Type scale and text roles
 
-Status: **done** (2026-11-05). Plan: [07-UI-PLAN.md §3](../../../plan-rust-diagram-editor/07-UI-PLAN.md).
+Status: **in progress** (2026-11-05). Done: text roles, sizes, direction rules, long-text handling. **Remaining** for the tracker definition: reviewed font files with versions and notices, fallback order, and multilingual typography fixtures (these feed R0-04). Plan: [UI-DESIGN-AND-INTEGRATION.md §3](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md).
 
 ## What was built
 

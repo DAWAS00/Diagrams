@@ -1,6 +1,6 @@
 # UI-01 — Design tokens and base components
 
-Status: **done** (2026-11-05). Plan: [07-UI-PLAN.md §3](../../../plan-rust-diagram-editor/07-UI-PLAN.md).
+Status: **in progress** (2026-11-05). Done: tokens, controls, measured contrast, live theme switching. **Remaining** for the tracker definition: a component showcase fixture and checks of focus, error and disabled states. Plan: [UI-DESIGN-AND-INTEGRATION.md §3](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md).
 
 ## What was built
 

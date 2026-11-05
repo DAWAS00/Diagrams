@@ -2,6 +2,8 @@
 
 Updated 2026-11-05 after syncing GitHub commit `17c20ea` and running the local Windows checks. **M0 remains incomplete: 3 of 5 tasks done.**
 
+**UI-first scope revision:** added 18 UI tasks, an eight-milestone/57-task tracker, a [full specification](UI-DESIGN-AND-INTEGRATION.md) and [interactive final design](UI-DESIGN.html). These are planned, not implemented. Existing Windows verification remains unchanged.
+
 ## Where we are
 
 | Task | Current status | Evidence / remaining work |
@@ -61,18 +63,12 @@ Linux recorded 31 Rust tests; Windows now passes 30 (29 integration + 1 doc test
 3. Apply the planned light default and text sizing with a dark-theme choice, then review longer labels and smaller windows.
 4. Complete R0-05: update ADR-001 using the full results and decide whether the GUI foundation passes.
 
-### B. UX milestone — the complete UI (in progress)
-Full plan: [07-UI-PLAN.md](07-UI-PLAN.md). Shareable summary of UI work: [app/docs/ui/README.md](../app/docs/ui/README.md). Twelve tasks, built on the existing shell with labeled fixtures (no simulated saving):
-1. **UI-01 — done.** Tokens and components with measured contrast; the failing border color was replaced (now 3.1–4.3:1); live Light/Dark/System switching. [Evidence](../app/docs/ui/UI-01-TOKENS-AND-COMPONENTS.md).
-2. **UI-02 — done.** One set of text roles; direction rules written with right-to-left display marked open until R0-04; two long-text defects found and fixed. [Evidence](../app/docs/ui/UI-02-TYPE-SCALE-AND-TEXT-ROLES.md).
-3. **UI-03** responsive workspace, then **UI-05** navigator/tabs, **UI-07** canvas states, **UI-08** inspector.
-4. **UI-06 — done.** One command catalog for the toolbar, menus, search and shortcuts; Ctrl+K command and object search; two defects found and fixed. [Evidence](../app/docs/ui/UI-06-COMMAND-CATALOG.md). Still to do: **UI-04** welcome/new/open and **UI-09** dialogs/status/validation.
-5. **UI-10** keyboard/focus/accessibility check, **UI-11** notation contract, **UI-12** review gate.
+### B. UX — full native presentation before domain implementation
 
-UI-01, UI-02 and UI-06 are done; UI-03, UI-04 and UI-11 are unblocked next. Later, UI-13 to UI-17 bind the screens to the real model (M2) and UI-18 is the final review (M3).
+UI-01, UI-02 and UI-06 are **in progress**: tokens, controls, text roles, the command catalog and Ctrl+K search are built and tested; their remaining items are listed in the [UI progress page](../app/docs/ui/README.md). Next: UI-03 workspace and UI-04 entry screens; complete UI-03–UI-11 surfaces, states, accessible focus paths and notation capability definitions. UI-12 requires these and R0-05. Keep unimplemented application actions disabled; presentation fixtures are clearly labeled.
 
-### C. M1 — model, commands and storage (starts after R0-05 and UI-12)
-All headless: no window needed, so it can be tested fully in this environment. The tracker gates it on UI-12 as the UI plan specifies; if you prefer to save time, R1-01 to R1-04 can run in parallel with the UX work by removing UI-12 from R1-01's prerequisites.
+### C. M1 — model, commands and storage (starts after UI-12)
+All headless: no window needed, so it can be tested fully in this environment.
 1. **R1-01** Typed IDs and document records (classes, members, relations, diagrams, views); invalid geometry is rejected.
 2. **R1-02** Validation: references, ownership, associations, inheritance cycles.
 3. **R1-03** Reversible command transactions; a failed command leaves the document untouched.
@@ -85,8 +81,8 @@ All headless: no window needed, so it can be tested fully in this environment. T
 R1-01 → R1-02 → R1-03 → R1-04 is one chain; R1-05/R1-06 can run in parallel with R1-03/R1-04.
 
 ### D. After M1
-- **M2** (13 tasks, 5 of them UI bindings): the full class-editing workflow on the real model — add, connect, edit members, multiple views, delete safely.
-- **M3** (8 tasks, 1 of them the final UI review): reliability, recovery, SVG export, usability checks and the Windows distribution test for **v0.1**.
+- **M2** (13 tasks, including five UI bindings): the full class-editing workflow on the real model — add, connect, edit members, multiple views, delete safely.
+- **M3** (8 tasks, including final UI review): reliability, recovery, SVG export, usability checks and the Windows distribution test for **v0.1**.
 - **M4–M6**: flowchart and use case, specialised editors, then separately scoped proposals.
 
 ## How to keep this page current

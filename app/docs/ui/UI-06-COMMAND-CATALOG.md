@@ -1,6 +1,6 @@
 # UI-06 — Tool and command catalog
 
-Status: **done** (2026-11-05). Plan: [07-UI-PLAN.md §5–§6](../../../plan-rust-diagram-editor/07-UI-PLAN.md).
+Status: **in progress** (2026-11-05). Done: one catalog for toolbar, menu groups, search and shortcuts, with reasons and text-field key rules. **Remaining** for the tracker definition: typed UI intents and a written prerequisite / effect-owner / test contract for every action. Its prerequisite UI-03 must also be done. Plan: [UI-DESIGN-AND-INTEGRATION.md §5–§6](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md).
 
 ## What was built
 

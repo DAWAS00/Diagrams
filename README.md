@@ -11,7 +11,7 @@ The first release focuses on a dependable class-modeling workflow: classes and m
 - [Rust implementation roadmap](plan-rust-diagram-editor/RUST-ROADMAP.md)
 - [Rust engineering rules](plan-rust-diagram-editor/RUST-ENGINEERING.md)
 - [Product and architecture plan](plan-rust-diagram-editor/README.md)
-- [39-task backlog](plan-rust-diagram-editor/rust-backlog.csv)
+- [57-task backlog](plan-rust-diagram-editor/rust-backlog.csv)
 - [Visual Paradigm comparison](plan-rust-diagram-editor/comparison/README.md)
 - [Supporting product research](research/visual-paradigm/README.md)
 - [Build and run the workspace](app/README.md)
@@ -19,7 +19,11 @@ The first release focuses on a dependable class-modeling workflow: classes and m
 - [Project Rust skills](SKILLS.md)
 - [Current Windows verification and remaining work](app/docs/WINDOWS-REVIEW-2026-11-05.md)
 
-The roadmap has eight milestones. M0 proves the desktop foundation; UX designs every native screen as fixtures ([UI plan](plan-rust-diagram-editor/07-UI-PLAN.md)); M1 builds the model and storage; M2 completes class editing; M3 prepares v0.1. M4–M6 cover later diagram families and separately scoped capabilities. Task **R0-01** created the Cargo workspace under `app/`; **R0-02** and **R0-03** add the native shell prototype and bundled SQLite.
+The roadmap has eight milestones. M0 proves the desktop foundation; UX delivers the designed native UI; M1 builds the model and storage; M2 completes class editing; M3 prepares v0.1. M4–M6 cover later diagram families and separately scoped capabilities. Task **R0-01** created the Cargo workspace under `app/`; **R0-02** and **R0-03** add the native shell prototype and bundled SQLite.
+
+## UI-first design revision
+
+The [complete UI specification](plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md) defines the final v0.1 workspace, all screen states, technology and command contracts. Open the [interactive UI design](plan-rust-diagram-editor/UI-DESIGN.html) locally to compare themes and scenarios. Eighteen new UI tasks prioritize native presentation before M1, with real functional bindings in M2/M3. Progress on the UI work, with screenshots and what is next: [app/docs/ui/README.md](app/docs/ui/README.md).
 
 ## Browse the planning dashboards
 

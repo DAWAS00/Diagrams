@@ -1,34 +1,50 @@
-# 07 — Complete native UI plan
+# Complete UI design and integration plan
 
-Status 2026-11-05: UX milestone started; UI-01, UI-02 and UI-06 are done ([UI progress](../app/docs/ui/README.md)). The running app is the R0-02 prototype (toolbar, sidebar, canvas with two sample classes, inspector, status bar). This document specifies every surface the product needs, how each connects to the model that M1 will build, and the tasks that deliver it. [03-GUI-AND-WORKFLOWS.md](03-GUI-AND-WORKFLOWS.md) remains the interaction direction; this plan makes it complete and testable. [ADR-001](decisions/ADR-001-GUI.md) stays conditional until R0-05.
+Date: 2026-11-05. Proposed v0.1 design baseline. This extends the roadmap at the user's request to prioritize the complete UI before broad functional implementation. It does not mark any new UI feature implemented. [Visual preview](UI-DESIGN.html) · [task tracker](roadmap.json) · [current evidence](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
 
-## 1. Goal and boundaries
+## 1. The intended final workspace
 
-Deliver a desktop editor where a new user can create a class diagram, name and edit members, connect classes, reuse a class in another diagram, undo mistakes, save, reopen, export SVG and recover from a failed save, without reading documentation. The UI is designed in full **before** M1 so the model, commands and storage are built against real screens, then bound to them in M2.
+One focused desktop workspace, with a light default and a supported dark theme. A new user sees labeled tools and a blank diagram; an experienced user can use shortcuts and a command palette. The UI stays consistent when the active notation changes.
 
-In scope: the complete v0.1 Class workflow and the shared shell for later notations. Out of scope until separately planned: other diagram families' editors, collaboration, plugins, web or mobile UI.
+```text
+Project menu  Customer model · unsaved     Undo Redo    Search commands    Save Export
+┌ Project [search] ──────┬ Diagram tabs: Class overview | Domain details + ┬ Inspector ┐
+│ Diagrams | Model      │ Select  Class  Association ▾  Note  Arrange ▾    │ Model     │
+│ ▾ Customer model      ├─────────────────────────────────────────────────┤ Appearance│
+│   Class overview      │                                                 │ Name      │
+│   Domain details      │           Customer ───────── Order               │ Members   │
+│ ▾ Classes             │                                                 │ Relations │
+│   Customer            │     diagram canvas with selection / previews     │ Style     │
+│   Order               │                                                 │ Advanced  │
+│ + Diagram             ├ Validation drawer (collapsed unless requested) ─┤           │
+└───────────────────────┴─────────────────────────────────────────────────┴───────────┘
+Unsaved · local path             2 warnings                    Snap  Grid  − 100% + Fit
+```
 
-## 2. Decisions and dependency boundaries
+This is the final **v0.1 target**, subject to the M0 text/accessibility gate and UI review. It is not a claim to implement all Visual Paradigm features. Later notation editors reuse the shell and add tools/property sections through an explicit capability definition. Sequence will need dedicated temporal interactions rather than forced class-box behavior.
 
-| Area | Decision | Notes |
-|---|---|---|
-| Framework | eframe/egui 0.37.0 with wgpu | Conditional on R0-05. Compare Iced/Slint only if a gate item fails |
-| Layout | Fixed resizable panels, no docking | Per ADR-001 |
-| Tests | `egui_kittest` 0.37.0 for event and accessibility-tree behavior, plus real Windows checks. Add small reviewed image fixtures only where useful | Image snapshots need extra `egui_kittest` features that pull in more dependencies; enable them when the first image test is written |
-| Accessibility | Existing AccessKit integration (`accesskit` 0.25 via eframe's default feature), named controls, keyboard object-list alternative, meaningful selection and relation descriptions. Real Narrator/NVDA testing remains required | Checked: the headless accessibility text for a mixed-text name differed from the editable value (Windows review 2026-11-05) |
-| Fonts | System-font fallback is already active (eframe default `system_fonts`). Candidate bundled Noto Sans + Noto Sans Arabic; verify exact files, version, metrics and notices before adding assets. Arabic upstream publishes OFL-1.1 | **egui 0.37 shapes text with HarfRust but has no bidirectional reordering** (its source notes bidi as future work). A font cannot fix mixed Arabic/English order. R0-04 must test this before UI-02 fixes any text rules. If it fails, the ADR-001 revisit trigger applies |
-| Icons | Original simple vector line icons drawn with the egui painter, plus visible labels for common tools | SVG icon files would need `egui_extras` with its `svg` feature (pulls in `resvg`). Decide explicitly if wanted. Preserve notices for any external icon source |
-| Native file dialogs | `rfd` when real Open/Save is implemented (0.17.2 resolved today, MIT, declares no minimum Rust version, so compile it on 1.99.1 when added). Cancel is a normal outcome | Windows uses Win32 dialogs; the default Linux portal features are irrelevant on Windows |
-| Preferences | Versioned per-user theme/panel/scale/recent-file settings, separate from the project and dirty state; no project bodies in preferences | Needs serialization. Choose at implementation time between eframe's `persistence` feature (adds `ron` and `serde`) and `serde_json`. This is a new dependency, so the choice is reviewed then |
-| Persistence | Existing `rusqlite` (bundled SQLite 3.54.1) for project storage, executed by a worker; the UI never performs a database save during painting | Verified on Windows MSVC (R0-03) |
+## 2. Technology and assets
+
+| Part | Use / decision |
+|---|---|
+| Native app | Existing Rust workspace, eframe 0.37.0 and its aligned egui re-export; existing wgpu backend |
+| Controls | egui text fields, buttons, menus, panels, scroll areas, popup/dialog surfaces and keyboard focus; small original components for repeated patterns |
+| Canvas | Renderer-neutral geometry/scene in diagram-canvas; desktop painter adapter; no document ownership inside widgets |
+| Tests | Existing egui_kittest 0.37.0 for event/accessibility-tree behavior, plus real Windows checks; small reviewed image fixtures only where useful |
+| Accessibility | Existing AccessKit integration, named controls, keyboard object-list alternative, meaningful selection and relation descriptions; real Narrator/NVDA testing remains required |
+| Fonts | Candidate bundled Noto Sans + Noto Sans Arabic; verify exact files, version, metrics and notices before adding assets. Arabic upstream publishes OFL-1.1. Font choice alone does not prove shaping/bidi/IME correctness |
+| Icons | Original simple vector line icons plus visible labels for common tools; preserve any notices if an external icon source is later selected |
+| Native file dialogs | Proposed rfd when real Open/Save is implemented; resolve a compatible locked version then. Cancel is a normal outcome |
+| Preferences | Versioned per-user theme/panel/scale/recent-file settings, separate from the project and dirty state; no project bodies in preferences |
+| Persistence | Existing rusqlite dependency for future project storage, executed by a worker; the UI never performs a database save during painting |
 
 No framework change, runtime, new dependencies or asset download occurs in this planning update. Avoid adding docking, animation, webview or chart frameworks without a demonstrated need.
 
-Official references checked: [eframe](https://docs.rs/eframe/0.37.0/eframe/), [egui source](https://github.com/emilk/egui), [rfd](https://docs.rs/rfd/latest/rfd/), [Noto Arabic and its license](https://github.com/notofonts/arabic). Verify exact APIs and fonts again at implementation time.
+Official references checked: [eframe](https://docs.rs/eframe/0.37.0/eframe/), [egui source](https://github.com/emilk/egui), [rfd](https://docs.rs/rfd/latest/rfd/), [Noto Arabic and its license](https://github.com/notofonts/arabic). Verify exact APIs and fonts again at implementation time. ADR-001 remains conditional until R0-05.
 
 ## 3. Visual specification
 
-Use semantic tokens rather than scattered RGB constants. Tokens cover background, surface, raised surface, canvas, text, secondary text, border, accent, selection, focus, warning and danger. The shell currently follows the operating system theme; tokens must be applied explicitly through egui's visuals, with a user preference for light, dark or system. Start with:
+Use semantic tokens rather than scattered RGB constants. Tokens cover background, surface, raised surface, canvas, text, secondary text, border, accent, selection, focus, warning and danger. Start with:
 
 | Token | Light target | Dark target |
 |---|---|---|
@@ -40,31 +56,7 @@ Use semantic tokens rather than scattered RGB constants. Tokens cover background
 | Border | #D9E0EB | #465469 |
 | Warning / danger text | #8A4B00 / #B42318 | #FFD08A / #FFB4AD |
 
-These are starting design values. Target 4.5:1 for normal text and 3:1 for large text and essential control boundaries, with labels, icons or patterns supplementing color.
-
-**Initial contrast check (computed with the WCAG formula, 2026-11-05).** Ratios of each token against workspace / panel / canvas:
-
-| Token | Light | Dark | Result |
-|---|---|---|---|
-| Primary text | 14.4 / 15.6 / 15.2 | 15.5 / 13.6 / 12.7 | Pass |
-| Secondary text | 5.9 / 6.4 / 6.2 | 9.7 / 8.5 / 7.9 | Pass |
-| Accent / focus | 5.7 / 6.2 / 6.0 | 8.7 / 7.6 / 7.2 | Pass (also meets 3:1 for focus rings) |
-| Warning text | 6.3 / 6.8 / 6.6 | 12.2 / 10.6 / 10.0 | Pass |
-| Danger text | 6.1 / 6.6 / 6.4 | 10.3 / 9.0 / 8.5 | Pass |
-| **Border** | **1.2 / 1.3 / 1.3** | **2.3 / 2.0 / 1.9** | **Fails 3:1 in both themes** |
-
-The border token is acceptable for decorative panel separators but **not** for input fields, buttons and other essential control boundaries. UI-01 defines a stronger control-border token and keeps the light border only for separators. **Done:** `#8A97AB` was tried and also failed (2.6–3.0:1); the implemented values are `#76839A` (light, 3.3–3.8:1) and `#6E7F98` (dark, 3.1–4.3:1). See [UI-01 evidence](../app/docs/ui/UI-01-TOKENS-AND-COMPONENTS.md). Disabled, hover, selected and pressed states, and text on the accent color, are still unchecked and belong to UI-10.
-
-**Text roles and direction rules (UI-02, done).** Sizes come only from `TextRole` (page title 24, panel title 16, body 15, label 14, code 14 monospace); see [UI-02 evidence](../app/docs/ui/UI-02-TYPE-SCALE-AND-TEXT-ROLES.md).
-
-| Rule | Status |
-|---|---|
-| Names and member text are stored exactly as typed; the app never inserts direction marks | Decided |
-| Application chrome (labels, menus, dialogs) is English and left-to-right in v0.1; mirroring the layout for a right-to-left UI language needs a separate localisation plan | Decided |
-| User text in lists, the status bar and canvas shapes stays on one line and ends in an ellipsis when it does not fit; the inspector field shows it in full | Decided, tested |
-| Shortened text keeps its full value in the accessibility tree | Decided, tested |
-| Display order of Arabic and mixed Arabic/English text | **Open** until R0-04 records the bidi result (egui 0.37 has no bidi reordering) |
-| Alignment of right-to-left text in fields, and which end an ellipsis cuts for right-to-left text | **Open**, same dependency |
+These are starting design values, not a passed contrast audit. Check actual foreground/background pairs and disabled/focus states. Target 4.5:1 normal text and 3:1 large text/essential control boundaries, with labels/icons/patterns supplementing color.
 
 Use an 8-unit rhythm, with 4-unit internal gaps; 6-unit control radii and 8-unit dialog radii. Default body text 15 logical pixels, labels 14, panel titles 16, page titles 24. Code/member lines use a readable monospace fallback at 14. Starting control heights: 34–36; hit targets at least 32 units, handles visually smaller but with larger hit regions. No motion is necessary for core workflows; respect reduced-motion settings if transitions are added.
 
@@ -114,13 +106,9 @@ Each visible action has an intent, prerequisites, effect owner, pending/success/
 
 Shortcut priority: modal/native dialog → focused text field → active gesture → focused canvas → application commands. Preserve Ctrl+A/C/V/Z and selection editing in text fields. Ctrl+N/O/S, Ctrl+Shift+S/Z, F2, Delete, Escape, Space+drag and zoom/fit have visible menu/help equivalents. No single-letter creation shortcut fires while typing. Keyboard users can select/reveal objects through the navigator and issue every essential action through named controls.
 
-**Implementation rule learned in R0-02:** egui drops text focus in the same frame an Escape is pressed. Every shortcut must therefore decide using the text-focus state from the **previous** frame, as the shell's Escape handling does. Apply this to F2, Delete, Ctrl+Z and every other key that a text field also uses, and cover each with a headless test that types in a field first. The UI-06 command catalog applies this rule centrally (`commands::take_shortcut`).
-
-**Implementation rule learned in UI-06:** egui keeps a closed modal's layer on top for one more frame, and a widget behind a modal gives up focus. Return focus to the remembered widget only once `top_modal_layer()` is empty, and test that focus really returns. Every dialog in UI-09 follows this.
-
 ## 6. Rust structure for the UI
 
-Grow `diagram-desktop` around actual units: `ui/theme.rs`, `ui/components.rs`, `ui/workspace.rs`, `ui/welcome.rs`, `ui/navigator.rs`, `ui/toolbar.rs`, `ui/inspector.rs`, `ui/dialogs.rs`, `ui/validation.rs`, `ui/commands.rs`, plus `editor_state.rs` and `presentation.rs`. Introduce modules when implemented, not empty-file scaffolding. Today's single `shell.rs` is split into these modules as each is built; keep its headless tests passing through every move.
+Grow `diagram-desktop` around actual units: `ui/theme.rs`, `ui/components.rs`, `ui/workspace.rs`, `ui/welcome.rs`, `ui/navigator.rs`, `ui/toolbar.rs`, `ui/inspector.rs`, `ui/dialogs.rs`, `ui/validation.rs`, `ui/commands.rs`, plus `editor_state.rs` and `presentation.rs`. Introduce modules when implemented, not empty-file scaffolding.
 
 - UI thread owns the current session and authoritative Document (once M1 exists).
 - EditorState owns selected ViewIds, tab/viewport preferences, tool/gesture enum, focus return target and local draft buffers.
@@ -138,26 +126,11 @@ The shell reserves one notation definition for display name, tools, inspector se
 
 ## 8. New tasks and order
 
-The machine-readable tracker ([roadmap.json](roadmap.json)) adds **18 UI tasks** and a new **UX** milestone between M0 and M1. Existing completion evidence is unchanged.
+The machine-readable tracker adds **18 UI tasks**. Existing completion evidence remains unchanged.
 
-**UX milestone, before M1:**
+**UX milestone, before M1:** UI-01 design tokens/components; UI-02 font/typography specification; UI-03 responsive workspace; UI-04 welcome/new/open screens; UI-05 navigator/tabs; UI-06 tool/command catalog; UI-07 canvas state presentations; UI-08 contextual inspector; UI-09 dialogs/status/validation; UI-10 keyboard/accessibility checks; UI-11 notation capability contract; UI-12 native UI review gate.
 
-| Task | Deliverable |
-|---|---|
-| UI-01 | Design tokens (including the stronger control-border token) and reusable components |
-| UI-02 | Type scale, text roles and text-direction rules; font files and the bidi result stay with R0-04 |
-| UI-03 | Responsive workspace at the supported sizes |
-| UI-04 | Welcome, new-project and open screens |
-| UI-05 | Navigator and diagram tabs |
-| UI-06 | Tool and command catalog (one source for menus, toolbar, shortcuts, search) |
-| UI-07 | Canvas state presentations |
-| UI-08 | Contextual inspector and member editor surfaces |
-| UI-09 | Dialogs, status bar and validation drawer |
-| UI-10 | Keyboard, focus and accessibility checks, including contrast of every state |
-| UI-11 | Notation capability contract |
-| UI-12 | Native UI review gate |
-
-UI-01 and layout exploration can start now on the prototype. UI-02 specifies roles and rules but **must not finalize right-to-left or mixed-text rules until R0-04 records the bidi result** (section 2, Fonts). The UI-12 gate requires R0-05 and all UX tasks; R0-04 keeps ownership of the framework-wide native text and accessibility evidence. Do not duplicate its status or bypass it. UI-12 confirms the designed native surfaces, realistic fixtures and explicit integration contracts; it does not claim persistence or command semantics exist.
+UI-01/UI-02 and layout exploration can start now on the prototype. The UI-12 gate requires R0-05 and all UX tasks; R0-04 continues to own the framework-wide native text/accessibility evidence. Do not duplicate its status or bypass it. UI-12 confirms the designed native surfaces, realistic fixtures and explicit integration contracts; it does not claim persistence or command semantics exist.
 
 **M2 integration:** UI-13 project/navigation lifecycle binding; UI-14 inspector/member binding; UI-15 canvas/history binding; UI-16 save/validation status binding; UI-17 complete keyboard workflow. Each depends on the necessary M1/M2 functionality. The R2-08 walkthrough requires these bindings.
 
@@ -165,10 +138,35 @@ UI-01 and layout exploration can start now on the prototype. UI-02 specifies rol
 
 New order: complete M0 evidence and design UX surfaces → pass UI-12 → M1 domain/storage → M2 real bindings/class workflow → M3 release polish → later families. This moves more visible UI work before M1; it increases upfront design work and review but makes the intended product concrete. UI details can be revised when actual domain constraints emerge.
 
-**Trade-off to decide:** the tracker gates M1 on UI-12 because this plan says so. M1's first tasks (R1-01 to R1-04) are headless and do not need a window, so they could safely run in parallel with the UX work if saving calendar time matters more than designing first. To allow that, remove UI-12 from R1-01's prerequisites in `roadmap.json`.
-
 ## 9. What counts as the final design
 
 Deliver both themes, all selection/dialog/error/loading states, a component/token catalog, focus/shortcut map, notation capability contract, native reviewed screenshots at supported sizes, and complete bindings for the released Class subset. Walk through new/open → create → edit members → connect → reuse → move/style → undo → save/reopen → export → recover from a failed operation.
 
-Measure time, errors, dialog count and keyboard access in representative tasks before claiming easier use than VP. The HTML preview ([GUI-CONCEPT.html](GUI-CONCEPT.html)) shows layout and representative states only; it cannot validate egui text, GPU behavior or accessibility. UI completion requires native evidence. Functional completion requires real model and storage results as well. No calendar dates are promised before sizing the new work.
+Measure time, errors, dialog count and keyboard access in representative tasks before claiming easier use than VP. The HTML preview shows layout and representative states only; it cannot validate egui text, GPU behavior or accessibility. UI completion requires native evidence. Functional completion requires real model and storage results as well. No calendar dates are promised before sizing the new work.
+
+## 10. Findings from implementation (verified 2026-11-05)
+
+These were checked against the code and resolved dependencies while building UI-01, UI-02 and UI-06. They refine sections 2–6; progress and evidence are in [the UI progress page](../app/docs/ui/README.md).
+
+**Dependencies (section 2).**
+- **Fonts and bidi.** eframe's default `system_fonts` feature is already active, so system fonts are the fallback today; that is most likely why `Order طلب` showed glyphs on Windows. egui 0.37 shapes text with HarfRust (Arabic letters join) but **has no bidirectional reordering**; its source notes this as future work. A bundled font cannot fix mixed Arabic/English order, so R0-04 must test it. If it fails, the ADR-001 revisit trigger applies.
+- **Preferences** need serialization, which is a new dependency: eframe's `persistence` feature (adds `ron` and `serde`) or `serde_json`. Choose and review it when preferences are implemented.
+- **Icons** drawn with the egui painter need no crate. SVG icon files would need `egui_extras` with `svg` (pulls in `resvg`).
+- **Image fixtures** need extra `egui_kittest` features; enable them with the first image test.
+- `rfd` 0.17.2 declares no minimum Rust version, so compile it on the pinned 1.99.1 when it is added.
+
+**Contrast (section 3).** Measured with the WCAG formula. Every text, accent, warning and danger token passes 4.5:1 in both themes. The planned **border** token measures 1.2–1.3:1 (light) and 1.9–2.3:1 (dark), below the 3:1 needed for control boundaries; a first replacement, `#8A97AB`, also failed. The implementation keeps the planned border for decorative separators and adds a control-border token: `#76839A` (light, 3.3–3.8:1) and `#6E7F98` (dark, 3.1–4.3:1). Full table: [UI-01 evidence](../app/docs/ui/UI-01-TOKENS-AND-COMPONENTS.md).
+
+**Text roles and direction (section 3).** Sizes come only from one `TextRole` definition (page title 24, panel title 16, body 15, label 14, code 14 monospace).
+
+| Rule | Status |
+|---|---|
+| Names and member text are stored exactly as typed; the app never inserts direction marks | Decided |
+| Application chrome is English and left-to-right in v0.1; mirroring for a right-to-left UI language needs a localisation plan | Decided |
+| User text in lists, the status bar and canvas shapes stays on one line and ends in an ellipsis; the inspector field shows it in full | Decided, tested |
+| Shortened text keeps its full value in the accessibility tree | Decided, tested |
+| Display order of Arabic and mixed text; alignment and ellipsis side for right-to-left text | **Open** until R0-04 records the bidi result |
+
+**Keyboard and focus (section 5).**
+- egui drops text focus in the same frame Escape is pressed, so every shortcut decides from the **previous** frame's text focus. The command catalog applies this centrally (`commands::take_shortcut`).
+- egui keeps a closed modal's layer on top for one more frame, and a widget behind a modal gives up focus. Return focus to the remembered widget only once `top_modal_layer()` is empty, and test that it really returns. Every dialog in UI-09 follows this.

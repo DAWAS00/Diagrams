@@ -1,6 +1,6 @@
 # Diagram Studio — UI work: what is done and what is next
 
-This page is for anyone following the project. It summarises the user-interface work, links the evidence for each finished task, and lists what comes next. The full specification is the [UI plan](../../../plan-rust-diagram-editor/07-UI-PLAN.md). Task status lives in the [roadmap tracker](../../../plan-rust-diagram-editor/roadmap.json), and the [dashboard](../../../plan-rust-diagram-editor/ROADMAP.html) shows it.
+This page is for anyone following the project. It summarises the user-interface work, links the evidence for each finished task, and lists what comes next. The full specification is the [UI plan](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md). Task status lives in the [roadmap tracker](../../../plan-rust-diagram-editor/roadmap.json), and the [dashboard](../../../plan-rust-diagram-editor/ROADMAP.html) shows it.
 
 ## Where the project stands
 
@@ -12,17 +12,17 @@ This page is for anyone following the project. It summarises the user-interface 
 
 | Task | What it delivers | Status |
 |---|---|---|
-| UI-01 | Design tokens and base components | **Done** — [evidence](UI-01-TOKENS-AND-COMPONENTS.md) |
-| UI-02 | Type scale and text roles | **Done** — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md) |
+| UI-01 | Design tokens and base components | In progress — [evidence](UI-01-TOKENS-AND-COMPONENTS.md); showcase and state checks remain |
+| UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
 | UI-03 | Responsive workspace | Next |
 | UI-04 | Welcome, new-project and open screens | Next |
 | UI-05 | Navigator and diagram tabs | Not started |
-| UI-06 | Tool and command catalog | **Done** — [evidence](UI-06-COMMAND-CATALOG.md) |
+| UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |
 | UI-07 | Canvas state presentations | Not started |
 | UI-08 | Contextual inspector | Not started |
 | UI-09 | Dialogs, status bar and validation drawer | Not started |
 | UI-10 | Keyboard, focus and accessibility checks | Not started |
-| UI-11 | Notation capability contract | Next |
+| UI-11 | Notation capability contract | Not started (needs UI-06 and UI-08) |
 | UI-12 | Native UI review gate | Not started |
 | UI-13 – UI-17 | Bind the screens to the real model (M2) | Not started |
 | UI-18 | Final visual, accessibility, recovery and export review (M3) | Not started |

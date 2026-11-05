@@ -1,6 +1,6 @@
 # 03 — A simpler GUI
 
-> This page is the interaction direction. The complete UI specification (tokens, every surface and state, action contracts, Rust structure and the UI tasks) is [07-UI-PLAN.md](07-UI-PLAN.md).
+**Detailed design baseline (2026-11-05):** use [UI-DESIGN-AND-INTEGRATION.md](UI-DESIGN-AND-INTEGRATION.md) and [UI-DESIGN.html](UI-DESIGN.html) for the complete UI specification and proposed final design. This file remains the shorter workflow overview; GUI-CONCEPT.html is the earlier exploration.
 
 ## Interaction direction
 
