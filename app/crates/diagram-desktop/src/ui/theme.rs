@@ -161,6 +161,13 @@ pub const DARK: Palette = Palette {
     danger: rgb(0xFFB4AD),
 };
 
+/// Default fill of a class box in a new diagram. This is a *document* color:
+/// it belongs to the diagram, does not follow the editor theme, and reaches
+/// the board through the presentation's document style.
+pub const DOCUMENT_DEFAULT_FILL: Color32 = rgb(0xFAFCFF);
+/// Default line and text color of diagram objects (a document color).
+pub const DOCUMENT_DEFAULT_INK: Color32 = rgb(0x223147);
+
 /// Tokens for `theme`.
 pub fn palette(theme: Theme) -> &'static Palette {
     match theme {

@@ -156,4 +156,4 @@ Task IDs come from [TASKS-AND-TESTS.md §3](TASKS-AND-TESTS.md#3-task-list). Add
 
 | Task | State | Branch / commit | Notes |
 |---|---|---|---|
-| — | — | — | — |
+| A-0 | done | `agent-a/new-ui` | `ui/fixtures.rs` (private contract copy until B-0, fixture `Presentation` per screen state), `tests/common_ui/` (harness at 3 sizes × 2 themes, intent recorder, find-by-name, shared audit), `ui_routing.rs` skeleton looping over every command. |
