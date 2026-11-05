@@ -9,6 +9,7 @@ use std::error::Error;
 use std::io::{self, Write};
 
 pub mod shell;
+pub mod ui;
 
 /// Working product name displayed by the desktop executable.
 pub const APPLICATION_NAME: &str = "Diagram Studio";

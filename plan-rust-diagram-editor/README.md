@@ -10,7 +10,7 @@ Build a local Windows desktop modeling tool in Rust, designed to make the basic 
 
 **Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 57 tasks with prerequisites and acceptance conditions; 46 lead through v0.1. Three tasks are complete; R0-04 is in progress and 53 tasks are not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
 
-**UI-first revision:** [complete UI specification](UI-DESIGN-AND-INTEGRATION.md), [interactive final design preview](UI-DESIGN.html), and 18 new UI tasks. UX design/native presentation now precedes M1; real feature binding remains in M2/M3. Existing completed tasks retain their evidence.
+**UI-first revision:** [complete UI specification](UI-DESIGN-AND-INTEGRATION.md), [interactive final design preview](UI-DESIGN.html), and 18 new UI tasks. UX design/native presentation now precedes M1; real feature binding remains in M2/M3. Existing completed tasks retain their evidence. UI progress: [app/docs/ui/README.md](../app/docs/ui/README.md). **Every UI change follows [UI-RULES.md](UI-RULES.md).**
 
 ## Recommended decisions
 

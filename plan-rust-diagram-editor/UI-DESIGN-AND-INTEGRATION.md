@@ -143,3 +143,30 @@ New order: complete M0 evidence and design UX surfaces → pass UI-12 → M1 dom
 Deliver both themes, all selection/dialog/error/loading states, a component/token catalog, focus/shortcut map, notation capability contract, native reviewed screenshots at supported sizes, and complete bindings for the released Class subset. Walk through new/open → create → edit members → connect → reuse → move/style → undo → save/reopen → export → recover from a failed operation.
 
 Measure time, errors, dialog count and keyboard access in representative tasks before claiming easier use than VP. The HTML preview shows layout and representative states only; it cannot validate egui text, GPU behavior or accessibility. UI completion requires native evidence. Functional completion requires real model and storage results as well. No calendar dates are promised before sizing the new work.
+
+## 10. Findings from implementation (verified 2026-11-05)
+
+These were checked against the code and resolved dependencies while building UI-01, UI-02 and UI-06. They refine sections 2–6; progress and evidence are in [the UI progress page](../app/docs/ui/README.md).
+
+**Dependencies (section 2).**
+- **Fonts and bidi.** eframe's default `system_fonts` feature is already active, so system fonts are the fallback today; that is most likely why `Order طلب` showed glyphs on Windows. egui 0.37 shapes text with HarfRust (Arabic letters join) but **has no bidirectional reordering**; its source notes this as future work. A bundled font cannot fix mixed Arabic/English order, so R0-04 must test it. If it fails, the ADR-001 revisit trigger applies.
+- **Preferences** need serialization, which is a new dependency: eframe's `persistence` feature (adds `ron` and `serde`) or `serde_json`. Choose and review it when preferences are implemented.
+- **Icons** drawn with the egui painter need no crate. SVG icon files would need `egui_extras` with `svg` (pulls in `resvg`).
+- **Image fixtures** need extra `egui_kittest` features; enable them with the first image test.
+- `rfd` 0.17.2 declares no minimum Rust version, so compile it on the pinned 1.99.1 when it is added.
+
+**Contrast (section 3).** Measured with the WCAG formula. Every text, accent, warning and danger token passes 4.5:1 in both themes. The planned **border** token measures 1.2–1.3:1 (light) and 1.9–2.3:1 (dark), below the 3:1 needed for control boundaries; a first replacement, `#8A97AB`, also failed. The implementation keeps the planned border for decorative separators and adds a control-border token: `#76839A` (light, 3.3–3.8:1) and `#6E7F98` (dark, 3.1–4.3:1). Full table: [UI-01 evidence](../app/docs/ui/UI-01-TOKENS-AND-COMPONENTS.md).
+
+**Text roles and direction (section 3).** Sizes come only from one `TextRole` definition (page title 24, panel title 16, body 15, label 14, code 14 monospace).
+
+| Rule | Status |
+|---|---|
+| Names and member text are stored exactly as typed; the app never inserts direction marks | Decided |
+| Application chrome is English and left-to-right in v0.1; mirroring for a right-to-left UI language needs a localisation plan | Decided |
+| User text in lists, the status bar and canvas shapes stays on one line and ends in an ellipsis; the inspector field shows it in full | Decided, tested |
+| Shortened text keeps its full value in the accessibility tree | Decided, tested |
+| Display order of Arabic and mixed text; alignment and ellipsis side for right-to-left text | **Open** until R0-04 records the bidi result |
+
+**Keyboard and focus (section 5).**
+- egui drops text focus in the same frame Escape is pressed, so every shortcut decides from the **previous** frame's text focus. The command catalog applies this centrally (`commands::take_shortcut`).
+- egui keeps a closed modal's layer on top for one more frame, and a widget behind a modal gives up focus. Return focus to the remembered widget only once `top_modal_layer()` is empty, and test that it really returns. Every dialog in UI-09 follows this.

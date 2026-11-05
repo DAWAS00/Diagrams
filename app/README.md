@@ -39,6 +39,8 @@ Set-Location 'D:\REA visual\app'
 
 This opens the native window. Nothing is saved. `cargo run -p diagram-desktop --locked -- --version` prints the application and bundled SQLite versions without opening a window. If the window cannot start, the program prints the cause and a hint, then exits with code 1.
 
+UI progress, evidence and next steps: [docs/ui/README.md](docs/ui/README.md).
+
 ## Checks
 
 From any directory on Windows:
@@ -60,7 +62,7 @@ cargo doc --workspace --no-deps --locked
 cargo build -p diagram-desktop --release --locked
 ```
 
-Tests: `diagram-core/tests/project_name.rs` covers name validation, display, equality and the error message; `diagram-desktop/tests/shell.rs` drives the shell headlessly through its accessibility tree (egui_kittest): layout, disabled actions, canvas and list selection, Escape, renaming and the blank-name warning; `diagram-desktop/tests/diagnostics.rs` covers `--version`, usage errors, window settings and launch-failure messages; `diagram-storage/tests/sqlite_smoke.rs` writes, closes, reopens, reads and deletes a temporary database. The roadmap validator has Python tests: from the repository root run `python -m unittest discover -s plan-rust-diagram-editor`.
+Tests: `diagram-core/tests/project_name.rs` covers name validation, display, equality and the error message; `diagram-desktop/tests/shell.rs` drives the shell headlessly through its accessibility tree (egui_kittest): layout, disabled actions, canvas and list selection, Escape, renaming and the blank-name warning; `diagram-desktop/tests/theme.rs` checks every design-token contrast pair and live theme switching (UI-01); `diagram-desktop/tests/typography.rs` checks text roles and that long text fits at 800×500 to 1440×900 (UI-02); `diagram-desktop/tests/commands.rs` checks the command catalog, shortcuts and the Ctrl+K search (UI-06); `diagram-desktop/tests/workspace.rs` checks the responsive layout, drawers and focus return (UI-03); `diagram-desktop/tests/showcase.rs` and `tests/welcome.rs` check the component showcase (UI-01) and the welcome and new-project screens (UI-04); `diagram-desktop/tests/diagnostics.rs` covers `--version`, usage errors, window settings and launch-failure messages; `diagram-storage/tests/sqlite_smoke.rs` writes, closes, reopens, reads and deletes a temporary database. The roadmap validator has Python tests: from the repository root run `python -m unittest discover -s plan-rust-diagram-editor`.
 
 All member crates inherit the workspace lints. Public library APIs require documentation; owned project names are validated once and borrowed as `&str`. Production unwrap/expect/panic and unsafe code are forbidden by the current lint policy. Build output stays in the ignored `app/target/` directory. Add dependencies when a task first uses them, and review/commit the resulting lockfile changes.
 

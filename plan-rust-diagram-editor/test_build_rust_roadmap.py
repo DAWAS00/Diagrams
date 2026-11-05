@@ -91,6 +91,26 @@ class ValidateTests(unittest.TestCase):
         validate(data)
         self.assertEqual(data, before)
 
+    def test_committed_ui_tasks_gate_the_right_milestones(self):
+        data = json.loads((Path(ROOT) / "roadmap.json").read_text(encoding="utf-8"))
+        _, tasks = validate(data)
+
+        def prerequisites(task_id, seen=None):
+            seen = set() if seen is None else seen
+            for dependency in tasks[task_id]["depends_on"]:
+                if dependency not in seen:
+                    seen.add(dependency)
+                    prerequisites(dependency, seen)
+            return seen
+
+        ui_tasks = [key for key in tasks if key.startswith("UI-")]
+        self.assertEqual(len(ui_tasks), 18)
+        self.assertEqual(len([key for key in ui_tasks if tasks[key]["milestone"] == "UX"]), 12)
+        self.assertTrue({"UI-%02d" % number for number in range(1, 12)} <= prerequisites("UI-12"))
+        self.assertIn("UI-12", prerequisites("R1-01"))
+        self.assertTrue({"UI-%02d" % number for number in range(13, 18)} <= prerequisites("R2-08"))
+        self.assertIn("UI-18", prerequisites("R3-07"))
+
     def test_committed_roadmap_is_valid(self):
         data = json.loads((Path(ROOT) / "roadmap.json").read_text(encoding="utf-8"))
         _, tasks = validate(data)
