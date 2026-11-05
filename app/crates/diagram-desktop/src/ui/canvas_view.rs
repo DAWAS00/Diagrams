@@ -86,8 +86,12 @@ pub fn show(ui: &mut egui::Ui, view: &CanvasView, out: &mut Vec<UiIntent>) {
         pointer(PointerKind::Down, at);
         pointer(PointerKind::Up, at);
     }
+    // egui recognizes a drag only after the pointer has moved past a
+    // threshold; report Down where the button went down, or a pan loses its
+    // first step.
+    let press_origin = ui.input(|input| input.pointer.press_origin());
     if board.drag_started()
-        && let Some(at) = position
+        && let Some(at) = press_origin.or(position)
     {
         pointer(PointerKind::Down, at);
     } else if board.dragged()

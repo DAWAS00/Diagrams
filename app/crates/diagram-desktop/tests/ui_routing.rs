@@ -327,6 +327,33 @@ fn board_node_click_should_select_and_empty_click_should_report_pointer() {
 }
 
 #[test]
+fn board_drag_should_report_down_at_the_press_position() {
+    // Regression (A-req-B2): Down used to be reported where the pointer was
+    // when egui recognized the drag, past the press, so a Hand pan lost
+    // its first step.
+    let mut harness = light(fixtures::sample(), board);
+    harness.state_mut().take();
+    let start = egui::Pos2::new(700.0, 500.0);
+    harness.hover_at(start);
+    harness.drag_at(start);
+    harness.run();
+    for step in 1..=3 {
+        harness.hover_at(start + Vec2::new(20.0 * step as f32, 10.0));
+        harness.run();
+    }
+    harness.drop_at(start + Vec2::new(60.0, 30.0));
+    let down = common_ui::intents_after(&mut harness)
+        .into_iter()
+        .find_map(|intent| match intent {
+            UiIntent::Pointer(pointer) if pointer.kind == PointerKind::Down => {
+                Some(pointer.position)
+            }
+            _ => None,
+        });
+    assert_eq!(down, Some(start));
+}
+
+#[test]
 fn board_drag_should_report_down_moves_and_up_once() {
     let mut harness = light(fixtures::sample(), board);
     harness.state_mut().take();

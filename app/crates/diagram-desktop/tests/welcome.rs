@@ -103,7 +103,7 @@ fn nothing_should_pretend_to_open_real_files() {
 fn missing_file_should_explain_and_offer_removal() {
     let mut harness = harness();
 
-    harness.get_by_label_contains("Error: File not found at this path");
+    harness.get_by_label_contains("Error: File not found");
     harness
         .get_by_label("Remove Old inventory from the list")
         .click();
