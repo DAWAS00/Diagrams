@@ -8,9 +8,10 @@
 use eframe::egui::{Id, ThemePreference};
 
 use super::commands::CommandId;
+use super::inspector::RelationField;
 
 /// Something the user asked for.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UiIntent {
     /// Run a catalog command if it is available. `origin` is the control it
     /// came from; a drawer or window it opens returns focus there.
@@ -22,6 +23,14 @@ pub enum UiIntent {
     },
     /// Select a class on the current diagram.
     SelectClass(usize),
+    /// Add a class to the selection, or remove it if already selected.
+    ToggleClassInSelection(usize),
+    /// Select a relationship.
+    SelectRelation(usize),
+    /// Commit a class name draft (validated by the coordinator).
+    RenameClass(usize, String),
+    /// Commit a relationship field draft (validated by the coordinator).
+    SetRelationField(usize, RelationField, String),
     /// Select a class from the project panel, opening a diagram that shows it.
     RevealClass(usize),
     /// Show a diagram in its tab, opening a tab if needed.

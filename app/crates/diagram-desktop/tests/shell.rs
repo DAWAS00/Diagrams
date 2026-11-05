@@ -37,8 +37,9 @@ fn shell_should_show_toolbar_sidebar_canvas_inspector_and_status() {
         harness.get_by_label(label);
     }
     harness.get_by_label("Project");
-    // The open diagram is both a tab and a row in the project panel.
-    assert_eq!(harness.get_all_by_label("Class diagram 1").count(), 2);
+    // The open diagram is a tab, a project-panel row, and the inspector's
+    // "Diagram" detail while nothing is selected.
+    assert_eq!(harness.get_all_by_label("Class diagram 1").count(), 3);
     harness.get_by_label("Diagram canvas");
     harness.get_by_label("Selection");
     harness.get_by_label("Prototype · nothing is saved");
@@ -139,6 +140,10 @@ fn typing_in_the_name_field_should_rename_the_class_everywhere() {
     name.focus();
     harness.key_press_modifiers(eframe::egui::Modifiers::COMMAND, Key::A);
     name.type_text("Client عميل");
+    harness.run();
+    // A name is a draft until Enter commits it.
+    assert_eq!(harness.state().classes[0].name, "Customer");
+    harness.key_press(Key::Enter);
     harness.run();
 
     assert_eq!(harness.state().classes[0].name, "Client عميل");

@@ -23,6 +23,8 @@ struct Control {
     name: String,
     role: Role,
     rect: Rect,
+    /// Partly scrolled out of view; only the visible part is in `rect`.
+    clipped: bool,
     enabled: bool,
 }
 
@@ -60,6 +62,24 @@ fn controls<S>(harness: &Harness<'_, S>) -> Vec<Control> {
         })
         .map(|node| {
             let access = node.accesskit_node();
+            // Clip to every scrolling ancestor: content scrolled out of view
+            // is not on screen, and partly visible content counts only for
+            // its visible part.
+            let mut rect = access
+                .bounding_box()
+                .unwrap_or_else(|| Rect::new(-1.0, -1.0, -1.0, -1.0));
+            let mut clipped = false;
+            let mut parent = access.parent();
+            while let Some(ancestor) = parent {
+                if ancestor.clips_children()
+                    && let Some(clip) = ancestor.bounding_box()
+                {
+                    let visible = rect.intersect(clip);
+                    clipped |= visible != rect;
+                    rect = visible;
+                }
+                parent = ancestor.parent();
+            }
             Control {
                 name: access
                     .label()
@@ -67,9 +87,8 @@ fn controls<S>(harness: &Harness<'_, S>) -> Vec<Control> {
                     .or_else(|| access.value())
                     .unwrap_or_default(),
                 role: access.role(),
-                rect: access
-                    .bounding_box()
-                    .unwrap_or_else(|| Rect::new(-1.0, -1.0, -1.0, -1.0)),
+                rect,
+                clipped,
                 enabled: !access.is_disabled(),
             }
         })
@@ -77,7 +96,12 @@ fn controls<S>(harness: &Harness<'_, S>) -> Vec<Control> {
 }
 
 fn visible(rect: Rect, (width, height): (f32, f32)) -> bool {
-    rect.x1 > 0.0 && rect.y1 > 0.0 && rect.x0 < f64::from(width) && rect.y0 < f64::from(height)
+    rect.width() > 0.5
+        && rect.height() > 0.5
+        && rect.x1 > 0.0
+        && rect.y1 > 0.0
+        && rect.x0 < f64::from(width)
+        && rect.y0 < f64::from(height)
 }
 
 fn contains(outer: Rect, inner: Rect) -> bool {
@@ -118,7 +142,7 @@ fn audit_layout<S>(
         {
             findings.push(format!("{what} extends outside the window: {rect:?}"));
         }
-        if rect.height() < MIN_HIT_HEIGHT - 0.5 {
+        if !control.clipped && rect.height() < MIN_HIT_HEIGHT - 0.5 {
             findings.push(format!(
                 "{what} is {:.0} high, below the {MIN_HIT_HEIGHT} hit target",
                 rect.height()
@@ -300,6 +324,70 @@ fn overflowing_tabs_should_pass_the_audit() {
             size,
             &POINTER_ONLY,
         ));
+        report(findings);
+    }
+}
+
+#[test]
+fn inspector_states_should_pass_the_audit() {
+    for size in [LARGE, SMALL] {
+        let mut findings = Vec::new();
+
+        // Relationship selected.
+        let mut state = ShellState::default();
+        state.select_relation(0);
+        let mut harness = harness_at(size, state);
+        if harness.query_by_label("Relationship name").is_none() {
+            harness.get_by_label("Inspector").click();
+            harness.run();
+        }
+        findings.extend(audit_layout(
+            "relationship inspector",
+            &harness,
+            size,
+            false,
+        ));
+        findings.extend(audit_tab_order(
+            "relationship inspector",
+            &mut harness,
+            size,
+            &POINTER_ONLY,
+        ));
+
+        // Two classes selected.
+        let mut state = ShellState::default();
+        state.select(0);
+        state.toggle_in_selection(1);
+        let mut harness = harness_at(size, state);
+        if harness
+            .query_by_label("Appearance (this view only)")
+            .is_none()
+        {
+            harness.get_by_label("Inspector").click();
+            harness.run();
+        }
+        findings.extend(audit_layout("mixed selection", &harness, size, false));
+
+        // Invalid draft with every section open.
+        let mut state = ShellState::default();
+        state.select(0);
+        state.inspector_sections = (true, true);
+        let mut harness = harness_at(size, state);
+        if harness.query_by_label("Name").is_none() {
+            harness.get_by_label("Inspector").click();
+            harness.run();
+        }
+        harness.get_by_label("Name").focus();
+        harness.run();
+        harness.key_press_modifiers(Modifiers::COMMAND, Key::A);
+        harness.get_by_label("Name").type_text(" ");
+        harness.run();
+        findings.extend(audit_layout("invalid name draft", &harness, size, false));
+        if size == SMALL {
+            // On small windows the inspector is a drawer over the canvas by
+            // design; canvas boxes beneath it are not controls on top of it.
+            findings.retain(|finding| !finding.contains("\"Class "));
+        }
         report(findings);
     }
 }

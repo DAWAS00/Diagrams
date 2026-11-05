@@ -2,6 +2,7 @@
 
 pub mod commands;
 pub mod components;
+pub mod inspector;
 pub mod intents;
 pub mod navigator;
 pub mod palette;

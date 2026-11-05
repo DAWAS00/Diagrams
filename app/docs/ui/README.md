@@ -23,10 +23,10 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 | UI-05 | Navigator and diagram tabs | **Done** — [evidence](UI-05-NAVIGATOR-AND-TABS.md) |
 | UI-06 | Tool and command catalog | **Done** — [evidence](UI-06-COMMAND-CATALOG.md) |
 | UI-07 | Canvas state presentations | Not started |
-| UI-08 | Contextual inspector | Not started |
+| UI-08 | Contextual inspector | **Done** — [evidence](UI-08-CONTEXTUAL-INSPECTOR.md) |
 | UI-09 | Dialogs, status bar and validation drawer | Not started |
 | UI-10 | Keyboard, focus and accessibility checks | Not started |
-| UI-11 | Notation capability contract | Not started (needs UI-06 and UI-08) |
+| UI-11 | Notation capability contract | Next |
 | UI-12 | Native UI review gate | Not started |
 | UI-13 – UI-17 | Bind the screens to the real model (M2) | Not started |
 | UI-18 | Final visual, accessibility, recovery and export review (M3) | Not started |
@@ -99,9 +99,21 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 
 - **Completed later (UI-06):** buttons, menus, tabs and lists no longer change anything directly. They send typed **intents** that one coordinator applies, which keeps behaviour consistent and testable. Every command also has a written **contract**: what it needs, what it changes, who carries it out and how it interacts with undo, plus the test that covers it. A test fails if any contract points to a test that doesn't exist.
 
+### UI-08 — Contextual inspector
+- Editing in the inspector is now **safe**: a change is a draft until you press **Enter** (or move to another field), **Escape** cancels it, and an invalid value stays in the field with its error instead of being saved.
+- The inspector adapts to what's selected: the **diagram** when nothing is selected; a **class** with its members, collapsed Appearance and Advanced sections; **several classes**, showing which values differ and refusing edits that would silently apply to all; or a **relationship**, with each end's role and multiplicity (checked: `1`, `0..*`, `2..5` and so on).
+- **Ctrl+click** adds classes to the selection; the sample now has a relationship ("Customer places Order") drawn on the canvas.
+- **Five problems found and fixed**, including the name field changing the class on every keystroke, an arrow symbol missing from the font, and relationship labels drawn on top of each other.
+- 14 new automated tests and new usability-audit scenes.
+
+| Relationship (dark) | Several classes | Invalid name |
+|---|---|---|
+| ![Relationship](ui-08-relation-dark.png) | ![Mixed](ui-08-mixed.png) | ![Invalid draft](ui-08-invalid.png) |
+
 ## What is next
-1. **UI-08 — contextual inspector**, then **UI-11 — notation capability contract** (which needs UI-06 and UI-08 in the tracker's order).
-2. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
+1. **UI-11 — notation capability contract:** what each diagram type offers (tools, inspector sections, allowed relationships), with only implemented types creatable.
+2. **UI-07 — canvas states** (blank, selection, previews, zoom) and **UI-09 — dialogs, status and validation**.
+3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it
 From `app/`:

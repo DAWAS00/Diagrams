@@ -208,6 +208,8 @@ fn renaming_in_the_drawer_should_update_the_canvas() {
     name.focus();
     name.type_text("Line");
     harness.run();
+    harness.key_press(Key::Enter);
+    harness.run();
 
     harness.get_by_label("Class OrderLine");
 }
