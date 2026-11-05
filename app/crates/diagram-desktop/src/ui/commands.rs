@@ -28,14 +28,12 @@ pub enum CommandId {
     Export,
     /// Select tool: click objects to select them.
     SelectTool,
-    /// Pan tool: drag to move the view (becomes "Hand", decision D3).
-    PanTool,
+    /// Hand tool: drag to move the view (decision D3; formerly "Pan").
+    HandTool,
     /// Class tool: place a new class.
     AddClass,
     /// Relationship tool: connect two classes.
     Connect,
-    /// Note tool (leaves the catalog, decision D2).
-    AddNote,
     /// Arrange menu for the selected views.
     Arrange,
     /// Add a diagram to the project.
@@ -151,17 +149,16 @@ pub enum CommandId {
 
 impl CommandId {
     /// Every command, in catalog order.
-    pub const ALL: [Self; 65] = [
+    pub const ALL: [Self; 64] = [
         Self::Undo,
         Self::Redo,
         Self::SearchCommands,
         Self::Save,
         Self::Export,
         Self::SelectTool,
-        Self::PanTool,
+        Self::HandTool,
         Self::AddClass,
         Self::Connect,
-        Self::AddNote,
         Self::Arrange,
         Self::NewDiagram,
         Self::ToggleNavigator,
@@ -415,7 +412,7 @@ use CommandId as C;
 use Placement as P;
 
 /// The catalog, in [`CommandId`] order.
-pub const CATALOG: [CommandSpec; 65] = [
+pub const CATALOG: [CommandSpec; 64] = [
     spec(C::Undo, "Undo", G::Edit, P::Header)
         .keys(CTRL, Key::Z)
         .text_owns(),
@@ -435,10 +432,11 @@ pub const CATALOG: [CommandSpec; 65] = [
         .keys(NONE, Key::V)
         .canvas()
         .aka(&["pointer", "arrow"]),
-    spec(C::PanTool, "Pan", G::Tools, P::ToolRow)
+    // D3: "Pan" is now "Hand".
+    spec(C::HandTool, "Hand", G::Tools, P::ToolRow)
         .keys(NONE, Key::H)
         .canvas()
-        .aka(&["hand", "move view", "scroll"]),
+        .aka(&["pan", "move view", "scroll"]),
     spec(C::AddClass, "Class", G::Tools, P::ToolRow)
         .keys(NONE, Key::C)
         .canvas()
@@ -447,7 +445,6 @@ pub const CATALOG: [CommandSpec; 65] = [
         .keys(NONE, Key::R)
         .canvas()
         .aka(&["relationship", "connect", "link", "edge"]),
-    spec(C::AddNote, "Note", G::Tools, P::ToolRow).aka(&["comment"]),
     spec(C::Arrange, "Arrange", G::Tools, P::ToolRow).aka(&["align", "distribute", "layout"]),
     spec(C::NewDiagram, "New diagram", G::File, P::TabRow)
         .keys(CTRL_SHIFT, Key::N)
@@ -683,16 +680,12 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
         CommandId::NewProject | CommandId::CloseProject => Disabled(
             "Not available yet: replacing the open project needs the unsaved-changes dialog.",
         ),
-        CommandId::PanTool => {
-            Disabled("Not available yet: panning arrives with canvas scrolling and zoom.")
-        }
         CommandId::AddClass => {
             Disabled("Not available yet: adding classes needs the project model.")
         }
         CommandId::Connect | CommandId::RelationshipKind | CommandId::EditRelationEnds => {
             Disabled("Not available yet: relationships need the project model.")
         }
-        CommandId::AddNote => Disabled("Not available yet: notes need the project model."),
         CommandId::Arrange
         | CommandId::AlignLeft
         | CommandId::AlignCenter
@@ -769,6 +762,7 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
         }
         CommandId::SearchCommands
         | CommandId::SelectTool
+        | CommandId::HandTool
         | CommandId::ToggleNavigator
         | CommandId::ToggleInspector
         | CommandId::ShowComponentShowcase => Enabled,
@@ -784,7 +778,7 @@ pub const fn tool_command(tool: diagram_core::notation::ToolKind) -> CommandId {
     use diagram_core::notation::ToolKind;
     match tool {
         ToolKind::Select => CommandId::SelectTool,
-        ToolKind::Hand => CommandId::PanTool,
+        ToolKind::Hand => CommandId::HandTool,
         ToolKind::Class => CommandId::AddClass,
         ToolKind::Relationship => CommandId::Connect,
         ToolKind::Arrange => CommandId::Arrange,

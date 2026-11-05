@@ -5,10 +5,11 @@
 //! The full journeys J1–J7 of TASKS-AND-TESTS §5 are added as their
 //! screens land.
 
+use diagram_desktop::editor_state::Tool;
 use diagram_desktop::shell::{self, ShellState};
 use diagram_desktop::ui::header;
 use eframe::egui::accesskit::Rect;
-use eframe::egui::{Key, Modifiers, Vec2};
+use eframe::egui::{Key, Modifiers, Pos2, Vec2};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
 
@@ -170,4 +171,62 @@ fn a_blank_name_should_hold_the_selection_until_escape_restores_it() {
     harness.get_by_label("Class Order").click();
     harness.run();
     assert_eq!(harness.state().selected, Some(1));
+}
+
+/// Drags with the primary button from `from` to `to` in small steps.
+fn drag(harness: &mut Harness<'_, ShellState>, from: Pos2, to: Pos2) {
+    harness.hover_at(from);
+    harness.run();
+    harness.drag_at(from);
+    harness.run();
+    for step in 1..=4u8 {
+        let t = f32::from(step) / 4.0;
+        harness.hover_at(from + (to - from) * t);
+        harness.run();
+    }
+    harness.drop_at(to);
+    harness.run();
+}
+
+#[test]
+fn j1_hand_drag_then_fit_and_100_percent_should_never_move_a_node() {
+    // J1 (TASKS-AND-TESTS section 5), in the shell that exists now.
+    let mut harness = harness_at(1280.0, 800.0);
+    harness.get_by_label("Hand").click();
+    harness.run();
+    assert_eq!(harness.state().editor.tool, Tool::Hand);
+    let before = bounds(&harness, "Class Customer");
+
+    // The drag starts on Customer: in Hand mode it pans the view.
+    #[expect(clippy::cast_possible_truncation, reason = "screen points")]
+    let start = Pos2::new(before.x0 as f32 + 20.0, before.y0 as f32 + 20.0);
+    drag(&mut harness, start, start + Vec2::new(60.0, 40.0));
+
+    // The view moved exactly with the pointer (the press position counts).
+    let after = bounds(&harness, "Class Customer");
+    let (dx, dy) = (after.x0 - before.x0, after.y0 - before.y0);
+    assert!((dx - 60.0).abs() < 1.0, "{before:?} -> {after:?}");
+    assert!((dy - 40.0).abs() < 1.0, "{before:?} -> {after:?}");
+    assert_eq!(harness.state().classes, ShellState::default().classes);
+    assert!(harness.state().selection.is_empty(), "Hand never selects");
+
+    run_from_search(&mut harness, "fit all");
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::Plus);
+    harness.run();
+    run_from_search(&mut harness, "actual size");
+    assert_eq!(harness.state().editor.viewport().zoom_percent(), 100);
+    // No edit was recorded: the document is exactly the sample.
+    assert_eq!(harness.state().classes, ShellState::default().classes);
+}
+
+#[test]
+fn h_should_choose_hand_and_escape_should_return_to_select() {
+    let mut harness = harness_at(1280.0, 800.0);
+    harness.key_press(Key::H);
+    harness.run();
+    assert_eq!(harness.state().editor.tool, Tool::Hand);
+
+    harness.key_press(Key::Escape);
+    harness.run();
+    assert_eq!(harness.state().editor.tool, Tool::Select);
 }

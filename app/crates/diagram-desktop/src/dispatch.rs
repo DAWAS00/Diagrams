@@ -123,7 +123,7 @@ fn run(state: &mut AppState, input: &InputContext, id: CommandId) {
             }
         }
         CommandId::SelectTool => set_tool(state, held, Tool::Select),
-        CommandId::PanTool => set_tool(state, held, Tool::Hand),
+        CommandId::HandTool => set_tool(state, held, Tool::Hand),
         CommandId::SelectAll => {
             if resolve_draft(state, held) {
                 state.set_selection((0..state.classes.len()).collect());
@@ -176,7 +176,6 @@ fn run(state: &mut AppState, input: &InputContext, id: CommandId) {
         | CommandId::Export
         | CommandId::AddClass
         | CommandId::Connect
-        | CommandId::AddNote
         | CommandId::Arrange
         | CommandId::NewDiagram
         | CommandId::NewProject

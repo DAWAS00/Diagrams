@@ -82,7 +82,7 @@ fn header_rows_and_menus_should_come_from_the_catalog() {
     );
     assert_eq!(
         labels(&placed(Placement::ToolRow)),
-        ["Select", "Pan", "Class", "Association", "Note", "Arrange"]
+        ["Select", "Hand", "Class", "Association", "Arrange"]
     );
     assert_eq!(labels(&placed(Placement::TabRow)), ["New diagram"]);
     assert_eq!(

@@ -46,6 +46,13 @@ Full results and the completed Windows table: [R0-02-R0-03-VERIFICATION.md](../a
 ### Totals
 Linux recorded 31 Rust tests; Windows now passes 30 (29 integration + 1 doc test). All 16 Python tests pass. `cargo fmt`, `clippy -D warnings` and `cargo doc` are clean.
 
+### Agent B update (2026-11-05, branch `agent-b/functionality`)
+
+- **Contract and commands (UI-06, in progress):** the views and the functionality now meet in `Presentation`, `UiIntent` and `InputContext`. The 63-command catalog carries a reason for every disabled command, applies D1–D3, and dispatches shortcuts in spec §8 priority. What remains is a real-window check.
+- **Editor state (B-4 to B-10):** tools and gestures, viewport and picking (`diagram-canvas`), selection, drafts with Resolve edit, Escape layering, F6 regions, preferences, tabs, split searches, and the Class notation contract (UI-11, in progress).
+- **Core model (R1-01 to R1-04, done):** typed IDs, records, validation including generalization cycles, atomic reversible commands, and undo/redo with saved-state identity. Evidence: [AGENT-B-EVIDENCE.md](../app/docs/functionality/AGENT-B-EVIDENCE.md).
+- **Next for B:** R1-05/R1-06 storage, then bind `Session` to the editor (UI-13 to UI-15) so that Undo, Add class, Connect and member edits switch from disabled to working.
+
 ## Findings that shape the next steps
 
 - Headless fonts lack Arabic glyphs. The initial Windows mixed-text sample rendered glyphs, but full Arabic/bidi editing and accessibility validation remains R0-04 work.

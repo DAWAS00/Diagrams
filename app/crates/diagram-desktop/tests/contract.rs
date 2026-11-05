@@ -222,7 +222,8 @@ fn search_aliases_should_reach_one_canonical_label() {
         ("reuse", CommandId::ShowInDiagram),
         ("fit", CommandId::FitAll),
         ("issues", CommandId::ShowIssues),
-        ("hand", CommandId::PanTool),
+        ("hand", CommandId::HandTool),
+        ("pan", CommandId::HandTool),
         ("svg", CommandId::Export),
     ] {
         let results = commands::search(word);

@@ -9,6 +9,8 @@
 use eframe::egui::{Id, Pos2, ThemePreference, Vec2};
 
 use crate::app_state::{AppState, BLANK_NAME_WARNING};
+use diagram_core::notation::{Notation, NotationId};
+
 use crate::editor_state::{Gesture, Tool};
 use crate::intent::{DraftField, Region, Target};
 use crate::ui::commands::{self, Availability, CommandContext, CommandGroup, CommandId, Placement};
@@ -349,11 +351,15 @@ pub fn build(state: &AppState) -> Presentation {
                 .collect(),
         })
         .collect();
-    let tools = placed(Placement::ToolRow, context)
-        .into_iter()
+    // The tool row is the active notation's tools (only Class in v0.1),
+    // so tools a notation does not offer never appear.
+    let tools = Notation::get(NotationId::Class)
+        .tools
+        .iter()
+        .map(|tool| command_view(commands::tool_command(*tool), context))
         .map(|view| match view.id {
             CommandId::SelectTool => pressed(view, editor.tool == Tool::Select),
-            CommandId::PanTool => pressed(view, editor.tool == Tool::Hand),
+            CommandId::HandTool => pressed(view, editor.tool == Tool::Hand),
             _ => view,
         })
         .collect();
