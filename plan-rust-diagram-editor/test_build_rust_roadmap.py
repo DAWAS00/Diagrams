@@ -107,7 +107,10 @@ class ValidateTests(unittest.TestCase):
         self.assertEqual(len(ui_tasks), 18)
         self.assertEqual(len([key for key in ui_tasks if tasks[key]["milestone"] == "UX"]), 12)
         self.assertTrue({"UI-%02d" % number for number in range(1, 12)} <= prerequisites("UI-12"))
-        self.assertIn("UI-12", prerequisites("R1-01"))
+        # 2026-11-05 user decision: model work (R1) runs in parallel with the UI design,
+        # but the class vertical slice still needs the native UI review and foundation gate.
+        self.assertNotIn("UI-12", prerequisites("R1-01"))
+        self.assertTrue({"UI-12", "R0-05"} <= prerequisites("R2-08"))
         self.assertTrue({"UI-%02d" % number for number in range(13, 18)} <= prerequisites("R2-08"))
         self.assertIn("UI-18", prerequisites("R3-07"))
 
