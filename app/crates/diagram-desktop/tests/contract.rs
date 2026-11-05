@@ -7,7 +7,8 @@ mod common_state;
 use common_state::apply_all;
 use diagram_desktop::app_state::AppState;
 use diagram_desktop::intent::{
-    CanvasPointer, DraftField, PointerKind, Region, SearchScope, Surface, Target, UiIntent,
+    CanvasPointer, DraftField, PointerKind, Region, ResolveChoice, SearchScope, Surface, Target,
+    UiIntent,
 };
 use diagram_desktop::ui::commands::{self, CATALOG, CommandContext, CommandGroup, CommandId};
 use eframe::egui::{Modifiers, Pos2, ThemePreference};
@@ -44,6 +45,13 @@ fn one_of_each_intent() -> Vec<UiIntent> {
         UiIntent::CreateProject {
             name: String::from("Shop"),
         },
+        UiIntent::ActivateTab(1),
+        UiIntent::TemporaryPan(true),
+        UiIntent::CanvasResized {
+            width: 900.0,
+            height: 600.0,
+        },
+        UiIntent::ResolveEdit(ResolveChoice::DiscardEdit),
     ];
     for example in &examples {
         // No wildcard: a new variant must be listed here.
@@ -59,7 +67,11 @@ fn one_of_each_intent() -> Vec<UiIntent> {
             | UiIntent::Close(_)
             | UiIntent::SetTheme(_)
             | UiIntent::OpenSampleProject
-            | UiIntent::CreateProject { .. } => {}
+            | UiIntent::CreateProject { .. }
+            | UiIntent::ActivateTab(_)
+            | UiIntent::TemporaryPan(_)
+            | UiIntent::CanvasResized { .. }
+            | UiIntent::ResolveEdit(_) => {}
         }
     }
     examples
@@ -224,4 +236,28 @@ fn search_aliases_should_reach_one_canonical_label() {
             assert_eq!(alias.to_lowercase(), *alias, "{:?}", spec.id);
         }
     }
+}
+
+#[test]
+fn every_notation_tool_should_be_a_tool_row_command() {
+    use diagram_core::notation::{self, Notation, NotationId};
+    use diagram_desktop::ui::commands::Placement;
+
+    let class = Notation::get(NotationId::Class);
+    for tool in class.tools {
+        let id = commands::tool_command(*tool);
+        assert_eq!(id.spec().placement, Placement::ToolRow, "{tool:?}");
+    }
+    // Only delivered notations can be created; planned ones list what they need.
+    let creatable: Vec<_> = notation::creatable().map(|n| n.id).collect();
+    assert_eq!(creatable, [NotationId::Class]);
+    for planned in notation::NOTATIONS.iter().filter(|n| !n.delivered) {
+        assert!(planned.tools.is_empty(), "{:?}", planned.id);
+        assert!(!planned.open_requirements.is_empty(), "{:?}", planned.id);
+    }
+    assert!(
+        Notation::get(NotationId::Sequence)
+            .open_requirements
+            .contains("interaction strategy")
+    );
 }

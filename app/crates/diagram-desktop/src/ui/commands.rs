@@ -10,6 +10,7 @@ use std::cmp::Reverse;
 
 use eframe::egui::{Event, ImeEvent, InputState, Key, KeyboardShortcut, ModifierNames, Modifiers};
 
+use crate::editor_state::ShellSupport;
 use crate::intent::{InputContext, Region};
 
 /// Every command the application knows about.
@@ -143,11 +144,14 @@ pub enum CommandId {
     ContextMenu,
     /// Help and keyboard shortcuts.
     HelpShortcuts,
+    /// Cancel the innermost thing in progress (Escape): a dialog or draft,
+    /// then a gesture or tool, then the selection, one layer per press.
+    Cancel,
 }
 
 impl CommandId {
     /// Every command, in catalog order.
-    pub const ALL: [Self; 64] = [
+    pub const ALL: [Self; 65] = [
         Self::Undo,
         Self::Redo,
         Self::SearchCommands,
@@ -212,6 +216,7 @@ impl CommandId {
         Self::PreviousRegion,
         Self::ContextMenu,
         Self::HelpShortcuts,
+        Self::Cancel,
     ];
 
     /// This command's catalog entry.
@@ -410,7 +415,7 @@ use CommandId as C;
 use Placement as P;
 
 /// The catalog, in [`CommandId`] order.
-pub const CATALOG: [CommandSpec; 64] = [
+pub const CATALOG: [CommandSpec; 65] = [
     spec(C::Undo, "Undo", G::Edit, P::Header)
         .keys(CTRL, Key::Z)
         .text_owns(),
@@ -453,10 +458,7 @@ pub const CATALOG: [CommandSpec; 64] = [
         "model list",
     ]),
     spec(C::ToggleInspector, "Inspector", G::View, P::PanelToggle).aka(&["properties", "details"]),
-    spec(C::ClearSelection, "Clear selection", G::Edit, P::MenuOnly)
-        .keys(NONE, Key::Escape)
-        .text_owns()
-        .aka(&["deselect"]),
+    spec(C::ClearSelection, "Clear selection", G::Edit, P::MenuOnly).aka(&["deselect"]),
     spec(
         C::ShowComponentShowcase,
         "Component showcase",
@@ -631,6 +633,10 @@ pub const CATALOG: [CommandSpec; 64] = [
     spec(C::HelpShortcuts, "Help and shortcuts", G::Help, P::MenuOnly)
         .keys(NONE, Key::F1)
         .aka(&["keyboard", "shortcuts", "help", "keys"]),
+    spec(C::Cancel, "Cancel", G::Edit, P::MenuOnly)
+        .keys(NONE, Key::Escape)
+        .text_owns()
+        .aka(&["escape", "stop", "deselect"]),
 ];
 
 /// The state that command availability depends on.
@@ -648,6 +654,10 @@ pub struct CommandContext {
     pub can_zoom_in: bool,
     /// Zoom is above the minimum.
     pub can_zoom_out: bool,
+    /// Escape has something to cancel: a dialog, draft, gesture, tool or selection.
+    pub can_cancel: bool,
+    /// What the running shell draws and sends.
+    pub support: ShellSupport,
 }
 
 /// Explains every command that changes the project model.
@@ -713,28 +723,47 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
         CommandId::ShowIssues => {
             Disabled("Not available yet: validation issues need the project model.")
         }
-        CommandId::CloseTab | CommandId::NextTab | CommandId::PreviousTab => {
-            Disabled("Not available yet: diagram tabs arrive with the editor state (B-9).")
+        CommandId::CloseTab if context.tab_count > 1 => Enabled,
+        CommandId::CloseTab => Disabled(
+            "Not available yet: the last tab stays open until the no-diagram screen exists.",
+        ),
+        CommandId::NextTab | CommandId::PreviousTab if context.tab_count > 1 => Enabled,
+        CommandId::NextTab | CommandId::PreviousTab => Disabled("Only one diagram tab is open."),
+        CommandId::SelectAll if context.has_content => Enabled,
+        CommandId::SelectAll => Disabled("This diagram has nothing to select."),
+        CommandId::Rename if !context.support.draft_events => Disabled(
+            "Not available yet: F2 moves focus to the Name field in the new inspector. \
+             Use the Name field in the inspector.",
+        ),
+        CommandId::Rename if context.selection_count == 1 => Enabled,
+        CommandId::Rename => Disabled("Select one class to rename it."),
+        CommandId::Reveal | CommandId::FitSelection if context.has_selection => Enabled,
+        CommandId::Reveal => Disabled("Select an object to reveal it."),
+        CommandId::FitSelection => Disabled("Select something to fit it in the view."),
+        CommandId::ZoomIn if context.can_zoom_in => Enabled,
+        CommandId::ZoomIn => Disabled("The view is already at the largest zoom, 400%."),
+        CommandId::ZoomOut if context.can_zoom_out => Enabled,
+        CommandId::ZoomOut => Disabled("The view is already at the smallest zoom, 10%."),
+        CommandId::ActualSize | CommandId::FitAll => Enabled,
+        CommandId::ToggleGrid | CommandId::ToggleSnap if context.support.grid => Enabled,
+        CommandId::ToggleGrid | CommandId::ToggleSnap => {
+            Disabled("Not available yet: the grid is drawn by the new canvas view (A-5).")
         }
-        CommandId::SelectAll | CommandId::Rename | CommandId::Reveal => {
-            Disabled("Not available yet: arrives with canvas selection (B-6).")
+        CommandId::Preferences => Disabled(
+            "Not available yet: the preferences window is part of the new screens (UI-09). \
+             Change the theme in the status bar.",
+        ),
+        CommandId::FindObject if context.support.object_search => Enabled,
+        CommandId::FindObject => Disabled(
+            "Not available yet: object search is part of the new project panel (A-4). \
+             Use Search to find classes by name.",
+        ),
+        CommandId::NextRegion | CommandId::PreviousRegion if context.support.region_focus => {
+            Enabled
         }
-        CommandId::ZoomIn
-        | CommandId::ZoomOut
-        | CommandId::ActualSize
-        | CommandId::FitAll
-        | CommandId::FitSelection => {
-            Disabled("Not available yet: zoom arrives with the canvas viewport (B-5).")
-        }
-        CommandId::ToggleGrid | CommandId::ToggleSnap | CommandId::Preferences => {
-            Disabled("Not available yet: preferences arrive with the editor state (B-9).")
-        }
-        CommandId::FindObject => {
-            Disabled("Not available yet: object search arrives with the project panel (B-9).")
-        }
-        CommandId::NextRegion | CommandId::PreviousRegion => {
-            Disabled("Not available yet: region focus arrives with keyboard navigation (B-8).")
-        }
+        CommandId::NextRegion | CommandId::PreviousRegion => Disabled(
+            "Not available yet: moving between regions arrives with the new workspace (A-10).",
+        ),
         CommandId::ContextMenu | CommandId::HelpShortcuts => {
             Disabled("Not available yet: this surface is part of the new screens (UI-09).")
         }
@@ -745,6 +774,20 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
         | CommandId::ShowComponentShowcase => Enabled,
         CommandId::ClearSelection if context.has_selection => Enabled,
         CommandId::ClearSelection => Disabled("Nothing is selected."),
+        CommandId::Cancel if context.can_cancel => Enabled,
+        CommandId::Cancel => Disabled("Nothing to cancel."),
+    }
+}
+
+/// The tool-row command for a notation tool.
+pub const fn tool_command(tool: diagram_core::notation::ToolKind) -> CommandId {
+    use diagram_core::notation::ToolKind;
+    match tool {
+        ToolKind::Select => CommandId::SelectTool,
+        ToolKind::Hand => CommandId::PanTool,
+        ToolKind::Class => CommandId::AddClass,
+        ToolKind::Relationship => CommandId::Connect,
+        ToolKind::Arrange => CommandId::Arrange,
     }
 }
 

@@ -78,6 +78,8 @@ pub enum Surface {
     Showcase,
     /// The command and object search dialog.
     CommandSearch,
+    /// The object search in the project panel.
+    ObjectSearch,
 }
 
 /// Kind of pointer event over the canvas.
@@ -157,6 +159,29 @@ pub enum UiIntent {
         /// Project name.
         name: String,
     },
+    /// Make the tab at this index the active one (a click on the tab).
+    ActivateTab(usize),
+    /// Space went down (`true`) or up (`false`) over the canvas: drags pan
+    /// while it is held. Never sent while a text field has focus.
+    TemporaryPan(bool),
+    /// The canvas has this size on screen, in points.
+    CanvasResized {
+        /// Width in points.
+        width: f32,
+        /// Height in points.
+        height: f32,
+    },
+    /// The person's answer in the Resolve edit dialog.
+    ResolveEdit(ResolveChoice),
+}
+
+/// Answers to the Resolve edit dialog.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ResolveChoice {
+    /// Go back to the field with the invalid text; nothing else happens.
+    ReturnToField,
+    /// Restore the original value, then do what was held back.
+    DiscardEdit,
 }
 
 /// Facts only the UI layer knows this frame. Shortcut handling and focus
