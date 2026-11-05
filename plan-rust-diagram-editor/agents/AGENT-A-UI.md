@@ -1,6 +1,6 @@
 # Agent A — New UI (look, layout, screens)
 
-Date: 2026-11-05. Partner brief: [AGENT-B-FUNCTIONALITY.md](AGENT-B-FUNCTIONALITY.md). Both agents work at the same time. **The two briefs share sections 1–3 word for word.** If they ever differ, stop and ask the user.
+Date: 2026-11-05. Partner brief: [AGENT-B-FUNCTIONALITY.md](AGENT-B-FUNCTIONALITY.md). Both agents work at the same time. **The two briefs share sections 1–3 word for word.** If they ever differ, stop and ask the user. The ordered task list and the routing tests are in [TASKS-AND-TESTS.md](TASKS-AND-TESTS.md).
 
 **Your job:** build every screen and control of the new design so it looks and behaves correctly *as a presentation*. You draw what you are given and report what the user did. You never decide what a button does to the project.
 
@@ -34,10 +34,10 @@ Rules:
 | Desktop crate | `src/shell.rs` (layout composition only, after Phase 0), `src/ui/mod.rs`, `src/ui/theme.rs`, `components.rs`, `palette.rs`, `showcase.rs`, `workspace.rs`, `welcome.rs`; new `src/ui/header.rs`, `tabs.rs`, `toolbar.rs`, `navigator.rs`, `canvas_view.rs` (painting and hit regions only), `inspector.rs`, `status.rs`, `dialogs.rs`, `search_view.rs`, `fixtures.rs` | `src/lib.rs`, `src/main.rs`, `src/ui/commands.rs`; new `src/presentation.rs`, `src/intent.rs`, `src/app_state.rs`, `src/editor_state.rs`, `src/dispatch.rs`, `src/viewport.rs`, `src/drafts.rs` |
 | Other crates | none | `diagram-core`, `diagram-canvas`, `diagram-storage` (all files) |
 | Build | `assets/` (fonts and icons, with license notes) | `Cargo.toml` (all), `Cargo.lock` |
-| Tests | `tests/theme.rs`, `typography.rs`, `showcase.rs`, `welcome.rs`, `workspace.rs`, `shell.rs`, `ui_audit.rs`; new `tests/views_*.rs` | `tests/commands.rs`, `diagnostics.rs`; new `tests/dispatch.rs`, `editor_state.rs`, `presentation.rs`, `shortcuts.rs`; all tests in the other crates |
+| Tests | `tests/theme.rs`, `typography.rs`, `showcase.rs`, `welcome.rs`, `workspace.rs`, `shell.rs`, `ui_audit.rs`; new `tests/views_*.rs`, `tests/ui_routing.rs`, `tests/common_ui/` | `tests/commands.rs`, `diagnostics.rs`; new `tests/routing.rs`, `editor_state.rs`, `presentation.rs`, `shortcuts.rs`, `contract.rs`, `journeys.rs`, `tests/common_state/`; all tests in the other crates |
 | Docs | `app/docs/ui/*.md` and screenshots, except `new-design/` | new `app/docs/functionality/*.md` and `plan-rust-diagram-editor/PROGRESS-AND-NEXT-STEPS.md` |
 | Tracker | `roadmap.json` entries for UI-02, UI-05, UI-07, UI-08, UI-09, UI-10, UI-12 and UI-18, plus R0-04 | `roadmap.json` entries for UI-06, UI-11, UI-13 to UI-17, and R1-xx/R2-xx when allowed |
-| Read-only for both | `app/docs/ui/new-design/*`, `UI-RULES.md`, `UI-DESIGN-AND-INTEGRATION.md`, the other agent's brief | same |
+| Read-only for both | `app/docs/ui/new-design/*`, `UI-RULES.md`, `UI-DESIGN-AND-INTEGRATION.md`, [TASKS-AND-TESTS.md](TASKS-AND-TESTS.md), sections 1–6 of the other agent's brief | same |
 
 Only one place is shared: **`roadmap.json`**. Edit only your own task objects, rebase immediately before pushing, and run `python build_rust_roadmap.py`.
 
@@ -148,3 +148,11 @@ Every item uses only `theme.rs` tokens and text roles, and `components.rs` contr
 | # | Date | Need (field, intent or command) | Why | Status |
 |---|---|---|---|---|
 | — | — | — | — | — |
+
+## 7. Task progress (Agent A only)
+
+Task IDs come from [TASKS-AND-TESTS.md §3](TASKS-AND-TESTS.md#3-task-list). Add a row when a task starts. Set its state to `done` only when its listed tests pass and the joint checkpoint it feeds, if any, still holds.
+
+| Task | State | Branch / commit | Notes |
+|---|---|---|---|
+| — | — | — | — |
