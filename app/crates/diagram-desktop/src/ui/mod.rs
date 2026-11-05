@@ -4,3 +4,4 @@ pub mod commands;
 pub mod components;
 pub mod palette;
 pub mod theme;
+pub mod workspace;

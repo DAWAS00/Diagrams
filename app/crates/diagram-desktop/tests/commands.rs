@@ -1,11 +1,11 @@
-//! UI-06: one command catalog feeds the toolbar, menu groups, search and
+//! UI-06: one command catalog feeds the header, tool row, menus, search and
 //! shortcuts; disabled commands explain why; text fields keep their keys.
 
 use std::collections::HashSet;
 
 use diagram_desktop::shell::{self, ShellState};
 use diagram_desktop::ui::commands::{
-    self, Availability, CATALOG, CommandContext, CommandGroup, CommandId,
+    self, Availability, CATALOG, CommandContext, CommandGroup, CommandId, Placement,
 };
 use diagram_desktop::ui::palette::{self, PaletteEntry};
 use eframe::egui::{Key, Modifiers, Vec2};
@@ -68,26 +68,28 @@ fn clear_selection_should_need_a_selection() {
 }
 
 #[test]
-fn toolbar_and_menus_should_come_from_the_catalog() {
-    let toolbar: Vec<_> = commands::toolbar().collect();
+fn header_rows_and_menus_should_come_from_the_catalog() {
+    let placed = |placement| commands::placed(placement).collect::<Vec<_>>();
     assert_eq!(
-        labels(&toolbar),
-        [
-            "Undo",
-            "Redo",
-            "Add class",
-            "Connect",
-            "Save",
-            "Export",
-            "Search"
-        ]
+        labels(&placed(Placement::Header)),
+        ["Undo", "Redo", "Search", "Save", "Export"]
+    );
+    assert_eq!(
+        labels(&placed(Placement::ToolRow)),
+        ["Select", "Pan", "Class", "Association", "Note", "Arrange"]
+    );
+    assert_eq!(labels(&placed(Placement::TabRow)), ["New diagram"]);
+    assert_eq!(
+        labels(&placed(Placement::PanelToggle)),
+        ["Project panel", "Inspector"]
     );
 
     let groups = commands::menu_groups();
     let group_names: Vec<_> = groups.iter().map(|(group, _)| *group).collect();
     assert_eq!(group_names, CommandGroup::ALL);
-    assert_eq!(labels(&groups[0].1), ["Save", "Export"]);
+    assert_eq!(labels(&groups[0].1), ["Save", "Export", "New diagram"]);
     assert_eq!(labels(&groups[1].1), ["Undo", "Redo", "Clear selection"]);
+    assert_eq!(labels(&groups[2].1), ["Project panel", "Inspector"]);
     let listed: usize = groups.iter().map(|(_, specs)| specs.len()).sum();
     assert_eq!(listed, CATALOG.len());
 }
@@ -131,10 +133,13 @@ fn highlight_should_stay_within_the_results() {
 }
 
 #[test]
-fn toolbar_buttons_should_match_catalog_availability() {
+fn visible_buttons_should_match_catalog_availability() {
     let harness = harness();
 
-    for spec in commands::toolbar() {
+    let buttons = [Placement::Header, Placement::ToolRow, Placement::TabRow]
+        .into_iter()
+        .flat_map(commands::placed);
+    for spec in buttons {
         let enabled = commands::availability(spec.id, CommandContext::default()).is_enabled();
         assert_eq!(
             !harness
@@ -201,19 +206,38 @@ fn typing_and_enter_should_select_the_matching_object_and_close() {
     assert!(harness.state().palette.is_none());
 }
 
+fn first_available_in_harness(query: &str) -> usize {
+    let results = palette::entries(query, &["Customer", "Order"]);
+    palette::first_available(&results, |entry| match entry {
+        PaletteEntry::Command(id) => {
+            commands::availability(id, CommandContext::default()).is_enabled()
+        }
+        PaletteEntry::Object(_) => true,
+    })
+}
+
 #[test]
 fn highlight_should_start_on_the_first_available_result() {
+    // "s" first matches "File: Save", which is unavailable.
+    assert!(first_available_in_harness("s") > 0);
     let mut harness = harness();
     harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
     harness.run();
 
-    // "s" matches several unavailable commands before the class Customer.
     harness.get_by_label(SEARCH_FIELD).type_text("s");
     harness.run();
+    assert_eq!(
+        harness
+            .state()
+            .palette
+            .as_ref()
+            .map(|search| search.highlighted),
+        Some(first_available_in_harness("s"))
+    );
     harness.key_press(Key::Enter);
     harness.run();
 
-    assert_eq!(harness.state().selected, Some(0));
+    // An available result ran, so the search closed.
     assert!(harness.state().palette.is_none());
 }
 
@@ -222,16 +246,20 @@ fn arrow_keys_should_move_the_highlight_to_the_next_result() {
     let mut harness = harness();
     harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
     harness.run();
-    // "o" matches unavailable commands, then Customer and Order.
     harness.get_by_label(SEARCH_FIELD).type_text("o");
     harness.run();
 
     harness.key_press(Key::ArrowDown);
     harness.run();
-    harness.key_press(Key::Enter);
-    harness.run();
 
-    assert_eq!(harness.state().selected, Some(1));
+    assert_eq!(
+        harness
+            .state()
+            .palette
+            .as_ref()
+            .map(|search| search.highlighted),
+        Some(first_available_in_harness("o") + 1)
+    );
 }
 
 #[test]

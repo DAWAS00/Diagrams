@@ -92,9 +92,11 @@ pub fn warning_text(ui: &mut egui::Ui, text: &str) -> Response {
     ui.label(RichText::new(format!("Warning: {text}")).color(ui.visuals().warn_fg_color))
 }
 
-/// One option of a segmented choice such as the theme selector.
+/// A toggle or one option of a segmented choice, such as a panel button or
+/// the theme selector. It keeps its control border when not selected, so it
+/// never looks like plain text.
 pub fn choice(ui: &mut egui::Ui, selected: bool, text: &str) -> Response {
-    ui.add(Button::selectable(selected, text))
+    ui.add(Button::selectable(selected, text).frame_when_inactive(true))
 }
 
 /// Text that shortens with an ellipsis instead of pushing other controls away.

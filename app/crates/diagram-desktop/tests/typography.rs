@@ -4,21 +4,34 @@
 use diagram_desktop::shell::{self, ShellState};
 use diagram_desktop::ui::components;
 use diagram_desktop::ui::theme::{self, TextRole};
+use diagram_desktop::ui::workspace::{Drawer, LayoutMode};
 use eframe::egui::accesskit::Rect;
 use eframe::egui::{Color32, FontFamily, LayerId, Painter, TextStyle, Theme, Vec2};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
 
 const LONG_NAME: &str = "PreferredCustomerAccountWithLoyaltyProgrammeAndRegionalBillingSettings";
-const TOOLBAR: [&str; 7] = [
+/// Every control in the header, tab row and tool row. ("Class diagram 1"
+/// is left out: it is both a tab and a project-panel row.)
+const CHROME: [&str; 15] = [
+    "Menu",
     "Undo",
     "Redo",
-    "Add class",
-    "Connect",
+    "Search",
     "Save",
     "Export",
-    "Search",
+    "New diagram",
+    "Project panel",
+    "Select",
+    "Pan",
+    "Class",
+    "Association",
+    "Note",
+    "Arrange",
+    "Inspector",
 ];
+/// Bottom of the tool row: header 48 + tab row 38 + tool row 40.
+const ROWS_BOTTOM: f64 = 126.0;
 const SUPPORTED_SIZES: [(f32, f32); 3] = [(800.0, 500.0), (1280.0, 800.0), (1440.0, 900.0)];
 
 fn harness_at(width: f32, height: f32, state: ShellState) -> Harness<'static, ShellState> {
@@ -27,6 +40,23 @@ fn harness_at(width: f32, height: f32, state: ShellState) -> Harness<'static, Sh
         .build_ui_state(shell::show, state);
     harness.run();
     harness
+}
+
+/// Opens a panel's drawer when the window is too narrow to dock it.
+fn show_panel(harness: &mut Harness<'_, ShellState>, toggle: &str) {
+    if harness.state().layout == LayoutMode::Narrow {
+        harness.get_by_label(toggle).click();
+        harness.run();
+    }
+}
+
+/// Bounds of the node labeled `label` that lies below the header and rows.
+fn bounds_below_rows(harness: &Harness<'_, ShellState>, label: &str) -> Rect {
+    harness
+        .get_all_by_label(label)
+        .filter_map(|node| node.accesskit_node().bounding_box())
+        .find(|rect| rect.y0 >= ROWS_BOTTOM)
+        .unwrap_or_else(|| Rect::new(-1.0, -1.0, -1.0, -1.0))
 }
 
 fn bounds(harness: &Harness<'_, ShellState>, label: &str) -> Rect {
@@ -87,7 +117,7 @@ fn shell_should_render_with_the_role_sizes() {
 fn chrome_should_fit_without_overlap_at_every_supported_size() {
     for (width, height) in SUPPORTED_SIZES {
         let harness = harness_at(width, height, ShellState::default());
-        let labels: Vec<&str> = TOOLBAR
+        let labels: Vec<&str> = CHROME
             .iter()
             .copied()
             .chain(["Light", "Dark", "System", "No selection"])
@@ -114,7 +144,8 @@ fn long_class_name_should_not_push_controls_out_of_the_window() {
         let mut state = ShellState::default();
         state.classes[0].name = String::from(LONG_NAME);
         state.select(0);
-        let harness = harness_at(width, height, state);
+        let mut harness = harness_at(width, height, state);
+        show_panel(&mut harness, "Inspector");
 
         for label in ["Light", "Dark", "System", "Name", "Undo", "Export"] {
             assert_inside(bounds(&harness, label), width, height, label);
@@ -137,7 +168,8 @@ fn long_class_name_should_stay_complete_in_the_accessibility_tree() {
     let mut state = ShellState::default();
     state.classes[0].name = String::from(LONG_NAME);
     state.select(0);
-    let harness = harness_at(800.0, 500.0, state);
+    let mut harness = harness_at(800.0, 500.0, state);
+    show_panel(&mut harness, "Inspector");
 
     harness.get_by_label(&format!("Class {LONG_NAME}"));
     assert_eq!(
@@ -165,19 +197,21 @@ fn truncated_status_should_keep_the_full_name_for_screen_readers() {
 fn list_rows_should_stay_on_one_line_in_the_narrowest_sidebar() {
     let mut state = ShellState::default();
     state.classes[0].name = String::from(LONG_NAME);
-    let harness = harness_at(800.0, 500.0, state);
+    let mut harness = harness_at(800.0, 500.0, state);
+    show_panel(&mut harness, "Project panel");
 
-    let canvas_left = bounds(&harness, "Diagram canvas").x0;
+    let canvas = bounds(&harness, "Diagram canvas");
+    let drawer_right = canvas.x0 + f64::from(Drawer::Navigator.width(canvas.width() as f32));
     for label in ["Class diagram 1", LONG_NAME, "Order"] {
-        let rect = bounds(&harness, label);
+        let rect = bounds_below_rows(&harness, label);
         // One line is the control height (34); a wrapped row is about 50.
         assert!(
             rect.height() <= f64::from(theme::CONTROL_HEIGHT) + 1.0,
             "{label} wraps: {rect:?}"
         );
         assert!(
-            rect.x1 <= canvas_left,
-            "{label} leaves the sidebar: {rect:?}"
+            rect.x0 >= 0.0 && rect.x1 <= drawer_right,
+            "{label} leaves the project panel: {rect:?}"
         );
     }
 }

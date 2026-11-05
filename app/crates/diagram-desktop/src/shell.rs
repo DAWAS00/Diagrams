@@ -5,14 +5,16 @@
 //! core model, commands and history.
 
 use eframe::egui::{
-    self, Align, Align2, Button, Color32, CornerRadius, Frame, Id, Key, Layout, Modal, Pos2, Rect,
-    Role, ScrollArea, Sense, Stroke, StrokeKind, ThemePreference, Vec2, WidgetInfo,
+    self, Align, Align2, Area, Button, Color32, CornerRadius, Frame, Id, Key, Layout, Modal,
+    Modifiers, Order, Pos2, Rect, Role, ScrollArea, Sense, Stroke, StrokeKind, ThemePreference,
+    Vec2, WidgetInfo,
 };
 
-use crate::ui::commands::{self, Availability, CommandContext, CommandId};
+use crate::ui::commands::{self, Availability, CommandContext, CommandId, CommandSpec, Placement};
 use crate::ui::components;
 use crate::ui::palette::{self, PaletteEntry, PaletteState};
 use crate::ui::theme::{self, Palette, TextRole};
+use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
 
 const CLASS_WIDTH: f32 = 180.0;
 const HEADER_HEIGHT: f32 = 32.0;
@@ -65,11 +67,20 @@ pub struct ShellState {
     pub theme: ThemePreference,
     /// The command and object search, while it is open.
     pub palette: Option<PaletteState>,
+    /// Which docked panels the user wants; kept across window sizes.
+    pub panels: PanelPreferences,
+    /// The open drawer on narrow windows, if any.
+    pub drawer: Option<Drawer>,
+    /// Docked or narrow, decided from the window width each frame.
+    pub layout: LayoutMode,
+    /// Widget to focus when the open drawer closes (usually its toggle).
+    drawer_return: Option<Id>,
     /// Widget to focus at the start of the next frame, after a dialog closes.
     pending_focus: Option<Id>,
     /// Theme preference currently installed in the egui context.
     applied_theme: Option<ThemePreference>,
-    /// Whether a text field had keyboard focus at the end of the last frame.
+    /// Whether a text field (not just any widget) had keyboard focus at the
+    /// end of the last frame.
     text_had_focus: bool,
 }
 
@@ -88,6 +99,10 @@ impl Default for ShellState {
             selected: None,
             theme: ThemePreference::Light,
             palette: None,
+            panels: PanelPreferences::default(),
+            drawer: None,
+            layout: LayoutMode::Docked,
+            drawer_return: None,
             pending_focus: None,
             applied_theme: None,
             text_had_focus: false,
@@ -132,13 +147,51 @@ fn run(state: &mut ShellState, ctx: &egui::Context, id: CommandId) {
                 state.palette = Some(PaletteState::new(focused));
             }
         }
+        CommandId::ToggleNavigator => toggle_panel(state, ctx, Drawer::Navigator),
+        CommandId::ToggleInspector => toggle_panel(state, ctx, Drawer::Inspector),
+        // Select is the only tool so far, so it is always the active one.
+        CommandId::SelectTool => {}
         // Always unavailable until the project model exists (M1/M2).
         CommandId::Undo
         | CommandId::Redo
+        | CommandId::Save
+        | CommandId::Export
+        | CommandId::PanTool
         | CommandId::AddClass
         | CommandId::Connect
-        | CommandId::Save
-        | CommandId::Export => {}
+        | CommandId::AddNote
+        | CommandId::Arrange
+        | CommandId::NewDiagram => {}
+    }
+}
+
+/// Shows or hides a docked panel, or opens and closes its drawer on narrow windows.
+fn toggle_panel(state: &mut ShellState, ctx: &egui::Context, which: Drawer) {
+    match state.layout {
+        LayoutMode::Docked => match which {
+            Drawer::Navigator => state.panels.navigator_visible ^= true,
+            Drawer::Inspector => state.panels.inspector_visible ^= true,
+        },
+        LayoutMode::Narrow if state.drawer == Some(which) => close_drawer(state),
+        LayoutMode::Narrow => {
+            state.drawer_return = ctx.memory(|memory| memory.focused());
+            state.drawer = Some(which);
+        }
+    }
+}
+
+/// Closes the open drawer and returns focus to where it came from.
+fn close_drawer(state: &mut ShellState) {
+    state.drawer = None;
+    state.pending_focus = state.drawer_return.take();
+}
+
+/// Whether a panel's toggle shows as pressed.
+fn panel_shown(state: &ShellState, which: Drawer) -> bool {
+    match (state.layout, which) {
+        (LayoutMode::Docked, Drawer::Navigator) => state.panels.navigator_visible,
+        (LayoutMode::Docked, Drawer::Inspector) => state.panels.inspector_visible,
+        (LayoutMode::Narrow, _) => state.drawer == Some(which),
     }
 }
 
@@ -160,57 +213,272 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         }
     }
 
+    let layout = workspace::layout_mode(ui.max_rect().width());
+    if layout != state.layout {
+        state.layout = layout;
+        state.drawer = None;
+        state.drawer_return = None;
+    }
+
     // Shortcuts use the text focus of the previous frame: egui drops focus in
     // the frame Escape is pressed, and Escape must first leave the field.
+    // An open drawer takes Escape before the canvas selection does.
     let text_had_focus = state.text_had_focus;
+    if state.drawer.is_some()
+        && !text_had_focus
+        && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
+    {
+        close_drawer(state);
+    }
     if let Some(id) = ui.input_mut(|input| commands::take_shortcut(input, text_had_focus)) {
         run(state, ui.ctx(), id);
     }
 
     let bar = Frame::side_top_panel(ui.style()).fill(palette.workspace);
-    egui::Panel::top("toolbar")
+    egui::Panel::top("header")
         .frame(bar)
-        .show(ui, |ui| toolbar(ui, state));
+        .exact_size(workspace::HEADER_HEIGHT)
+        .show(ui, |ui| header(ui, state));
     egui::Panel::bottom("status")
         .frame(bar)
         .show(ui, |ui| status_bar(ui, state));
-    egui::Panel::left("sidebar")
-        .resizable(true)
-        .default_size(220.0)
-        .min_size(160.0)
-        .show(ui, |ui| sidebar(ui, state));
-    egui::Panel::right("inspector")
-        .resizable(true)
-        .default_size(280.0)
-        .min_size(200.0)
-        .show(ui, |ui| inspector(ui, state));
-    egui::CentralPanel::default()
-        .frame(Frame::central_panel(ui.style()).fill(palette.workspace))
-        .show(ui, |ui| canvas(ui, state, &palette));
+    if state.layout == LayoutMode::Docked {
+        if state.panels.navigator_visible {
+            egui::Panel::left("navigator")
+                .resizable(true)
+                .default_size(NAVIGATOR.default)
+                .size_range(NAVIGATOR.min..=NAVIGATOR.max)
+                .show(ui, |ui| scrolling(ui, "navigator", |ui| sidebar(ui, state)));
+        }
+        if state.panels.inspector_visible {
+            egui::Panel::right("inspector")
+                .resizable(true)
+                .default_size(INSPECTOR.default)
+                .size_range(INSPECTOR.min..=INSPECTOR.max)
+                .show(ui, |ui| {
+                    scrolling(ui, "inspector", |ui| inspector(ui, state))
+                });
+        }
+    }
+    let canvas_rect = egui::CentralPanel::default()
+        .frame(Frame::new().fill(palette.workspace))
+        .show(ui, |ui| {
+            let row = Frame::side_top_panel(ui.style()).fill(palette.panel);
+            egui::Panel::top("tabs")
+                .frame(row)
+                .exact_size(workspace::TAB_ROW_HEIGHT)
+                .show(ui, |ui| tab_row(ui, state));
+            egui::Panel::top("tools")
+                .frame(row)
+                .exact_size(workspace::TOOL_ROW_HEIGHT)
+                .show(ui, |ui| tool_row(ui, state));
+            Frame::new()
+                .inner_margin(theme::SPACING)
+                .show(ui, |ui| canvas(ui, state, &palette))
+                .inner
+        })
+        .inner;
+    drawer(ui.ctx(), state, canvas_rect, &palette);
     command_palette(ui.ctx(), state);
-    state.text_had_focus = ui.ctx().egui_wants_keyboard_input();
+    // Only a focused text field keeps editing keys; a focused button must not
+    // swallow Escape (egui_wants_keyboard_input is true for any focus).
+    state.text_had_focus = ui.ctx().text_edit_focused();
 }
 
-fn toolbar(ui: &mut egui::Ui, state: &mut ShellState) {
+/// A command button with its shortcut as a hover hint; disabled commands
+/// explain why.
+fn command_button(
+    ui: &mut egui::Ui,
+    spec: &CommandSpec,
+    context: CommandContext,
+    clicked: &mut Option<CommandId>,
+) {
+    let hint = spec
+        .shortcut
+        .map(|shortcut| format!("Shortcut: {}", ui.ctx().format_shortcut(&shortcut)));
+    let availability = commands::availability(spec.id, context);
+    if components::action_button(ui, spec.label, availability.reason(), hint.as_deref()).clicked() {
+        *clicked = Some(spec.id);
+    }
+}
+
+/// The application menu: every catalog command, grouped, with shortcuts.
+fn command_menu(ui: &mut egui::Ui, context: CommandContext, clicked: &mut Option<CommandId>) {
+    ui.menu_button("Menu", |ui| {
+        for (group, specs) in commands::menu_groups() {
+            ui.menu_button(group.label(), |ui| {
+                for spec in specs {
+                    let availability = commands::availability(spec.id, context);
+                    let mut item = Button::new(spec.label);
+                    if let Some(shortcut) = spec.shortcut {
+                        item = item.shortcut_text(ui.ctx().format_shortcut(&shortcut));
+                    }
+                    let response = ui.add_enabled(availability.is_enabled(), item);
+                    let response = match availability.reason() {
+                        Some(reason) => response.on_disabled_hover_text(reason),
+                        None => response,
+                    };
+                    if response.clicked() {
+                        *clicked = Some(spec.id);
+                        ui.close();
+                    }
+                }
+            });
+        }
+    });
+}
+
+/// Header: menu, project name, then Undo, Redo, Search, Save and Export.
+fn header(ui: &mut egui::Ui, state: &mut ShellState) {
     let context = state.command_context();
     let mut clicked = None;
-    ui.horizontal(|ui| {
-        ui.strong(crate::APPLICATION_NAME);
+    ui.horizontal_centered(|ui| {
+        command_menu(ui, context, &mut clicked);
         ui.separator();
-        for spec in commands::toolbar() {
-            let hint = spec
-                .shortcut
-                .map(|shortcut| format!("Shortcut: {}", ui.ctx().format_shortcut(&shortcut)));
-            let availability = commands::availability(spec.id, context);
-            let response =
-                components::action_button(ui, spec.label, availability.reason(), hint.as_deref());
-            if response.clicked() {
-                clicked = Some(spec.id);
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            // Right-to-left: add in reverse visual order, with a separator
+            // between command groups.
+            let mut previous_group = None;
+            for spec in commands::placed(Placement::Header)
+                .collect::<Vec<_>>()
+                .into_iter()
+                .rev()
+            {
+                if previous_group.is_some_and(|group| group != spec.group) {
+                    ui.separator();
+                }
+                previous_group = Some(spec.group);
+                command_button(ui, spec, context, &mut clicked);
             }
+            ui.separator();
+            ui.allocate_ui_with_layout(
+                ui.available_size(),
+                Layout::left_to_right(Align::Center),
+                |ui| components::truncated_text(ui, "Sample project · not saved"),
+            );
+        });
+    });
+    if let Some(id) = clicked {
+        run(state, ui.ctx(), id);
+    }
+}
+
+/// Diagram tabs. The tab strip itself (overflow, close, per-tab state) is UI-05.
+fn tab_row(ui: &mut egui::Ui, state: &mut ShellState) {
+    let context = state.command_context();
+    let mut clicked = None;
+    ui.horizontal_centered(|ui| {
+        let _ = components::choice(ui, true, "Class diagram 1");
+        for spec in commands::placed(Placement::TabRow) {
+            command_button(ui, spec, context, &mut clicked);
         }
     });
     if let Some(id) = clicked {
         run(state, ui.ctx(), id);
+    }
+}
+
+/// Tool row: project panel button, tools, inspector button.
+fn tool_row(ui: &mut egui::Ui, state: &mut ShellState) {
+    let context = state.command_context();
+    let mut clicked = None;
+    let mut toggle = None;
+    ui.horizontal_centered(|ui| {
+        let navigator = components::choice(
+            ui,
+            panel_shown(state, Drawer::Navigator),
+            CommandId::ToggleNavigator.spec().label,
+        );
+        if navigator.clicked() {
+            toggle = Some((CommandId::ToggleNavigator, navigator.id));
+        }
+        ui.separator();
+        for spec in commands::placed(Placement::ToolRow) {
+            if spec.id == CommandId::SelectTool {
+                // The active tool shows as pressed.
+                if components::choice(ui, true, spec.label).clicked() {
+                    clicked = Some(spec.id);
+                }
+            } else {
+                command_button(ui, spec, context, &mut clicked);
+            }
+        }
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            let inspector = components::choice(
+                ui,
+                panel_shown(state, Drawer::Inspector),
+                CommandId::ToggleInspector.spec().label,
+            );
+            if inspector.clicked() {
+                toggle = Some((CommandId::ToggleInspector, inspector.id));
+            }
+        });
+    });
+    if let Some(id) = clicked {
+        run(state, ui.ctx(), id);
+    }
+    if let Some((id, button)) = toggle {
+        run(state, ui.ctx(), id);
+        // A drawer opened from its button returns focus to that button.
+        if state.drawer.is_some() {
+            state.drawer_return = Some(button);
+        }
+    }
+}
+
+/// Wraps panel contents in a vertical scroll area.
+fn scrolling(ui: &mut egui::Ui, id: &str, add_contents: impl FnOnce(&mut egui::Ui)) {
+    ScrollArea::vertical()
+        .id_salt(id)
+        .auto_shrink([false, false])
+        .show(ui, add_contents);
+}
+
+/// The open drawer, over the canvas only, never over the header, rows or
+/// status bar.
+fn drawer(ctx: &egui::Context, state: &mut ShellState, canvas_rect: Rect, palette: &Palette) {
+    let Some(which) = state.drawer else {
+        return;
+    };
+    let width = which.width(canvas_rect.width());
+    let rect = match which {
+        Drawer::Navigator => {
+            Rect::from_min_size(canvas_rect.min, Vec2::new(width, canvas_rect.height()))
+        }
+        Drawer::Inspector => Rect::from_min_max(
+            Pos2::new(canvas_rect.max.x - width, canvas_rect.min.y),
+            canvas_rect.max,
+        ),
+    };
+    let close_label = match which {
+        Drawer::Navigator => "Close project panel",
+        Drawer::Inspector => "Close inspector",
+    };
+    let frame = Frame::new()
+        .fill(palette.panel)
+        .stroke(Stroke::new(1.0, palette.separator))
+        .inner_margin(theme::SPACING);
+    let inner_size = rect.size() - Vec2::splat(2.0 * (theme::SPACING + 1.0));
+    let mut close = false;
+    Area::new(Id::unique("drawer"))
+        .order(Order::Foreground)
+        .fixed_pos(rect.min)
+        .show(ctx, |ui| {
+            frame.show(ui, |ui| {
+                ui.set_min_size(inner_size);
+                ui.set_max_size(inner_size);
+                if components::action_button(ui, close_label, None, Some("Escape")).clicked() {
+                    close = true;
+                }
+                ui.separator();
+                scrolling(ui, "drawer", |ui| match which {
+                    Drawer::Navigator => sidebar(ui, state),
+                    Drawer::Inspector => inspector(ui, state),
+                });
+            });
+        });
+    if close {
+        close_drawer(state);
     }
 }
 
@@ -386,7 +654,7 @@ fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
     }
 }
 
-fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
+fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) -> Rect {
     let (background, painter) = ui.allocate_painter(ui.available_size(), Sense::click());
     background.widget_info(|| WidgetInfo::labeled(Role::Canvas, true, "Diagram canvas"));
     painter.rect_filled(background.rect, CornerRadius::ZERO, palette.canvas);
@@ -416,6 +684,7 @@ fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
         None if background.clicked() => state.clear_selection(),
         None => {}
     }
+    background.rect
 }
 
 fn paint_class(

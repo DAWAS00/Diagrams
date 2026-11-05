@@ -14,7 +14,7 @@ This page is for anyone following the project. It summarises the user-interface 
 |---|---|---|
 | UI-01 | Design tokens and base components | In progress — [evidence](UI-01-TOKENS-AND-COMPONENTS.md); showcase and state checks remain |
 | UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
-| UI-03 | Responsive workspace | Next |
+| UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
 | UI-04 | Welcome, new-project and open screens | Next |
 | UI-05 | Navigator and diagram tabs | Not started |
 | UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |
@@ -57,9 +57,19 @@ This page is for anyone following the project. It summarises the user-interface 
 
 ![Command search](ui-06-command-search.png)
 
+### UI-03 — Responsive workspace
+- The full window layout from the design: a header with a **Menu** (every command, grouped, with shortcuts), Undo/Redo, Search, Save and Export; a tab row; a tool row with Select, Pan, Class, Association, Note and Arrange; the project panel and inspector at their planned widths.
+- **Small windows:** below 1020 points wide, the panels become drawers over the canvas, opened by the **Project panel** and **Inspector** buttons. **Escape** closes a drawer and returns keyboard focus to the button that opened it. A panel you hide stays hidden when the window is resized.
+- **Two problems found and fixed:** Escape was swallowed whenever *any* button had keyboard focus, so keyboard users couldn't close a drawer or clear the selection; and unpressed toggle buttons had no border, so they looked like plain text.
+- 15 new automated tests; all 15 header and row controls fit without overlapping from 800×500 to 1440×900.
+
+| Docked, 1280×800 | Small window with the inspector drawer |
+|---|---|
+| ![Docked](ui-03-docked-1280x800.png) | ![Inspector drawer](ui-03-narrow-inspector-drawer.png) |
+
 ## What is next
-1. **UI-03 — responsive workspace:** the full header (with menus drawn from the command catalog), tab row and tool row; panels that collapse into drawers on small windows (down to 800×500).
-2. **UI-04 — welcome, new-project and open screens**, and **UI-11 — notation capability contract** (what each diagram type offers).
+1. **UI-04 — welcome, new-project and open screens.**
+2. **UI-11 — notation capability contract** needs UI-08 (the inspector) first, in the tracker's order.
 3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it

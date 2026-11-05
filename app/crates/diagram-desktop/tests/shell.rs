@@ -22,11 +22,23 @@ fn is_pressed(harness: &Harness<'_, ShellState>, label: &str) -> bool {
 fn shell_should_show_toolbar_sidebar_canvas_inspector_and_status() {
     let harness = harness();
 
-    for label in ["Undo", "Redo", "Add class", "Connect", "Save", "Export"] {
+    for label in [
+        "Undo",
+        "Redo",
+        "Save",
+        "Export",
+        "Pan",
+        "Class",
+        "Association",
+        "Note",
+        "Arrange",
+        "New diagram",
+    ] {
         harness.get_by_label(label);
     }
     harness.get_by_label("Project");
-    harness.get_by_label("Class diagram 1");
+    // The open diagram is both a tab and a row in the project panel.
+    assert_eq!(harness.get_all_by_label("Class diagram 1").count(), 2);
     harness.get_by_label("Diagram canvas");
     harness.get_by_label("Selection");
     harness.get_by_label("Prototype · nothing is saved");
@@ -37,7 +49,18 @@ fn shell_should_show_toolbar_sidebar_canvas_inspector_and_status() {
 fn unimplemented_toolbar_actions_should_be_disabled() {
     let harness = harness();
 
-    for label in ["Undo", "Redo", "Add class", "Connect", "Save", "Export"] {
+    for label in [
+        "Undo",
+        "Redo",
+        "Save",
+        "Export",
+        "Pan",
+        "Class",
+        "Association",
+        "Note",
+        "Arrange",
+        "New diagram",
+    ] {
         assert!(
             harness.get_by_label(label).accesskit_node().is_disabled(),
             "{label} is enabled"

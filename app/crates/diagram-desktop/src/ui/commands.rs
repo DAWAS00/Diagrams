@@ -15,30 +15,51 @@ pub enum CommandId {
     Undo,
     /// Redo the last undone change.
     Redo,
-    /// Create a class on the current diagram.
-    AddClass,
-    /// Connect two classes with a relationship.
-    Connect,
+    /// Open the command and object search.
+    SearchCommands,
     /// Save the project.
     Save,
     /// Export the current diagram.
     Export,
-    /// Open the command and object search.
-    SearchCommands,
+    /// Select tool: click objects to select them.
+    SelectTool,
+    /// Pan tool: drag to move the view.
+    PanTool,
+    /// Class tool: place a new class.
+    AddClass,
+    /// Association tool: connect two classes.
+    Connect,
+    /// Note tool: place a note.
+    AddNote,
+    /// Arrange the selected objects.
+    Arrange,
+    /// Create a diagram.
+    NewDiagram,
+    /// Show or hide the project panel (a drawer on narrow windows).
+    ToggleNavigator,
+    /// Show or hide the inspector (a drawer on narrow windows).
+    ToggleInspector,
     /// Clear the current selection.
     ClearSelection,
 }
 
 impl CommandId {
     /// Every command, in catalog order.
-    pub const ALL: [Self; 8] = [
+    pub const ALL: [Self; 15] = [
         Self::Undo,
         Self::Redo,
-        Self::AddClass,
-        Self::Connect,
+        Self::SearchCommands,
         Self::Save,
         Self::Export,
-        Self::SearchCommands,
+        Self::SelectTool,
+        Self::PanTool,
+        Self::AddClass,
+        Self::Connect,
+        Self::AddNote,
+        Self::Arrange,
+        Self::NewDiagram,
+        Self::ToggleNavigator,
+        Self::ToggleInspector,
         Self::ClearSelection,
     ];
 
@@ -51,29 +72,53 @@ impl CommandId {
 /// Menu group a command belongs to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CommandGroup {
-    /// Project files: save and export.
+    /// Project files and diagrams.
     File,
     /// Changes and selection.
     Edit,
-    /// Creating diagram content.
-    Insert,
+    /// Panels and layout.
+    View,
+    /// Canvas tools.
+    Tools,
     /// Finding commands and objects.
     Navigate,
 }
 
 impl CommandGroup {
     /// Groups in menu order.
-    pub const ALL: [Self; 4] = [Self::File, Self::Edit, Self::Insert, Self::Navigate];
+    pub const ALL: [Self; 5] = [
+        Self::File,
+        Self::Edit,
+        Self::View,
+        Self::Tools,
+        Self::Navigate,
+    ];
 
     /// Name shown in menus and in search results.
     pub const fn label(self) -> &'static str {
         match self {
             Self::File => "File",
             Self::Edit => "Edit",
-            Self::Insert => "Insert",
+            Self::View => "View",
+            Self::Tools => "Tools",
             Self::Navigate => "Navigate",
         }
     }
+}
+
+/// Where a command appears besides the menu and the search, which list every command.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Placement {
+    /// A button in the header.
+    Header,
+    /// A tool in the tool row above the canvas.
+    ToolRow,
+    /// A button in the diagram tab row.
+    TabRow,
+    /// A labeled panel button at the ends of the tool row.
+    PanelToggle,
+    /// Only in the menu, the search and its shortcut.
+    MenuOnly,
 }
 
 /// Whether a command can run now, and if not, why.
@@ -114,8 +159,8 @@ pub struct CommandSpec {
     /// True when a focused text field uses the same keys (for example Ctrl+Z
     /// or Escape). The field then keeps them and the command does not run.
     pub text_field_owns_shortcut: bool,
-    /// Shown as a toolbar button.
-    pub in_toolbar: bool,
+    /// Where the command appears outside the menu and the search.
+    pub placement: Placement,
 }
 
 const fn spec(
@@ -124,7 +169,7 @@ const fn spec(
     group: CommandGroup,
     shortcut: Option<KeyboardShortcut>,
     text_field_owns_shortcut: bool,
-    in_toolbar: bool,
+    placement: Placement,
 ) -> CommandSpec {
     CommandSpec {
         id,
@@ -132,7 +177,7 @@ const fn spec(
         group,
         shortcut,
         text_field_owns_shortcut,
-        in_toolbar,
+        placement,
     }
 }
 
@@ -141,14 +186,14 @@ const fn keys(modifiers: Modifiers, key: Key) -> Option<KeyboardShortcut> {
 }
 
 /// The catalog, in [`CommandId`] order.
-pub const CATALOG: [CommandSpec; 8] = [
+pub const CATALOG: [CommandSpec; 15] = [
     spec(
         CommandId::Undo,
         "Undo",
         CommandGroup::Edit,
         keys(Modifiers::COMMAND, Key::Z),
         true,
-        true,
+        Placement::Header,
     ),
     spec(
         CommandId::Redo,
@@ -156,39 +201,7 @@ pub const CATALOG: [CommandSpec; 8] = [
         CommandGroup::Edit,
         keys(Modifiers::COMMAND.plus(Modifiers::SHIFT), Key::Z),
         true,
-        true,
-    ),
-    spec(
-        CommandId::AddClass,
-        "Add class",
-        CommandGroup::Insert,
-        None,
-        false,
-        true,
-    ),
-    spec(
-        CommandId::Connect,
-        "Connect",
-        CommandGroup::Insert,
-        None,
-        false,
-        true,
-    ),
-    spec(
-        CommandId::Save,
-        "Save",
-        CommandGroup::File,
-        keys(Modifiers::COMMAND, Key::S),
-        false,
-        true,
-    ),
-    spec(
-        CommandId::Export,
-        "Export",
-        CommandGroup::File,
-        None,
-        false,
-        true,
+        Placement::Header,
     ),
     spec(
         CommandId::SearchCommands,
@@ -196,7 +209,95 @@ pub const CATALOG: [CommandSpec; 8] = [
         CommandGroup::Navigate,
         keys(Modifiers::COMMAND, Key::K),
         false,
-        true,
+        Placement::Header,
+    ),
+    spec(
+        CommandId::Save,
+        "Save",
+        CommandGroup::File,
+        keys(Modifiers::COMMAND, Key::S),
+        false,
+        Placement::Header,
+    ),
+    spec(
+        CommandId::Export,
+        "Export",
+        CommandGroup::File,
+        None,
+        false,
+        Placement::Header,
+    ),
+    spec(
+        CommandId::SelectTool,
+        "Select",
+        CommandGroup::Tools,
+        None,
+        false,
+        Placement::ToolRow,
+    ),
+    spec(
+        CommandId::PanTool,
+        "Pan",
+        CommandGroup::Tools,
+        None,
+        false,
+        Placement::ToolRow,
+    ),
+    spec(
+        CommandId::AddClass,
+        "Class",
+        CommandGroup::Tools,
+        None,
+        false,
+        Placement::ToolRow,
+    ),
+    spec(
+        CommandId::Connect,
+        "Association",
+        CommandGroup::Tools,
+        None,
+        false,
+        Placement::ToolRow,
+    ),
+    spec(
+        CommandId::AddNote,
+        "Note",
+        CommandGroup::Tools,
+        None,
+        false,
+        Placement::ToolRow,
+    ),
+    spec(
+        CommandId::Arrange,
+        "Arrange",
+        CommandGroup::Tools,
+        None,
+        false,
+        Placement::ToolRow,
+    ),
+    spec(
+        CommandId::NewDiagram,
+        "New diagram",
+        CommandGroup::File,
+        None,
+        false,
+        Placement::TabRow,
+    ),
+    spec(
+        CommandId::ToggleNavigator,
+        "Project panel",
+        CommandGroup::View,
+        None,
+        false,
+        Placement::PanelToggle,
+    ),
+    spec(
+        CommandId::ToggleInspector,
+        "Inspector",
+        CommandGroup::View,
+        None,
+        false,
+        Placement::PanelToggle,
     ),
     spec(
         CommandId::ClearSelection,
@@ -204,7 +305,7 @@ pub const CATALOG: [CommandSpec; 8] = [
         CommandGroup::Edit,
         keys(Modifiers::NONE, Key::Escape),
         true,
-        false,
+        Placement::MenuOnly,
     ),
 ];
 
@@ -217,32 +318,38 @@ pub struct CommandContext {
 
 /// Whether `id` can run in `context`, with the reason when it cannot.
 pub fn availability(id: CommandId, context: CommandContext) -> Availability {
+    use Availability::{Disabled, Enabled};
     match id {
-        CommandId::Undo => {
-            Availability::Disabled("Not available yet: undo needs the project history.")
-        }
-        CommandId::Redo => {
-            Availability::Disabled("Not available yet: redo needs the project history.")
+        CommandId::Undo => Disabled("Not available yet: undo needs the project history."),
+        CommandId::Redo => Disabled("Not available yet: redo needs the project history."),
+        CommandId::Save => Disabled("Not available yet: this prototype cannot save."),
+        CommandId::Export => Disabled("Not available yet: SVG export is planned for v0.1."),
+        CommandId::PanTool => {
+            Disabled("Not available yet: panning arrives with canvas scrolling and zoom.")
         }
         CommandId::AddClass => {
-            Availability::Disabled("Not available yet: adding classes needs the project model.")
+            Disabled("Not available yet: adding classes needs the project model.")
         }
-        CommandId::Connect => {
-            Availability::Disabled("Not available yet: relationships need the project model.")
+        CommandId::Connect => Disabled("Not available yet: relationships need the project model."),
+        CommandId::AddNote => Disabled("Not available yet: notes need the project model."),
+        CommandId::Arrange => Disabled("Not available yet: arranging needs movable objects."),
+        CommandId::NewDiagram => {
+            Disabled("Not available yet: new diagrams need the project model.")
         }
-        CommandId::Save => Availability::Disabled("Not available yet: this prototype cannot save."),
-        CommandId::Export => {
-            Availability::Disabled("Not available yet: SVG export is planned for v0.1.")
-        }
-        CommandId::SearchCommands => Availability::Enabled,
-        CommandId::ClearSelection if context.has_selection => Availability::Enabled,
-        CommandId::ClearSelection => Availability::Disabled("Nothing is selected."),
+        CommandId::SearchCommands
+        | CommandId::SelectTool
+        | CommandId::ToggleNavigator
+        | CommandId::ToggleInspector => Enabled,
+        CommandId::ClearSelection if context.has_selection => Enabled,
+        CommandId::ClearSelection => Disabled("Nothing is selected."),
     }
 }
 
-/// Commands shown as toolbar buttons, in order.
-pub fn toolbar() -> impl Iterator<Item = &'static CommandSpec> {
-    CATALOG.iter().filter(|spec| spec.in_toolbar)
+/// Commands shown in `placement`, in catalog order.
+pub fn placed(placement: Placement) -> impl Iterator<Item = &'static CommandSpec> {
+    CATALOG
+        .iter()
+        .filter(move |spec| spec.placement == placement)
 }
 
 /// Commands grouped for menus, in menu order; empty groups are left out.
