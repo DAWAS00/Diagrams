@@ -8,6 +8,9 @@
 
 use eframe::egui::{Id, ThemePreference, Vec2};
 
+use diagram_canvas::{MAX_ZOOM, MIN_ZOOM};
+
+use crate::editor_state::{EditorState, Gesture, ShellSupport, TabState, Tool};
 use crate::ui::commands::CommandContext;
 use crate::ui::palette::PaletteState;
 use crate::ui::showcase::ShowcaseState;
@@ -20,6 +23,12 @@ pub const CLASS_WIDTH: f32 = 180.0;
 pub const CLASS_HEADER_HEIGHT: f32 = 32.0;
 /// Height of one attribute line.
 pub const ATTRIBUTE_HEIGHT: f32 = 20.0;
+
+/// Name of the sample project's diagram.
+pub const SAMPLE_DIAGRAM: &str = "Class diagram 1";
+
+/// Name of the second fixture diagram used to exercise tabs.
+pub const SECOND_DIAGRAM: &str = "Class diagram 2 (design fixture)";
 
 /// Name of the built-in sample project.
 pub const SAMPLE_PROJECT: &str = "Sample project";
@@ -76,8 +85,17 @@ pub fn sample_classes() -> Vec<PreviewClass> {
 pub struct AppState {
     /// Classes shown on the canvas, in drawing order.
     pub classes: Vec<PreviewClass>,
-    /// Index into [`Self::classes`] of the selected class, if any.
+    /// The primary selected class: the last one added to [`Self::selection`].
+    /// Change it only through the selection methods, which keep both in step.
     pub selected: Option<usize>,
+    /// Every selected class, in the order selected.
+    pub selection: Vec<usize>,
+    /// Diagrams in the project (design fixture names until M1).
+    pub diagrams: Vec<String>,
+    /// Tool, gesture, tabs, viewport, preferences, drafts and searches.
+    pub editor: EditorState,
+    /// What the running shell draws and sends.
+    pub support: ShellSupport,
     /// Light, dark or follow the operating system. Light is the default.
     pub theme: ThemePreference,
     /// The command and object search, while it is open.
@@ -115,6 +133,10 @@ impl Default for AppState {
         Self {
             classes: sample_classes(),
             selected: None,
+            selection: Vec::new(),
+            diagrams: vec![String::from(SAMPLE_DIAGRAM)],
+            editor: EditorState::default(),
+            support: ShellSupport::default(),
             theme: ThemePreference::Light,
             palette: None,
             panels: PanelPreferences::default(),
@@ -141,30 +163,84 @@ impl AppState {
         }
     }
 
+    /// The sample project with a second diagram tab open (design fixture),
+    /// for tab switching before the project model exists.
+    pub fn with_second_diagram() -> Self {
+        let mut state = Self::default();
+        state.diagrams.push(String::from(SECOND_DIAGRAM));
+        state.editor.tabs.push(TabState::new(1));
+        state
+    }
+
     /// The currently selected class, if the selection index is valid.
     pub fn selected_class(&self) -> Option<&PreviewClass> {
         self.selected.and_then(|index| self.classes.get(index))
     }
 
-    /// Selects the class at `index`; out-of-range indices clear the selection.
+    /// Selects only the class at `index`; out-of-range indices clear the selection.
     pub fn select(&mut self, index: usize) {
-        self.selected = (index < self.classes.len()).then_some(index);
+        self.set_selection(vec![index]);
+    }
+
+    /// Adds the class at `index` to the selection, or removes it if selected.
+    pub fn toggle_selected(&mut self, index: usize) {
+        let mut selection = self.selection.clone();
+        if let Some(position) = selection.iter().position(|&item| item == index) {
+            selection.remove(position);
+        } else {
+            selection.push(index);
+        }
+        self.set_selection(selection);
+    }
+
+    /// Replaces the selection; invalid and repeated indices are dropped.
+    pub fn set_selection(&mut self, indices: Vec<usize>) {
+        let mut selection: Vec<usize> = Vec::with_capacity(indices.len());
+        for index in indices {
+            if index < self.classes.len() && !selection.contains(&index) {
+                selection.push(index);
+            }
+        }
+        self.selected = selection.last().copied();
+        self.selection = selection;
     }
 
     /// Clears the selection.
     pub fn clear_selection(&mut self) {
-        self.selected = None;
+        self.set_selection(Vec::new());
+    }
+
+    /// Indices of the selected classes. A primary selection set without the
+    /// selection methods still counts.
+    pub fn selected_indices(&self) -> Vec<usize> {
+        match self.selected {
+            Some(index) if !self.selection.contains(&index) => vec![index],
+            _ => self.selection.clone(),
+        }
+    }
+
+    /// Escape has something to cancel.
+    pub fn can_cancel(&self) -> bool {
+        self.editor.pending.is_some()
+            || self.editor.draft.is_some()
+            || self.editor.gesture != Gesture::Idle
+            || self.editor.tool != Tool::Select
+            || self.selected_class().is_some()
     }
 
     /// The state that decides which commands are available.
     pub fn command_context(&self) -> CommandContext {
+        let selection_count = self.selected_indices().len();
+        let zoom = self.editor.viewport().zoom();
         CommandContext {
-            has_selection: self.selected_class().is_some(),
-            selection_count: usize::from(self.selected_class().is_some()),
+            has_selection: selection_count > 0,
+            selection_count,
             has_content: !self.classes.is_empty(),
-            tab_count: 1,
-            can_zoom_in: false,
-            can_zoom_out: false,
+            tab_count: self.editor.tabs.len(),
+            can_zoom_in: zoom < MAX_ZOOM,
+            can_zoom_out: zoom > MIN_ZOOM,
+            can_cancel: self.can_cancel(),
+            support: self.support,
         }
     }
 

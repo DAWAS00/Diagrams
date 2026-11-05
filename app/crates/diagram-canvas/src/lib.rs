@@ -1,10 +1,14 @@
 //! Renderer-neutral canvas boundary for Diagram Studio.
 //!
-//! Reserved for geometry, hit testing, interaction previews and the scene shared
-//! by screen rendering and SVG export. The core owns authoritative document
-//! values; this crate will borrow them and derive visual output.
-//!
-//! No canvas operations are implemented in R0-01. The desktop prototype is the
-//! next step; the validated scene and interaction pipeline arrive in M2.
+//! Pure geometry for the editor: the world ↔ screen [`Viewport`] transform
+//! and [`picking`] in visible stacking order. The core owns authoritative
+//! document values; this crate borrows them and derives visual output. It
+//! never owns a writable document or writes files. The shared scene and SVG
+//! output arrive in M2.
 
 #![deny(missing_docs)]
+
+pub mod picking;
+pub mod viewport;
+
+pub use viewport::{MAX_ZOOM, MIN_ZOOM, ScreenSize, Viewport, ZOOM_STEP};

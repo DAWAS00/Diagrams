@@ -12,10 +12,13 @@ use std::io::{self, Write};
 
 pub mod app_state;
 pub mod dispatch;
+pub mod drafts;
+pub mod editor_state;
 pub mod intent;
 pub mod presentation;
 pub mod shell;
 pub mod ui;
+pub mod viewport;
 
 /// Working product name displayed by the desktop executable.
 pub const APPLICATION_NAME: &str = "Diagram Studio";
