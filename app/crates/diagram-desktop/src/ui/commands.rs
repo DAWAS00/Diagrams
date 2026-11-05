@@ -2,11 +2,15 @@
 //!
 //! Every surface that offers a command reads it from [`CATALOG`], so labels,
 //! shortcuts and availability cannot drift apart. A disabled command always
-//! carries the reason shown to the user.
+//! carries the reason shown to the user. Shortcuts are dispatched by
+//! [`take_shortcut_in`] in the priority order of the functional spec §8:
+//! modal → IME or text field → focused region → application command.
 
 use std::cmp::Reverse;
 
-use eframe::egui::{InputState, Key, KeyboardShortcut, ModifierNames, Modifiers};
+use eframe::egui::{Event, ImeEvent, InputState, Key, KeyboardShortcut, ModifierNames, Modifiers};
+
+use crate::intent::{InputContext, Region};
 
 /// Every command the application knows about.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -15,25 +19,25 @@ pub enum CommandId {
     Undo,
     /// Redo the last undone change.
     Redo,
-    /// Open the command and object search.
+    /// Open the command search.
     SearchCommands,
     /// Save the project.
     Save,
-    /// Export the current diagram.
+    /// Export the current diagram as SVG.
     Export,
     /// Select tool: click objects to select them.
     SelectTool,
-    /// Pan tool: drag to move the view.
+    /// Pan tool: drag to move the view (becomes "Hand", decision D3).
     PanTool,
     /// Class tool: place a new class.
     AddClass,
-    /// Association tool: connect two classes.
+    /// Relationship tool: connect two classes.
     Connect,
-    /// Note tool: place a note.
+    /// Note tool (leaves the catalog, decision D2).
     AddNote,
-    /// Arrange the selected objects.
+    /// Arrange menu for the selected views.
     Arrange,
-    /// Create a diagram.
+    /// Add a diagram to the project.
     NewDiagram,
     /// Show or hide the project panel (a drawer on narrow windows).
     ToggleNavigator,
@@ -43,11 +47,107 @@ pub enum CommandId {
     ClearSelection,
     /// Show every reusable control in each state (design fixture).
     ShowComponentShowcase,
+    /// Create a new project.
+    NewProject,
+    /// Open a project file.
+    OpenProject,
+    /// Save the project to a chosen file.
+    SaveAs,
+    /// Close the project.
+    CloseProject,
+    /// Review a recovered project snapshot.
+    RecoverProject,
+    /// Rename the active diagram.
+    RenameDiagram,
+    /// Close the active diagram tab; the diagram stays in the project.
+    CloseTab,
+    /// Switch to the next diagram tab.
+    NextTab,
+    /// Switch to the previous diagram tab.
+    PreviousTab,
+    /// Delete the active diagram and its views.
+    DeleteDiagram,
+    /// Select every view in the active diagram.
+    SelectAll,
+    /// Remove the selected views from this diagram only.
+    RemoveView,
+    /// Rename the selected model element.
+    Rename,
+    /// Edit the position and size of the selected views.
+    EditGeometry,
+    /// Edit the appearance of the selected views.
+    EditAppearance,
+    /// Add an attribute to the selected class.
+    AddAttribute,
+    /// Add an operation to the selected class.
+    AddOperation,
+    /// Move the selected member up.
+    MoveMemberUp,
+    /// Move the selected member down.
+    MoveMemberDown,
+    /// Remove the selected member.
+    RemoveMember,
+    /// Edit the ends (roles, multiplicities) of the selected relationship.
+    EditRelationEnds,
+    /// Show an existing model element in another diagram.
+    ShowInDiagram,
+    /// Create an independent copy of the selected class.
+    DuplicateModel,
+    /// Delete the selected model element from every diagram.
+    DeleteModelEverywhere,
+    /// Choose the relationship kind (association or generalization).
+    RelationshipKind,
+    /// Align left edges.
+    AlignLeft,
+    /// Align horizontal centers.
+    AlignCenter,
+    /// Align right edges.
+    AlignRight,
+    /// Align top edges.
+    AlignTop,
+    /// Align vertical middles.
+    AlignMiddle,
+    /// Align bottom edges.
+    AlignBottom,
+    /// Equal horizontal gaps.
+    DistributeHorizontally,
+    /// Equal vertical gaps.
+    DistributeVertically,
+    /// Zoom in.
+    ZoomIn,
+    /// Zoom out.
+    ZoomOut,
+    /// Zoom to 100%.
+    ActualSize,
+    /// Fit the whole diagram in the view.
+    FitAll,
+    /// Fit the selection in the view.
+    FitSelection,
+    /// Show or hide the grid.
+    ToggleGrid,
+    /// Turn snapping to the grid on or off.
+    ToggleSnap,
+    /// Open the validation issues drawer.
+    ShowIssues,
+    /// Open preferences.
+    Preferences,
+    /// Find an object by name.
+    FindObject,
+    /// Reveal the selected element's view in the active diagram.
+    Reveal,
+    /// Move keyboard focus to the next workspace region.
+    NextRegion,
+    /// Move keyboard focus to the previous workspace region.
+    PreviousRegion,
+    /// Open the context menu for the focused object.
+    ContextMenu,
+    /// Help and keyboard shortcuts.
+    HelpShortcuts,
 }
 
 impl CommandId {
     /// Every command, in catalog order.
-    pub const ALL: [Self; 16] = [
+    pub const ALL: [Self; 64] = [
         Self::Undo,
         Self::Redo,
         Self::SearchCommands,
@@ -64,6 +164,54 @@ impl CommandId {
         Self::ToggleInspector,
         Self::ClearSelection,
         Self::ShowComponentShowcase,
+        Self::NewProject,
+        Self::OpenProject,
+        Self::SaveAs,
+        Self::CloseProject,
+        Self::RecoverProject,
+        Self::RenameDiagram,
+        Self::CloseTab,
+        Self::NextTab,
+        Self::PreviousTab,
+        Self::DeleteDiagram,
+        Self::SelectAll,
+        Self::RemoveView,
+        Self::Rename,
+        Self::EditGeometry,
+        Self::EditAppearance,
+        Self::AddAttribute,
+        Self::AddOperation,
+        Self::MoveMemberUp,
+        Self::MoveMemberDown,
+        Self::RemoveMember,
+        Self::EditRelationEnds,
+        Self::ShowInDiagram,
+        Self::DuplicateModel,
+        Self::DeleteModelEverywhere,
+        Self::RelationshipKind,
+        Self::AlignLeft,
+        Self::AlignCenter,
+        Self::AlignRight,
+        Self::AlignTop,
+        Self::AlignMiddle,
+        Self::AlignBottom,
+        Self::DistributeHorizontally,
+        Self::DistributeVertically,
+        Self::ZoomIn,
+        Self::ZoomOut,
+        Self::ActualSize,
+        Self::FitAll,
+        Self::FitSelection,
+        Self::ToggleGrid,
+        Self::ToggleSnap,
+        Self::ShowIssues,
+        Self::Preferences,
+        Self::FindObject,
+        Self::Reveal,
+        Self::NextRegion,
+        Self::PreviousRegion,
+        Self::ContextMenu,
+        Self::HelpShortcuts,
     ];
 
     /// This command's catalog entry.
@@ -79,22 +227,28 @@ pub enum CommandGroup {
     File,
     /// Changes and selection.
     Edit,
-    /// Panels and layout.
+    /// Classes, members and relationships (shared model).
+    Model,
+    /// Panels, zoom and layout.
     View,
-    /// Canvas tools.
+    /// Canvas tools and arranging.
     Tools,
-    /// Finding commands and objects.
+    /// Finding commands, objects and regions.
     Navigate,
+    /// Help and shortcuts.
+    Help,
 }
 
 impl CommandGroup {
     /// Groups in menu order.
-    pub const ALL: [Self; 5] = [
+    pub const ALL: [Self; 7] = [
         Self::File,
         Self::Edit,
+        Self::Model,
         Self::View,
         Self::Tools,
         Self::Navigate,
+        Self::Help,
     ];
 
     /// Name shown in menus and in search results.
@@ -102,9 +256,11 @@ impl CommandGroup {
         match self {
             Self::File => "File",
             Self::Edit => "Edit",
+            Self::Model => "Model",
             Self::View => "View",
             Self::Tools => "Tools",
             Self::Navigate => "Navigate",
+            Self::Help => "Help",
         }
     }
 }
@@ -122,6 +278,16 @@ pub enum Placement {
     PanelToggle,
     /// Only in the menu, the search and its shortcut.
     MenuOnly,
+}
+
+/// Where a command's shortcut works.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ShortcutScope {
+    /// Anywhere outside a modal (unless a text field owns the keys).
+    Application,
+    /// Only while the board has focus, nobody is typing or composing text
+    /// and no modal is open. Single letters, digits, Delete and Ctrl+A.
+    Canvas,
 }
 
 /// Whether a command can run now, and if not, why.
@@ -157,167 +323,314 @@ pub struct CommandSpec {
     pub label: &'static str,
     /// Menu group.
     pub group: CommandGroup,
-    /// Keyboard shortcut, if any.
+    /// Keyboard shortcut shown to the user, if any.
     pub shortcut: Option<KeyboardShortcut>,
+    /// Further keys that run the command (for example Ctrl+Shift+P for search,
+    /// or Ctrl+= for zoom in). They are not shown separately.
+    pub alternate_shortcuts: &'static [KeyboardShortcut],
     /// True when a focused text field uses the same keys (for example Ctrl+Z
     /// or Escape). The field then keeps them and the command does not run.
     pub text_field_owns_shortcut: bool,
+    /// Where the shortcut works.
+    pub scope: ShortcutScope,
     /// Where the command appears outside the menu and the search.
     pub placement: Placement,
+    /// Other words command search accepts for this command; results always
+    /// show the canonical label.
+    pub aliases: &'static [&'static str],
+}
+
+impl CommandSpec {
+    /// Every key combination that runs the command.
+    pub fn all_shortcuts(&self) -> impl Iterator<Item = KeyboardShortcut> + '_ {
+        self.shortcut
+            .into_iter()
+            .chain(self.alternate_shortcuts.iter().copied())
+    }
+
+    const fn keys(self, modifiers: Modifiers, key: Key) -> Self {
+        Self {
+            shortcut: Some(KeyboardShortcut::new(modifiers, key)),
+            ..self
+        }
+    }
+
+    const fn also(self, alternate_shortcuts: &'static [KeyboardShortcut]) -> Self {
+        Self {
+            alternate_shortcuts,
+            ..self
+        }
+    }
+
+    const fn text_owns(self) -> Self {
+        Self {
+            text_field_owns_shortcut: true,
+            ..self
+        }
+    }
+
+    const fn canvas(self) -> Self {
+        Self {
+            scope: ShortcutScope::Canvas,
+            ..self
+        }
+    }
+
+    const fn aka(self, aliases: &'static [&'static str]) -> Self {
+        Self { aliases, ..self }
+    }
 }
 
 const fn spec(
     id: CommandId,
     label: &'static str,
     group: CommandGroup,
-    shortcut: Option<KeyboardShortcut>,
-    text_field_owns_shortcut: bool,
     placement: Placement,
 ) -> CommandSpec {
     CommandSpec {
         id,
         label,
         group,
-        shortcut,
-        text_field_owns_shortcut,
+        shortcut: None,
+        alternate_shortcuts: &[],
+        text_field_owns_shortcut: false,
+        scope: ShortcutScope::Application,
         placement,
+        aliases: &[],
     }
 }
 
-const fn keys(modifiers: Modifiers, key: Key) -> Option<KeyboardShortcut> {
-    Some(KeyboardShortcut::new(modifiers, key))
-}
+const CTRL: Modifiers = Modifiers::COMMAND;
+const CTRL_SHIFT: Modifiers = Modifiers::COMMAND.plus(Modifiers::SHIFT);
+const SHIFT: Modifiers = Modifiers::SHIFT;
+const NONE: Modifiers = Modifiers::NONE;
+
+use CommandGroup as G;
+use CommandId as C;
+use Placement as P;
 
 /// The catalog, in [`CommandId`] order.
-pub const CATALOG: [CommandSpec; 16] = [
+pub const CATALOG: [CommandSpec; 64] = [
+    spec(C::Undo, "Undo", G::Edit, P::Header)
+        .keys(CTRL, Key::Z)
+        .text_owns(),
+    spec(C::Redo, "Redo", G::Edit, P::Header)
+        .keys(CTRL_SHIFT, Key::Z)
+        .text_owns(),
+    // D1: Ctrl+K stays and Ctrl+Shift+P is added.
+    spec(C::SearchCommands, "Search", G::Navigate, P::Header)
+        .keys(CTRL, Key::K)
+        .also(&[KeyboardShortcut::new(CTRL_SHIFT, Key::P)])
+        .aka(&["command palette", "commands", "actions"]),
+    spec(C::Save, "Save", G::File, P::Header).keys(CTRL, Key::S),
+    spec(C::Export, "Export", G::File, P::Header)
+        .keys(CTRL_SHIFT, Key::E)
+        .aka(&["svg", "export svg", "image"]),
+    spec(C::SelectTool, "Select", G::Tools, P::ToolRow)
+        .keys(NONE, Key::V)
+        .canvas()
+        .aka(&["pointer", "arrow"]),
+    spec(C::PanTool, "Pan", G::Tools, P::ToolRow)
+        .keys(NONE, Key::H)
+        .canvas()
+        .aka(&["hand", "move view", "scroll"]),
+    spec(C::AddClass, "Class", G::Tools, P::ToolRow)
+        .keys(NONE, Key::C)
+        .canvas()
+        .aka(&["add class", "new class", "create class"]),
+    spec(C::Connect, "Association", G::Tools, P::ToolRow)
+        .keys(NONE, Key::R)
+        .canvas()
+        .aka(&["relationship", "connect", "link", "edge"]),
+    spec(C::AddNote, "Note", G::Tools, P::ToolRow).aka(&["comment"]),
+    spec(C::Arrange, "Arrange", G::Tools, P::ToolRow).aka(&["align", "distribute", "layout"]),
+    spec(C::NewDiagram, "New diagram", G::File, P::TabRow)
+        .keys(CTRL_SHIFT, Key::N)
+        .aka(&["add diagram", "diagram"]),
+    spec(C::ToggleNavigator, "Project panel", G::View, P::PanelToggle).aka(&[
+        "navigator",
+        "sidebar",
+        "model list",
+    ]),
+    spec(C::ToggleInspector, "Inspector", G::View, P::PanelToggle).aka(&["properties", "details"]),
+    spec(C::ClearSelection, "Clear selection", G::Edit, P::MenuOnly)
+        .keys(NONE, Key::Escape)
+        .text_owns()
+        .aka(&["deselect"]),
     spec(
-        CommandId::Undo,
-        "Undo",
-        CommandGroup::Edit,
-        keys(Modifiers::COMMAND, Key::Z),
-        true,
-        Placement::Header,
-    ),
-    spec(
-        CommandId::Redo,
-        "Redo",
-        CommandGroup::Edit,
-        keys(Modifiers::COMMAND.plus(Modifiers::SHIFT), Key::Z),
-        true,
-        Placement::Header,
-    ),
-    spec(
-        CommandId::SearchCommands,
-        "Search",
-        CommandGroup::Navigate,
-        keys(Modifiers::COMMAND, Key::K),
-        false,
-        Placement::Header,
-    ),
-    spec(
-        CommandId::Save,
-        "Save",
-        CommandGroup::File,
-        keys(Modifiers::COMMAND, Key::S),
-        false,
-        Placement::Header,
-    ),
-    spec(
-        CommandId::Export,
-        "Export",
-        CommandGroup::File,
-        None,
-        false,
-        Placement::Header,
-    ),
-    spec(
-        CommandId::SelectTool,
-        "Select",
-        CommandGroup::Tools,
-        None,
-        false,
-        Placement::ToolRow,
-    ),
-    spec(
-        CommandId::PanTool,
-        "Pan",
-        CommandGroup::Tools,
-        None,
-        false,
-        Placement::ToolRow,
-    ),
-    spec(
-        CommandId::AddClass,
-        "Class",
-        CommandGroup::Tools,
-        None,
-        false,
-        Placement::ToolRow,
-    ),
-    spec(
-        CommandId::Connect,
-        "Association",
-        CommandGroup::Tools,
-        None,
-        false,
-        Placement::ToolRow,
-    ),
-    spec(
-        CommandId::AddNote,
-        "Note",
-        CommandGroup::Tools,
-        None,
-        false,
-        Placement::ToolRow,
-    ),
-    spec(
-        CommandId::Arrange,
-        "Arrange",
-        CommandGroup::Tools,
-        None,
-        false,
-        Placement::ToolRow,
-    ),
-    spec(
-        CommandId::NewDiagram,
-        "New diagram",
-        CommandGroup::File,
-        None,
-        false,
-        Placement::TabRow,
-    ),
-    spec(
-        CommandId::ToggleNavigator,
-        "Project panel",
-        CommandGroup::View,
-        None,
-        false,
-        Placement::PanelToggle,
-    ),
-    spec(
-        CommandId::ToggleInspector,
-        "Inspector",
-        CommandGroup::View,
-        None,
-        false,
-        Placement::PanelToggle,
-    ),
-    spec(
-        CommandId::ClearSelection,
-        "Clear selection",
-        CommandGroup::Edit,
-        keys(Modifiers::NONE, Key::Escape),
-        true,
-        Placement::MenuOnly,
-    ),
-    spec(
-        CommandId::ShowComponentShowcase,
+        C::ShowComponentShowcase,
         "Component showcase",
-        CommandGroup::View,
-        None,
-        false,
-        Placement::MenuOnly,
-    ),
+        G::View,
+        P::MenuOnly,
+    )
+    .aka(&["design fixture", "controls"]),
+    spec(C::NewProject, "New project", G::File, P::MenuOnly).keys(CTRL, Key::N),
+    spec(C::OpenProject, "Open project", G::File, P::MenuOnly)
+        .keys(CTRL, Key::O)
+        .aka(&["open file", "load"]),
+    spec(C::SaveAs, "Save As", G::File, P::MenuOnly)
+        .keys(CTRL_SHIFT, Key::S)
+        .aka(&["save copy"]),
+    spec(C::CloseProject, "Close project", G::File, P::MenuOnly).aka(&["quit project"]),
+    spec(C::RecoverProject, "Review recovery", G::File, P::MenuOnly)
+        .aka(&["recover", "restore", "autosave"]),
+    spec(C::RenameDiagram, "Rename diagram", G::File, P::MenuOnly),
+    spec(C::CloseTab, "Close tab", G::File, P::MenuOnly)
+        .keys(CTRL, Key::W)
+        .aka(&["close diagram tab"]),
+    spec(C::NextTab, "Next tab", G::Navigate, P::MenuOnly)
+        .keys(CTRL, Key::Tab)
+        .aka(&["switch diagram", "next diagram"]),
+    spec(C::PreviousTab, "Previous tab", G::Navigate, P::MenuOnly)
+        .keys(CTRL_SHIFT, Key::Tab)
+        .aka(&["switch diagram", "previous diagram"]),
+    spec(C::DeleteDiagram, "Delete diagram", G::File, P::MenuOnly),
+    spec(C::SelectAll, "Select all", G::Edit, P::MenuOnly)
+        .keys(CTRL, Key::A)
+        .text_owns()
+        .canvas(),
+    spec(C::RemoveView, "Remove from diagram", G::Edit, P::MenuOnly)
+        .keys(NONE, Key::Delete)
+        .text_owns()
+        .canvas()
+        .aka(&["remove view", "delete"]),
+    spec(C::Rename, "Rename", G::Edit, P::MenuOnly)
+        .keys(NONE, Key::F2)
+        .canvas()
+        .aka(&["rename class", "edit name"]),
+    spec(C::EditGeometry, "Position and size", G::Edit, P::MenuOnly)
+        .aka(&["move", "resize", "geometry", "nudge"]),
+    spec(C::EditAppearance, "Appearance", G::Edit, P::MenuOnly)
+        .aka(&["style", "color", "fill", "border"]),
+    spec(C::AddAttribute, "Add attribute", G::Model, P::MenuOnly).aka(&[
+        "attribute",
+        "field",
+        "property",
+        "member",
+    ]),
+    spec(C::AddOperation, "Add operation", G::Model, P::MenuOnly).aka(&[
+        "operation",
+        "method",
+        "function",
+        "member",
+    ]),
+    spec(C::MoveMemberUp, "Move member up", G::Model, P::MenuOnly)
+        .aka(&["reorder", "attribute up"]),
+    spec(C::MoveMemberDown, "Move member down", G::Model, P::MenuOnly)
+        .aka(&["reorder", "attribute down"]),
+    spec(C::RemoveMember, "Remove member", G::Model, P::MenuOnly)
+        .aka(&["delete attribute", "delete operation"]),
+    spec(
+        C::EditRelationEnds,
+        "Relationship ends",
+        G::Model,
+        P::MenuOnly,
+    )
+    .aka(&["multiplicity", "role", "ends"]),
+    spec(C::ShowInDiagram, "Show in diagram", G::Model, P::MenuOnly).aka(&[
+        "reuse",
+        "add existing",
+        "place existing",
+    ]),
+    spec(C::DuplicateModel, "Duplicate model", G::Model, P::MenuOnly).aka(&[
+        "copy",
+        "clone",
+        "duplicate",
+    ]),
+    spec(
+        C::DeleteModelEverywhere,
+        "Delete model everywhere",
+        G::Model,
+        P::MenuOnly,
+    )
+    .aka(&["delete", "remove model"]),
+    spec(
+        C::RelationshipKind,
+        "Relationship kind",
+        G::Tools,
+        P::MenuOnly,
+    )
+    .aka(&["generalization", "inheritance", "association"]),
+    spec(C::AlignLeft, "Align left", G::Tools, P::MenuOnly).aka(&["arrange"]),
+    spec(C::AlignCenter, "Align center", G::Tools, P::MenuOnly).aka(&["arrange"]),
+    spec(C::AlignRight, "Align right", G::Tools, P::MenuOnly).aka(&["arrange"]),
+    spec(C::AlignTop, "Align top", G::Tools, P::MenuOnly).aka(&["arrange"]),
+    spec(C::AlignMiddle, "Align middle", G::Tools, P::MenuOnly).aka(&["arrange"]),
+    spec(C::AlignBottom, "Align bottom", G::Tools, P::MenuOnly).aka(&["arrange"]),
+    spec(
+        C::DistributeHorizontally,
+        "Distribute horizontally",
+        G::Tools,
+        P::MenuOnly,
+    )
+    .aka(&["arrange", "spacing"]),
+    spec(
+        C::DistributeVertically,
+        "Distribute vertically",
+        G::Tools,
+        P::MenuOnly,
+    )
+    .aka(&["arrange", "spacing"]),
+    spec(C::ZoomIn, "Zoom in", G::View, P::MenuOnly)
+        .keys(CTRL, Key::Plus)
+        .also(&[KeyboardShortcut::new(CTRL, Key::Equals)])
+        .aka(&["magnify", "larger"]),
+    spec(C::ZoomOut, "Zoom out", G::View, P::MenuOnly)
+        .keys(CTRL, Key::Minus)
+        .aka(&["smaller"]),
+    spec(C::ActualSize, "Actual size", G::View, P::MenuOnly)
+        .keys(CTRL, Key::Num0)
+        .aka(&["100%", "reset zoom", "zoom"]),
+    spec(C::FitAll, "Fit all", G::View, P::MenuOnly)
+        .keys(SHIFT, Key::Num1)
+        .also(&[KeyboardShortcut::new(SHIFT, Key::Exclamationmark)])
+        .canvas()
+        .aka(&["fit", "zoom to fit", "show all"]),
+    spec(C::FitSelection, "Fit selection", G::View, P::MenuOnly)
+        .keys(SHIFT, Key::Num2)
+        .canvas()
+        .aka(&["fit", "zoom to selection"]),
+    spec(C::ToggleGrid, "Grid", G::View, P::MenuOnly)
+        .keys(NONE, Key::G)
+        .canvas()
+        .aka(&["show grid"]),
+    spec(C::ToggleSnap, "Snap to grid", G::View, P::MenuOnly)
+        .keys(SHIFT, Key::G)
+        .canvas()
+        .aka(&["snap"]),
+    spec(C::ShowIssues, "Validation issues", G::View, P::MenuOnly).aka(&[
+        "issues",
+        "problems",
+        "errors",
+        "warnings",
+        "validation",
+    ]),
+    spec(C::Preferences, "Preferences", G::View, P::MenuOnly)
+        .keys(CTRL, Key::Comma)
+        .aka(&["settings", "options", "theme", "text scale"]),
+    spec(C::FindObject, "Find object", G::Navigate, P::MenuOnly)
+        .keys(CTRL, Key::F)
+        .text_owns()
+        .aka(&["find", "search objects", "model search"]),
+    spec(C::Reveal, "Reveal in diagram", G::Navigate, P::MenuOnly)
+        .aka(&["reveal", "go to", "locate"]),
+    spec(C::NextRegion, "Next region", G::Navigate, P::MenuOnly)
+        .keys(NONE, Key::F6)
+        .aka(&["focus", "panel"]),
+    spec(
+        C::PreviousRegion,
+        "Previous region",
+        G::Navigate,
+        P::MenuOnly,
+    )
+    .keys(SHIFT, Key::F6)
+    .aka(&["focus", "panel"]),
+    spec(C::ContextMenu, "Context menu", G::Navigate, P::MenuOnly)
+        .keys(SHIFT, Key::F10)
+        .aka(&["actions menu", "right click"]),
+    spec(C::HelpShortcuts, "Help and shortcuts", G::Help, P::MenuOnly)
+        .keys(NONE, Key::F1)
+        .aka(&["keyboard", "shortcuts", "help", "keys"]),
 ];
 
 /// The state that command availability depends on.
@@ -325,7 +638,20 @@ pub const CATALOG: [CommandSpec; 16] = [
 pub struct CommandContext {
     /// Something is selected on the canvas.
     pub has_selection: bool,
+    /// Number of selected views.
+    pub selection_count: usize,
+    /// The active diagram has at least one view.
+    pub has_content: bool,
+    /// Number of open diagram tabs.
+    pub tab_count: usize,
+    /// Zoom is below the maximum.
+    pub can_zoom_in: bool,
+    /// Zoom is above the minimum.
+    pub can_zoom_out: bool,
 }
+
+/// Explains every command that changes the project model.
+pub const NEEDS_MODEL: &str = "Not available yet: this needs the project model (milestone M1).";
 
 /// Whether `id` can run in `context`, with the reason when it cannot.
 pub fn availability(id: CommandId, context: CommandContext) -> Availability {
@@ -334,18 +660,83 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
         CommandId::Undo => Disabled("Not available yet: undo needs the project history."),
         CommandId::Redo => Disabled("Not available yet: redo needs the project history."),
         CommandId::Save => Disabled("Not available yet: this prototype cannot save."),
+        CommandId::SaveAs => {
+            Disabled("Not available yet: Save As arrives with project storage (R1-06).")
+        }
         CommandId::Export => Disabled("Not available yet: SVG export is planned for v0.1."),
+        CommandId::OpenProject => {
+            Disabled("Not available yet: opening project files arrives with project storage.")
+        }
+        CommandId::RecoverProject => {
+            Disabled("Not available yet: recovery arrives with project storage.")
+        }
+        CommandId::NewProject | CommandId::CloseProject => Disabled(
+            "Not available yet: replacing the open project needs the unsaved-changes dialog.",
+        ),
         CommandId::PanTool => {
             Disabled("Not available yet: panning arrives with canvas scrolling and zoom.")
         }
         CommandId::AddClass => {
             Disabled("Not available yet: adding classes needs the project model.")
         }
-        CommandId::Connect => Disabled("Not available yet: relationships need the project model."),
+        CommandId::Connect | CommandId::RelationshipKind | CommandId::EditRelationEnds => {
+            Disabled("Not available yet: relationships need the project model.")
+        }
         CommandId::AddNote => Disabled("Not available yet: notes need the project model."),
-        CommandId::Arrange => Disabled("Not available yet: arranging needs movable objects."),
-        CommandId::NewDiagram => {
+        CommandId::Arrange
+        | CommandId::AlignLeft
+        | CommandId::AlignCenter
+        | CommandId::AlignRight
+        | CommandId::AlignTop
+        | CommandId::AlignMiddle
+        | CommandId::AlignBottom
+        | CommandId::DistributeHorizontally
+        | CommandId::DistributeVertically => {
+            Disabled("Not available yet: arranging needs movable objects.")
+        }
+        CommandId::NewDiagram | CommandId::RenameDiagram | CommandId::DeleteDiagram => {
             Disabled("Not available yet: new diagrams need the project model.")
+        }
+        CommandId::AddAttribute
+        | CommandId::AddOperation
+        | CommandId::MoveMemberUp
+        | CommandId::MoveMemberDown
+        | CommandId::RemoveMember => {
+            Disabled("Not available yet: editing members needs the project model.")
+        }
+        CommandId::ShowInDiagram
+        | CommandId::DuplicateModel
+        | CommandId::DeleteModelEverywhere
+        | CommandId::RemoveView
+        | CommandId::EditGeometry
+        | CommandId::EditAppearance => Disabled(NEEDS_MODEL),
+        CommandId::ShowIssues => {
+            Disabled("Not available yet: validation issues need the project model.")
+        }
+        CommandId::CloseTab | CommandId::NextTab | CommandId::PreviousTab => {
+            Disabled("Not available yet: diagram tabs arrive with the editor state (B-9).")
+        }
+        CommandId::SelectAll | CommandId::Rename | CommandId::Reveal => {
+            Disabled("Not available yet: arrives with canvas selection (B-6).")
+        }
+        CommandId::ZoomIn
+        | CommandId::ZoomOut
+        | CommandId::ActualSize
+        | CommandId::FitAll
+        | CommandId::FitSelection => {
+            Disabled("Not available yet: zoom arrives with the canvas viewport (B-5).")
+        }
+        CommandId::ToggleGrid | CommandId::ToggleSnap | CommandId::Preferences => {
+            Disabled("Not available yet: preferences arrive with the editor state (B-9).")
+        }
+        CommandId::FindObject => {
+            Disabled("Not available yet: object search arrives with the project panel (B-9).")
+        }
+        CommandId::NextRegion | CommandId::PreviousRegion => {
+            Disabled("Not available yet: region focus arrives with keyboard navigation (B-8).")
+        }
+        CommandId::ContextMenu | CommandId::HelpShortcuts => {
+            Disabled("Not available yet: this surface is part of the new screens (UI-09).")
         }
         CommandId::SearchCommands
         | CommandId::SelectTool
@@ -376,8 +767,8 @@ pub fn menu_groups() -> Vec<(CommandGroup, Vec<&'static CommandSpec>)> {
         .collect()
 }
 
-/// Commands whose label or group contains `query`, ignoring case. An empty
-/// query returns every command.
+/// Commands whose label, group or search alias contains `query`, ignoring
+/// case. An empty query returns every command.
 pub fn search(query: &str) -> Vec<&'static CommandSpec> {
     let query = query.trim().to_lowercase();
     CATALOG
@@ -386,6 +777,7 @@ pub fn search(query: &str) -> Vec<&'static CommandSpec> {
             query.is_empty()
                 || spec.label.to_lowercase().contains(&query)
                 || spec.group.label().to_lowercase().contains(&query)
+                || spec.aliases.iter().any(|alias| alias.contains(&query))
         })
         .collect()
 }
@@ -403,21 +795,84 @@ fn modifier_count(shortcut: &KeyboardShortcut) -> u8 {
         + u8::from(modifiers.command || modifiers.ctrl || modifiers.mac_cmd)
 }
 
-/// Consumes the first catalog shortcut pressed this frame and returns its command.
+/// Whether `spec`'s shortcut may fire in `context` (spec §8 input dispatch).
 ///
-/// More specific shortcuts are checked first, so Ctrl+Shift+Z is never read as
-/// Ctrl+Z. When a text field had focus in the previous frame, shortcuts that
-/// the field uses are left for the field: egui drops text focus in the same
-/// frame that Escape is pressed, so the current frame's focus is not reliable.
-pub fn take_shortcut(input: &mut InputState, text_had_focus: bool) -> Option<CommandId> {
-    let mut candidates: Vec<(&CommandSpec, KeyboardShortcut)> = CATALOG
-        .iter()
-        .filter(|spec| !(text_had_focus && spec.text_field_owns_shortcut))
-        .filter_map(|spec| spec.shortcut.map(|shortcut| (spec, shortcut)))
+/// - A modal owns the keyboard; only Escape-style keys it handles itself pass.
+/// - A focused text field or an IME composition keeps every key a text field
+///   uses, and every canvas-only key.
+/// - Canvas-only keys need the board to have focus.
+pub fn shortcut_allowed(spec: &CommandSpec, context: &InputContext) -> bool {
+    if context.modal_open {
+        return false;
+    }
+    let typing = context.text_had_focus || context.ime_composing;
+    if typing && spec.text_field_owns_shortcut {
+        return false;
+    }
+    match spec.scope {
+        ShortcutScope::Application => true,
+        ShortcutScope::Canvas => !typing && context.focused_region == Region::Board,
+    }
+}
+
+/// Consumes the first catalog shortcut pressed this frame that may fire in
+/// `context`, and returns its command. Each key event is consumed at most
+/// once, and more specific shortcuts are checked first, so Ctrl+Shift+Z is
+/// never read as Ctrl+Z and Shift+G never as G.
+pub fn take_shortcut_in(input: &mut InputState, context: &InputContext) -> Option<CommandId> {
+    take_first(
+        input,
+        CATALOG
+            .iter()
+            .filter(|spec| shortcut_allowed(spec, context)),
+    )
+}
+
+/// Consumes the most specific pressed shortcut among `specs`.
+fn take_first<'a>(
+    input: &mut InputState,
+    specs: impl Iterator<Item = &'a CommandSpec>,
+) -> Option<CommandId> {
+    let mut candidates: Vec<(&CommandSpec, KeyboardShortcut)> = specs
+        .flat_map(|spec| spec.all_shortcuts().map(move |shortcut| (spec, shortcut)))
         .collect();
     candidates.sort_by_key(|(_, shortcut)| Reverse(modifier_count(shortcut)));
     candidates
         .into_iter()
         .find(|(_, shortcut)| input.consume_shortcut(shortcut))
         .map(|(spec, _)| spec.id)
+}
+
+/// True when this frame's events show an input method composing text.
+pub fn ime_composing(input: &InputState) -> bool {
+    input.events.iter().any(
+        |event| matches!(event, Event::Ime(ImeEvent::Preedit { text, .. }) if !text.is_empty()),
+    )
+}
+
+/// Consumes the first catalog shortcut pressed this frame and returns its command.
+///
+/// This is [`take_shortcut_in`] for a shell that only knows whether a text
+/// field had focus in the previous frame (egui drops text focus in the same
+/// frame that Escape is pressed, so the current frame's focus is not
+/// reliable). IME composition is read from this frame's events; the board is
+/// assumed to have focus and no modal to be open.
+///
+/// Because such a shell cannot tell a text field that gains focus in this
+/// very frame from the canvas, canvas keys that text fields also use
+/// (Ctrl+A, Delete) are left alone here; [`take_shortcut_in`] handles them
+/// once the region focus is known.
+pub fn take_shortcut(input: &mut InputState, text_had_focus: bool) -> Option<CommandId> {
+    let context = InputContext {
+        text_had_focus,
+        ime_composing: ime_composing(input),
+        ..InputContext::default()
+    };
+    take_first(
+        input,
+        CATALOG
+            .iter()
+            .filter(|spec| shortcut_allowed(spec, &context))
+            .filter(|spec| !(spec.scope == ShortcutScope::Canvas && spec.text_field_owns_shortcut)),
+    )
 }

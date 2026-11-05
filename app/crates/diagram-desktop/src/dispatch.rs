@@ -98,7 +98,56 @@ fn run(state: &mut AppState, input: &InputContext, id: CommandId) {
         | CommandId::Connect
         | CommandId::AddNote
         | CommandId::Arrange
-        | CommandId::NewDiagram => {}
+        | CommandId::NewDiagram
+        | CommandId::NewProject
+        | CommandId::OpenProject
+        | CommandId::SaveAs
+        | CommandId::CloseProject
+        | CommandId::RecoverProject
+        | CommandId::RenameDiagram
+        | CommandId::DeleteDiagram
+        | CommandId::RemoveView
+        | CommandId::EditGeometry
+        | CommandId::EditAppearance
+        | CommandId::AddAttribute
+        | CommandId::AddOperation
+        | CommandId::MoveMemberUp
+        | CommandId::MoveMemberDown
+        | CommandId::RemoveMember
+        | CommandId::EditRelationEnds
+        | CommandId::ShowInDiagram
+        | CommandId::DuplicateModel
+        | CommandId::DeleteModelEverywhere
+        | CommandId::RelationshipKind
+        | CommandId::AlignLeft
+        | CommandId::AlignCenter
+        | CommandId::AlignRight
+        | CommandId::AlignTop
+        | CommandId::AlignMiddle
+        | CommandId::AlignBottom
+        | CommandId::DistributeHorizontally
+        | CommandId::DistributeVertically
+        | CommandId::ShowIssues
+        | CommandId::ContextMenu
+        | CommandId::HelpShortcuts => {}
+        // Editor-state commands, enabled task by task from B-5 to B-9.
+        CommandId::CloseTab
+        | CommandId::NextTab
+        | CommandId::PreviousTab
+        | CommandId::SelectAll
+        | CommandId::Rename
+        | CommandId::Reveal
+        | CommandId::ZoomIn
+        | CommandId::ZoomOut
+        | CommandId::ActualSize
+        | CommandId::FitAll
+        | CommandId::FitSelection
+        | CommandId::ToggleGrid
+        | CommandId::ToggleSnap
+        | CommandId::Preferences
+        | CommandId::FindObject
+        | CommandId::NextRegion
+        | CommandId::PreviousRegion => {}
     }
 }
 

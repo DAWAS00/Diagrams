@@ -83,7 +83,10 @@ fn every_command_should_have_a_label_group_and_placement() {
 #[test]
 fn every_disabled_reason_should_be_a_sentence_in_words() {
     for has_selection in [false, true] {
-        let context = CommandContext { has_selection };
+        let context = CommandContext {
+            has_selection,
+            ..CommandContext::default()
+        };
         for id in CommandId::ALL {
             if let Some(reason) = commands::availability(id, context).reason() {
                 let first = reason.chars().next();
@@ -138,5 +141,87 @@ fn disabled_commands_should_leave_the_state_unchanged() {
         let mut state = start.clone();
         apply_all(&mut state, [UiIntent::Command(id)]);
         assert_eq!(state, start, "{id:?}");
+    }
+}
+
+/// The catalog command that carries each action of the function map.
+fn function_map_command(action: &str) -> Option<CommandId> {
+    Some(match action {
+        "New project" => CommandId::NewProject,
+        "Open project" => CommandId::OpenProject,
+        "Add diagram" => CommandId::NewDiagram,
+        "Find object" => CommandId::FindObject,
+        "Switch diagram" => CommandId::NextTab,
+        "Add class" => CommandId::AddClass,
+        "Rename class" => CommandId::Rename,
+        "Add attribute" => CommandId::AddAttribute,
+        "Add operation" => CommandId::AddOperation,
+        "Edit/reorder member" => CommandId::MoveMemberUp,
+        "Connect association" => CommandId::Connect,
+        "Add generalization" => CommandId::RelationshipKind,
+        "Edit relation ends" => CommandId::EditRelationEnds,
+        "Move/resize views" => CommandId::EditGeometry,
+        "Change appearance" => CommandId::EditAppearance,
+        "Align selected views" => CommandId::AlignLeft,
+        "Show existing model in diagram" => CommandId::ShowInDiagram,
+        "Duplicate model" => CommandId::DuplicateModel,
+        "Remove view" => CommandId::RemoveView,
+        "Delete model everywhere" => CommandId::DeleteModelEverywhere,
+        "Undo/Redo" => CommandId::Undo,
+        "Pan/zoom/fit" => CommandId::FitAll,
+        "Save/Save As" => CommandId::Save,
+        "Export SVG" => CommandId::Export,
+        "Reveal validation issue" => CommandId::ShowIssues,
+        "Close dirty project" => CommandId::CloseProject,
+        "Recover project" => CommandId::RecoverProject,
+        "Theme/text scale/shortcuts" => CommandId::Preferences,
+        _ => return None,
+    })
+}
+
+#[test]
+fn every_function_map_row_should_name_a_catalog_command() {
+    let csv = include_str!("../../../docs/ui/new-design/UI-FUNCTION-MAP.csv");
+    let mut rows = 0;
+    for line in csv.trim_start_matches('\u{feff}').lines().skip(1) {
+        let Some(action) = line.split(',').next().filter(|action| !action.is_empty()) else {
+            continue;
+        };
+        rows += 1;
+        let command = function_map_command(action);
+        assert!(
+            command.is_some(),
+            "function map row {action:?} has no command"
+        );
+        if let Some(id) = command {
+            // Enabled, or disabled with a reason; either way it is in the
+            // catalog and reachable from command search.
+            assert!(CommandId::ALL.contains(&id));
+            assert!(!commands::search(id.spec().label).is_empty(), "{action}");
+        }
+    }
+    assert_eq!(rows, 28, "the function map changed; update the mapping");
+}
+
+#[test]
+fn search_aliases_should_reach_one_canonical_label() {
+    for (word, expected) in [
+        ("attribute", CommandId::AddAttribute),
+        ("reuse", CommandId::ShowInDiagram),
+        ("fit", CommandId::FitAll),
+        ("issues", CommandId::ShowIssues),
+        ("hand", CommandId::PanTool),
+        ("svg", CommandId::Export),
+    ] {
+        let results = commands::search(word);
+        assert!(
+            results.iter().any(|spec| spec.id == expected),
+            "{word:?} does not find {expected:?}"
+        );
+    }
+    for spec in &CATALOG {
+        for alias in spec.aliases {
+            assert_eq!(alias.to_lowercase(), *alias, "{:?}", spec.id);
+        }
     }
 }

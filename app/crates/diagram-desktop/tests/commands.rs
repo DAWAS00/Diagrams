@@ -22,6 +22,16 @@ fn harness() -> Harness<'static, ShellState> {
     harness
 }
 
+fn context(has_selection: bool) -> CommandContext {
+    CommandContext {
+        has_selection,
+        selection_count: usize::from(has_selection),
+        has_content: true,
+        tab_count: 1,
+        ..CommandContext::default()
+    }
+}
+
 fn labels(specs: &[&commands::CommandSpec]) -> Vec<&'static str> {
     specs.iter().map(|spec| spec.label).collect()
 }
@@ -42,7 +52,7 @@ fn catalog_should_list_each_command_once_in_id_order() {
 #[test]
 fn every_disabled_command_should_state_a_reason() {
     for has_selection in [false, true] {
-        let context = CommandContext { has_selection };
+        let context = context(has_selection);
         for id in CommandId::ALL {
             if let Availability::Disabled(reason) = commands::availability(id, context) {
                 assert!(
@@ -56,12 +66,8 @@ fn every_disabled_command_should_state_a_reason() {
 
 #[test]
 fn clear_selection_should_need_a_selection() {
-    let none = CommandContext {
-        has_selection: false,
-    };
-    let some = CommandContext {
-        has_selection: true,
-    };
+    let none = context(false);
+    let some = context(true);
 
     assert!(!commands::availability(CommandId::ClearSelection, none).is_enabled());
     assert!(commands::availability(CommandId::ClearSelection, some).is_enabled());
@@ -87,23 +93,33 @@ fn header_rows_and_menus_should_come_from_the_catalog() {
     let groups = commands::menu_groups();
     let group_names: Vec<_> = groups.iter().map(|(group, _)| *group).collect();
     assert_eq!(group_names, CommandGroup::ALL);
-    assert_eq!(labels(&groups[0].1), ["Save", "Export", "New diagram"]);
-    assert_eq!(labels(&groups[1].1), ["Undo", "Redo", "Clear selection"]);
+    for (group, specs) in &groups {
+        assert!(specs.iter().all(|spec| spec.group == *group));
+    }
+    assert_eq!(labels(&groups[0].1)[..3], ["Save", "Export", "New diagram"]);
     assert_eq!(
-        labels(&groups[2].1),
-        ["Project panel", "Inspector", "Component showcase"]
+        labels(&groups[1].1)[..3],
+        ["Undo", "Redo", "Clear selection"]
     );
     let listed: usize = groups.iter().map(|(_, specs)| specs.len()).sum();
     assert_eq!(listed, CATALOG.len());
 }
 
 #[test]
-fn search_should_match_label_or_group_ignoring_case() {
-    assert_eq!(labels(&commands::search("sav")), ["Save"]);
+fn search_should_match_label_group_or_alias_ignoring_case() {
+    // "autosave" is an alias of Review recovery.
     assert_eq!(
-        labels(&commands::search("  EDIT ")),
-        ["Undo", "Redo", "Clear selection"]
+        labels(&commands::search("sav")),
+        ["Save", "Save As", "Review recovery"]
     );
+    let edit = labels(&commands::search("  EDIT "));
+    assert_eq!(edit[..3], ["Undo", "Redo", "Clear selection"]);
+    for spec in commands::search("edit") {
+        let matches = spec.group == CommandGroup::Edit
+            || spec.label.to_lowercase().contains("edit")
+            || spec.aliases.iter().any(|alias| alias.contains("edit"));
+        assert!(matches, "{}", spec.label);
+    }
     assert_eq!(commands::search("").len(), CATALOG.len());
     assert!(commands::search("zzz").is_empty());
 }
@@ -286,12 +302,16 @@ fn unavailable_result_should_show_its_reason_and_stay_open_on_enter() {
     harness.run();
 
     harness.get_by_label_contains("this prototype cannot save");
-    assert!(
-        harness
-            .get_by_label_contains("File: Save")
-            .accesskit_node()
-            .is_disabled()
-    );
+    let save = harness
+        .get_all_by_label_contains("File: Save")
+        .find(|node| {
+            !node
+                .accesskit_node()
+                .label()
+                .unwrap_or_default()
+                .contains("As")
+        });
+    assert!(save.is_some_and(|node| node.accesskit_node().is_disabled()));
     harness.key_press(Key::Enter);
     harness.run();
 

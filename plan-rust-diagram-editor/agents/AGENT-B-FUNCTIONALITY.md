@@ -161,7 +161,7 @@ Read [AGENT-A-UI.md §6](AGENT-A-UI.md#6-requests-to-agent-b-a-appends-here-b-re
 
 | A's # | Answer: field, intent or command added | Merged in | Status |
 |---|---|---|---|
-| Phase 0 | `Presentation` (`src/presentation.rs`), `UiIntent` and `InputContext` (`src/intent.rs`), `AppState` (`src/app_state.rs`, `ShellState` kept as an alias), `dispatch::apply(&mut AppState, &InputContext, intents)` (`src/dispatch.rs`). `shell.rs` now builds the presentation, draws from it and applies intents. A may edit `shell.rs` from this commit on. | `agent-b/functionality`, commit `B-0` | done (not yet merged to `main`) |
+| Phase 0 | `Presentation` (`src/presentation.rs`), `UiIntent` and `InputContext` (`src/intent.rs`), `AppState` (`src/app_state.rs`, `ShellState` kept as an alias), `dispatch::apply(&mut AppState, &InputContext, intents)` (`src/dispatch.rs`). `shell.rs` now builds the presentation, draws from it and applies intents. A may edit `shell.rs` from this commit on. | `agent-b/functionality`, commit 6c31494 | done (not yet merged to `main`) |
 
 ## 7. Task progress (Agent B only)
 
@@ -169,4 +169,7 @@ Task IDs come from [TASKS-AND-TESTS.md §3](TASKS-AND-TESTS.md#3-task-list). Add
 
 | Task | State | Branch / commit | Notes |
 |---|---|---|---|
-| B-0 | done | `agent-b/functionality`, `B-0` commit | Contract types added; no visible change; all existing tests and the audit pass; new `tests/presentation.rs` (9) and `tests/contract.rs` (5). |
+| B-0 | done | `agent-b/functionality`, 6c31494 | Contract types added; no visible change; all existing tests and the audit pass; new `tests/presentation.rs` (9) and `tests/contract.rs` (5). |
+| B-1 | done | `agent-b/functionality`, `B-1, B-2, B-3` commit | `tests/common_state/` helpers; `tests/routing.rs` loops over `CommandId::ALL` (control, shortcut and search routes give the same state; disabled commands change nothing; presentation availability equals the catalog). |
+| B-2 | in_progress | same commit | D1 done (Ctrl+Shift+P). 48 commands added with group, placement (menu and search only), shortcut, scope, aliases and reasons; every `UI-FUNCTION-MAP.csv` row maps to a command (`tests/contract.rs`). **D2/D3 wait for A:** A's `tests/shell.rs` and `tests/typography.rs` assert "Pan" and "Note"; the change is ready and lands after A's `A-req-B:` commit. |
+| B-3 | done | same commit | `commands::take_shortcut_in(&mut InputState, &InputContext)` with spec §8 priority (modal → IME/text → region → app); canvas-only keys need board focus; each event consumed once; the existing `take_shortcut` stays for today's shell. `tests/shortcuts.rs` (11). |
