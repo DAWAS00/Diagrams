@@ -12,6 +12,7 @@ use eframe::egui::{
 
 use crate::ui::commands::{self, Availability, CommandContext, CommandId, CommandSpec, Placement};
 use crate::ui::components;
+use crate::ui::navigator::{self, Diagram, OpenTab};
 use crate::ui::palette::{self, PaletteEntry, PaletteState};
 use crate::ui::showcase::{self, ShowcaseState};
 use crate::ui::theme::{self, Palette, TextRole};
@@ -27,6 +28,9 @@ const TEXT_INSET: f32 = 10.0;
 /// so switching themes never changes how a diagram looks when exported.
 const DOCUMENT_FILL: Color32 = Color32::from_rgb(0xFA, 0xFC, 0xFF);
 const DOCUMENT_INK: Color32 = Color32::from_rgb(0x22, 0x31, 0x47);
+
+/// Name of the diagram every new project starts with.
+pub const FIRST_DIAGRAM: &str = "Class diagram 1";
 
 /// Name of the built-in sample project.
 pub const SAMPLE_PROJECT: &str = "Sample project";
@@ -66,8 +70,16 @@ impl PreviewClass {
 pub struct ShellState {
     /// Classes shown on the canvas, in drawing order.
     pub classes: Vec<PreviewClass>,
-    /// Index into [`Self::classes`] of the selected class, if any.
+    /// Index into [`Self::classes`] of the selected class, if any (in the active tab).
     pub selected: Option<usize>,
+    /// Diagrams in the project; each shows some of [`Self::classes`].
+    pub diagrams: Vec<Diagram>,
+    /// Open diagram tabs, in order.
+    pub tabs: Vec<OpenTab>,
+    /// Index into [`Self::tabs`] of the active tab, if any tab is open.
+    pub active_tab: Option<usize>,
+    /// Text in the project panel's search field.
+    pub navigator_search: String,
     /// Light, dark or follow the operating system. Light is the default.
     pub theme: ThemePreference,
     /// The command and object search, while it is open.
@@ -110,6 +122,16 @@ impl Default for ShellState {
                 class("Order", &["id: OrderId", "total: Money"], 300.0, 96.0),
             ],
             selected: None,
+            diagrams: vec![
+                Diagram::new(FIRST_DIAGRAM, &[0, 1]),
+                Diagram::new("Order details", &[1]),
+            ],
+            tabs: vec![OpenTab {
+                diagram: 0,
+                selected: None,
+            }],
+            active_tab: Some(0),
+            navigator_search: String::new(),
             theme: ThemePreference::Light,
             palette: None,
             panels: PanelPreferences::default(),
@@ -149,6 +171,88 @@ impl ShellState {
     /// Clears the selection.
     pub fn clear_selection(&mut self) {
         self.selected = None;
+    }
+
+    /// The diagram in the active tab, if a tab is open.
+    pub fn active_diagram(&self) -> Option<usize> {
+        self.active_tab
+            .and_then(|tab| self.tabs.get(tab))
+            .map(|tab| tab.diagram)
+    }
+
+    /// Classes shown on the canvas: those in the active diagram.
+    pub fn visible_classes(&self) -> Vec<usize> {
+        self.active_diagram()
+            .and_then(|diagram| self.diagrams.get(diagram))
+            .map(|diagram| diagram.classes.clone())
+            .unwrap_or_default()
+    }
+
+    /// Makes tab `index` active. The leaving tab keeps its selection and the
+    /// arriving tab restores its own.
+    pub fn activate_tab(&mut self, index: usize) {
+        if index >= self.tabs.len() || self.active_tab == Some(index) {
+            return;
+        }
+        if let Some(current) = self.active_tab.and_then(|tab| self.tabs.get_mut(tab)) {
+            current.selected = self.selected;
+        }
+        self.active_tab = Some(index);
+        self.selected = self.tabs[index].selected;
+    }
+
+    /// Shows `diagram` in its tab, opening a tab if it has none.
+    pub fn open_diagram(&mut self, diagram: usize) {
+        if diagram >= self.diagrams.len() {
+            return;
+        }
+        match self.tabs.iter().position(|tab| tab.diagram == diagram) {
+            Some(index) => self.activate_tab(index),
+            None => {
+                self.tabs.push(OpenTab {
+                    diagram,
+                    selected: None,
+                });
+                self.activate_tab(self.tabs.len() - 1);
+            }
+        }
+    }
+
+    /// Closes tab `index`. Model elements are untouched; a neighbouring tab
+    /// becomes active when the active one closes.
+    pub fn close_tab(&mut self, index: usize) {
+        if index >= self.tabs.len() {
+            return;
+        }
+        if let Some(current) = self.active_tab.and_then(|tab| self.tabs.get_mut(tab)) {
+            current.selected = self.selected;
+        }
+        let was_active = self.active_tab == Some(index);
+        self.tabs.remove(index);
+        self.active_tab = match self.active_tab {
+            _ if self.tabs.is_empty() => None,
+            Some(active) if active > index => Some(active - 1),
+            Some(active) if was_active => Some(active.min(self.tabs.len() - 1)),
+            other => other,
+        };
+        self.selected = self
+            .active_tab
+            .and_then(|tab| self.tabs.get(tab))
+            .and_then(|tab| tab.selected);
+    }
+
+    /// Selects a class from the project panel. If the active diagram does not
+    /// show it, a diagram that does is opened first ("reveal").
+    pub fn reveal_class(&mut self, class: usize) {
+        if class >= self.classes.len() {
+            return;
+        }
+        if !self.visible_classes().contains(&class)
+            && let Some(&diagram) = navigator::diagrams_showing(&self.diagrams, class).first()
+        {
+            self.open_diagram(diagram);
+        }
+        self.select(class);
     }
 
     /// The state that decides which commands are available.
@@ -309,6 +413,12 @@ fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
                 state.project_name = name;
                 state.classes.clear();
                 state.selected = None;
+                state.diagrams = vec![Diagram::new(FIRST_DIAGRAM, &[])];
+                state.tabs = vec![OpenTab {
+                    diagram: 0,
+                    selected: None,
+                }];
+                state.active_tab = Some(0);
                 return;
             }
             entry.name_touched = true;
@@ -318,6 +428,9 @@ fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
             state.project_name = sample.project_name;
             state.classes = sample.classes;
             state.selected = None;
+            state.diagrams = sample.diagrams;
+            state.tabs = sample.tabs;
+            state.active_tab = sample.active_tab;
             return;
         }
         Some(EntryAction::RemoveRecent(index)) => {
@@ -529,15 +642,89 @@ fn header(ui: &mut egui::Ui, state: &mut ShellState) {
 }
 
 /// Diagram tabs. The tab strip itself (overflow, close, per-tab state) is UI-05.
+/// What the user did in the tab row.
+enum TabAction {
+    Activate(usize),
+    Close(usize),
+}
+
+/// Space a tab takes: its title, its Close button and the gaps.
+fn tab_width(ui: &egui::Ui, title: &str) -> f32 {
+    let font = TextRole::Label.font_id();
+    let text = ui.fonts_mut(|fonts| {
+        fonts
+            .layout_no_wrap(title.to_owned(), font.clone(), Color32::BLACK)
+            .size()
+            .x
+    });
+    let close = ui.fonts_mut(|fonts| {
+        fonts
+            .layout_no_wrap(String::from("Close"), font, Color32::BLACK)
+            .size()
+            .x
+    });
+    let padding = 2.0 * ui.spacing().button_padding.x;
+    text + close + 2.0 * padding + 3.0 * ui.spacing().item_spacing.x
+}
+
+/// Diagram tabs: one per open diagram with a labeled Close button, a
+/// "More tabs" menu for tabs that do not fit, and New diagram.
 fn tab_row(ui: &mut egui::Ui, state: &mut ShellState) {
     let context = state.command_context();
     let mut clicked = None;
+    let mut action = None;
+    let titles: Vec<String> = state
+        .tabs
+        .iter()
+        .map(|tab| {
+            state
+                .diagrams
+                .get(tab.diagram)
+                .map(|diagram| diagram.name.clone())
+                .unwrap_or_default()
+        })
+        .collect();
     ui.horizontal_centered(|ui| {
-        let _ = components::choice(ui, true, "Class diagram 1");
+        // Reserve room for New diagram and the overflow menu.
+        let available = ui.available_width() - 260.0;
+        let widths: Vec<f32> = titles.iter().map(|title| tab_width(ui, title)).collect();
+        let (shown, overflow) = navigator::tabs_that_fit(&widths, available, state.active_tab);
+        for index in shown {
+            let title = &titles[index];
+            let active = state.active_tab == Some(index);
+            let tab = components::choice(ui, active, title);
+            tab.widget_info(|| WidgetInfo::selected(Role::Tab, true, active, title));
+            if tab.clicked() {
+                action = Some(TabAction::Activate(index));
+            }
+            let close = ui
+                .add(Button::new("Close").min_size(Vec2::new(0.0, theme::CONTROL_HEIGHT)))
+                .on_hover_text(format!("Close {title}. Its classes stay in the project."));
+            close.widget_info(|| WidgetInfo::labeled(Role::Button, true, format!("Close {title}")));
+            if close.clicked() {
+                action = Some(TabAction::Close(index));
+            }
+            ui.separator();
+        }
+        if !overflow.is_empty() {
+            ui.menu_button(format!("More tabs ({})", overflow.len()), |ui| {
+                for index in overflow {
+                    if ui.button(&titles[index]).clicked() {
+                        action = Some(TabAction::Activate(index));
+                        ui.close();
+                    }
+                }
+            });
+        }
         for spec in commands::placed(Placement::TabRow) {
             command_button(ui, spec, context, &mut clicked);
         }
     });
+    match action {
+        Some(TabAction::Activate(index)) => state.activate_tab(index),
+        Some(TabAction::Close(index)) => state.close_tab(index),
+        None => {}
+    }
     if let Some(id) = clicked {
         run(state, ui.ctx(), id);
     }
@@ -781,30 +968,78 @@ fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace: bool) {
     });
 }
 
+/// Project panel: search, the project's diagrams (views) and its model
+/// elements, with distinct "nothing yet" and "no match" states.
 fn sidebar(ui: &mut egui::Ui, state: &mut ShellState) {
     components::panel_title(ui, "Project");
-    components::field_label(ui, "Diagrams");
-    ui.indent("diagrams", |ui| {
-        let _ = components::list_row(ui, true, "Class diagram 1");
-    });
+    components::text_field(ui, "Search project", &mut state.navigator_search);
+    let query = state.navigator_search.clone();
+    let searching = !query.trim().is_empty();
+
     ui.add_space(theme::SPACING);
-    components::field_label(ui, "Model");
-    ui.indent("model", |ui| {
-        for index in 0..state.classes.len() {
-            let selected = state.selected == Some(index);
-            let label = state.classes[index].display_name().to_owned();
-            if components::list_row(ui, selected, &label).clicked() {
-                state.select(index);
+    components::field_label(ui, "Diagrams (views of the model)");
+    let diagram_hits: Vec<usize> = (0..state.diagrams.len())
+        .filter(|&index| navigator::matches(&query, &state.diagrams[index].name))
+        .collect();
+    if state.diagrams.is_empty() {
+        ui.label("No diagrams yet.");
+    } else if diagram_hits.is_empty() {
+        ui.label(format!("No diagrams match \"{}\".", query.trim()));
+    }
+    let active = state.active_diagram();
+    let mut open = None;
+    ui.indent("diagrams", |ui| {
+        for index in diagram_hits {
+            let name = &state.diagrams[index].name;
+            let row = components::list_row(ui, active == Some(index), name)
+                .on_hover_text("Open this diagram in a tab");
+            if row.clicked() {
+                open = Some(index);
             }
         }
     });
+    if let Some(index) = open {
+        state.open_diagram(index);
+    }
+
+    ui.add_space(theme::SPACING);
+    components::field_label(ui, "Model (shared by all diagrams)");
+    let class_hits: Vec<usize> = (0..state.classes.len())
+        .filter(|&index| navigator::matches(&query, state.classes[index].display_name()))
+        .collect();
+    if state.classes.is_empty() {
+        ui.label("No classes yet. Classes appear here when you add them to a diagram.");
+    } else if class_hits.is_empty() {
+        ui.label(format!("No classes match \"{}\".", query.trim()));
+    }
+    let mut reveal = None;
+    ui.indent("model", |ui| {
+        for index in class_hits {
+            let selected = state.selected == Some(index);
+            let label = state.classes[index].display_name().to_owned();
+            let row = components::list_row(ui, selected, &label)
+                .on_hover_text(navigator::shown_in(&state.diagrams, index));
+            if row.clicked() {
+                reveal = Some(index);
+            }
+        }
+    });
+    if searching {
+        ui.add_space(theme::GAP);
+        if components::action_button(ui, "Clear search", None, None).clicked() {
+            state.navigator_search.clear();
+        }
+    }
+    if let Some(index) = reveal {
+        state.reveal_class(index);
+    }
 }
 
 fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
     components::panel_title(ui, "Selection");
-    let Some(class) = state
+    let Some((index, class)) = state
         .selected
-        .and_then(|index| state.classes.get_mut(index))
+        .and_then(|index| state.classes.get_mut(index).map(|class| (index, class)))
     else {
         ui.label("Nothing selected. Select a class on the canvas or in the Model list.");
         return;
@@ -814,6 +1049,8 @@ fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
     if class.name.trim().is_empty() {
         components::warning_text(ui, BLANK_NAME_WARNING);
     }
+    // Model versus view: renaming changes the class in every diagram.
+    components::field_label(ui, &navigator::shown_in(&state.diagrams, index));
 
     ui.add_space(theme::SPACING);
     components::field_label(ui, "Attributes");
@@ -826,11 +1063,18 @@ fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) -> Rect 
     let (background, painter) = ui.allocate_painter(ui.available_size(), Sense::click());
     background.widget_info(|| WidgetInfo::labeled(Role::Canvas, true, "Diagram canvas"));
     painter.rect_filled(background.rect, CornerRadius::ZERO, palette.canvas);
-    if state.classes.is_empty() {
+    let empty_message = match state.active_diagram() {
+        None => Some("No diagram is open. Open one from the project panel."),
+        Some(_) if state.visible_classes().is_empty() => {
+            Some("This diagram is empty. Adding classes arrives with the project model.")
+        }
+        Some(_) => None,
+    };
+    if let Some(message) = empty_message {
         painter.text(
             background.rect.center(),
             Align2::CENTER_CENTER,
-            "This diagram is empty. Adding classes arrives with the project model.",
+            message,
             TextRole::Body.font_id(),
             palette.text_secondary,
         );
@@ -838,7 +1082,13 @@ fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) -> Rect 
     let origin = background.rect.min;
 
     let mut clicked_class = None;
-    for (index, class) in state.classes.iter().enumerate() {
+    let visible = state.visible_classes();
+    for (index, class) in state
+        .classes
+        .iter()
+        .enumerate()
+        .filter(|(index, _)| visible.contains(index))
+    {
         let rect = Rect::from_min_size(origin + class.position, class.size());
         let selected = state.selected == Some(index);
         let response = ui.interact(

@@ -20,7 +20,7 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 | UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
 | UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
 | UI-04 | Welcome, new-project and open screens | **Done** — [evidence](UI-04-WELCOME-AND-ENTRY.md) |
-| UI-05 | Navigator and diagram tabs | Not started |
+| UI-05 | Navigator and diagram tabs | **Done** — [evidence](UI-05-NAVIGATOR-AND-TABS.md) |
 | UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |
 | UI-07 | Canvas state presentations | Not started |
 | UI-08 | Contextual inspector | Not started |
@@ -87,10 +87,19 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 |---|---|---|
 | ![Welcome](ui-04-welcome.png) | ![Name error](ui-04-new-project-error.png) | ![Empty diagram](ui-04-created-empty-diagram.png) |
 
+### UI-05 — Project panel and diagram tabs
+- The project panel has a **search** and two sections: **Diagrams** (views of the model) and **Model** (classes shared by all diagrams). Each section says clearly when it is empty or when nothing matches.
+- Picking a class that isn't on the current diagram **opens a diagram that shows it**. The inspector says which diagrams show the class, so it's clear that renaming changes it everywhere.
+- **Tabs:** one per open diagram, each with a labeled Close button. Each tab remembers its own selection; closing a tab never deletes anything. Tabs that don't fit go into a **More tabs** menu.
+- 15 new automated tests, plus new usability-audit scenes.
+
+| Two tabs, dark theme | Search with no matches |
+|---|---|
+| ![Two tabs](ui-05-two-tabs-dark.png) | ![No matches](ui-05-search-no-match.png) |
+
 ## What is next
-1. **UI-05 — navigator and diagram tabs:** project-panel search, empty and no-match states, tab overflow and keyboard selection.
-2. **UI-06 — finish the command catalog:** typed UI intents and a written prerequisite / effect / test contract for every action.
-3. **UI-08 — contextual inspector**, then **UI-11 — notation capability contract** (which needs UI-06 and UI-08 in the tracker's order).
+1. **UI-06 — finish the command catalog:** typed UI intents and a written prerequisite / effect / test contract for every action.
+2. **UI-08 — contextual inspector**, then **UI-11 — notation capability contract** (which needs UI-06 and UI-08 in the tracker's order).
 3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it

@@ -261,6 +261,50 @@ fn narrow_workspace_and_drawers_should_pass_the_audit() {
 }
 
 #[test]
+fn project_panel_states_should_pass_the_audit() {
+    let mut harness = harness_at(LARGE, ShellState::default());
+    harness.get_by_label("Search project").focus();
+    harness.run();
+    harness.get_by_label("Search project").type_text("zzz");
+    harness.run();
+    let mut findings = audit_layout("project panel, no matches", &harness, LARGE, false);
+    findings.extend(audit_tab_order(
+        "project panel, no matches",
+        &mut harness,
+        LARGE,
+        &POINTER_ONLY,
+    ));
+    report(findings);
+}
+
+#[test]
+fn overflowing_tabs_should_pass_the_audit() {
+    use diagram_desktop::ui::navigator::{Diagram, OpenTab};
+    let mut state = ShellState::default();
+    state.diagrams = (1..=8)
+        .map(|number| Diagram::new(&format!("Customer overview part {number}"), &[0, 1]))
+        .collect();
+    state.tabs = (0..8)
+        .map(|diagram| OpenTab {
+            diagram,
+            selected: None,
+        })
+        .collect();
+    state.active_tab = Some(6);
+    for size in [SMALL, LARGE] {
+        let mut harness = harness_at(size, state.clone());
+        let mut findings = audit_layout("overflowing tabs", &harness, size, false);
+        findings.extend(audit_tab_order(
+            "overflowing tabs",
+            &mut harness,
+            size,
+            &POINTER_ONLY,
+        ));
+        report(findings);
+    }
+}
+
+#[test]
 fn command_search_should_pass_the_audit() {
     let mut harness = harness_at(LARGE, ShellState::default());
     harness.key_press_modifiers(Modifiers::COMMAND, Key::K);

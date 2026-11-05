@@ -144,15 +144,19 @@ fn visible_buttons_should_match_catalog_availability() {
         .flat_map(commands::placed);
     for spec in buttons {
         let enabled = commands::availability(spec.id, CommandContext::default()).is_enabled();
-        assert_eq!(
-            !harness
-                .get_by_label(spec.label)
-                .accesskit_node()
-                .is_disabled(),
-            enabled,
-            "{}",
-            spec.label
-        );
+        // A command may appear in several places (New diagram: tab row and
+        // project panel); every copy must agree with the catalog.
+        let mut copies = 0;
+        for node in harness.get_all_by_label(spec.label) {
+            copies += 1;
+            assert_eq!(
+                !node.accesskit_node().is_disabled(),
+                enabled,
+                "{}",
+                spec.label
+            );
+        }
+        assert!(copies >= 1, "{} is not shown", spec.label);
     }
 }
 

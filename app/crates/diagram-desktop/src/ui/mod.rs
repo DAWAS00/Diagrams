@@ -2,6 +2,7 @@
 
 pub mod commands;
 pub mod components;
+pub mod navigator;
 pub mod palette;
 pub mod showcase;
 pub mod theme;
