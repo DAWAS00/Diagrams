@@ -26,7 +26,7 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 | UI-08 | Contextual inspector | **Done** — [evidence](UI-08-CONTEXTUAL-INSPECTOR.md) |
 | UI-09 | Dialogs, status bar and validation drawer | Not started |
 | UI-10 | Keyboard, focus and accessibility checks | Not started |
-| UI-11 | Notation capability contract | Next |
+| UI-11 | Notation capability contract | **Done** — [evidence](UI-11-NOTATION-CONTRACT.md) |
 | UI-12 | Native UI review gate | Not started |
 | UI-13 – UI-17 | Bind the screens to the real model (M2) | Not started |
 | UI-18 | Final visual, accessibility, recovery and export review (M3) | Not started |
@@ -110,9 +110,14 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 |---|---|---|
 | ![Relationship](ui-08-relation-dark.png) | ![Mixed](ui-08-mixed.png) | ![Invalid draft](ui-08-invalid.png) |
 
+### UI-11 — Notation contract
+- One table now says what each diagram type offers: its tools, inspector sections, allowed relationships, and how its canvas behaves. The tool row, the inspector and the new-project form all read it.
+- Only **Class diagram** can be created today. Flowchart and Use Case (M4), and Entity-relationship and Sequence (M5), are described for planning but never offered. Sequence diagrams keep their own written rules (messages ordered top to bottom, aligned lifelines), so they won't be forced into the free-form class canvas.
+- 8 new automated tests.
+
 ## What is next
-1. **UI-11 — notation capability contract:** what each diagram type offers (tools, inspector sections, allowed relationships), with only implemented types creatable.
-2. **UI-07 — canvas states** (blank, selection, previews, zoom) and **UI-09 — dialogs, status and validation**.
+1. **UI-07 — canvas states:** blank, selection, move/resize/connect previews, invalid targets, zoom and fit.
+2. **UI-09 — dialogs, status bar and validation drawer**, then **UI-02** font files and **UI-10** keyboard and accessibility checks (with R0-04 on Windows).
 3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it

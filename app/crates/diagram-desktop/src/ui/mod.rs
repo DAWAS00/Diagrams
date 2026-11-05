@@ -5,6 +5,7 @@ pub mod components;
 pub mod inspector;
 pub mod intents;
 pub mod navigator;
+pub mod notation;
 pub mod palette;
 pub mod showcase;
 pub mod theme;

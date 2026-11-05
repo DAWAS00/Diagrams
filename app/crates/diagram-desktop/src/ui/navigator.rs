@@ -4,6 +4,8 @@
 //! Diagrams here are prototype fixtures: a name and the classes it shows.
 //! Real diagrams, views and sessions arrive with M1 and are bound in UI-13.
 
+use super::notation::NotationId;
+
 /// A diagram in the prototype project: a view of some of the model's classes.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Diagram {
@@ -11,14 +13,17 @@ pub struct Diagram {
     pub name: String,
     /// Indices of the classes this diagram shows.
     pub classes: Vec<usize>,
+    /// The diagram's notation, which decides its tools and inspector sections.
+    pub notation: NotationId,
 }
 
 impl Diagram {
-    /// A diagram named `name` showing `classes`.
+    /// A class diagram named `name` showing `classes`.
     pub fn new(name: &str, classes: &[usize]) -> Self {
         Self {
             name: name.to_owned(),
             classes: classes.to_vec(),
+            notation: NotationId::Class,
         }
     }
 }

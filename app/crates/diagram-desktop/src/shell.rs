@@ -15,6 +15,7 @@ use crate::ui::components;
 use crate::ui::inspector::{self as rules, DraftKey, DraftOutcome, PreviewRelation, RelationField};
 use crate::ui::intents::UiIntent;
 use crate::ui::navigator::{self, Diagram, OpenTab};
+use crate::ui::notation::{self, InspectorSection, NotationId};
 use crate::ui::palette::{self, PaletteEntry, PaletteState};
 use crate::ui::showcase::{self, ShowcaseState};
 use crate::ui::theme::{self, Palette, TextRole};
@@ -232,6 +233,13 @@ impl ShellState {
         self.active_tab
             .and_then(|tab| self.tabs.get(tab))
             .map(|tab| tab.diagram)
+    }
+
+    /// Notation of the active diagram; Class when no diagram is open.
+    pub fn active_notation(&self) -> NotationId {
+        self.active_diagram()
+            .and_then(|diagram| self.diagrams.get(diagram))
+            .map_or(NotationId::Class, |diagram| diagram.notation)
     }
 
     /// Classes shown on the canvas: those in the active diagram.
@@ -879,7 +887,8 @@ fn tool_row(ui: &mut egui::Ui, state: &mut ShellState) {
             toggle = Some((CommandId::ToggleNavigator, navigator.id));
         }
         ui.separator();
-        for spec in commands::placed(Placement::ToolRow) {
+        // Tools come from the active diagram's notation contract.
+        for spec in notation::tool_commands(state.active_notation()).map(CommandId::spec) {
             if spec.id == CommandId::SelectTool {
                 // The active tool shows as pressed.
                 if components::choice(ui, true, spec.label).clicked() {
@@ -1365,6 +1374,20 @@ fn class_inspector(ui: &mut egui::Ui, state: &mut ShellState, index: usize) {
     // Model versus view: renaming changes the class in every diagram.
     components::field_label(ui, &navigator::shown_in(&state.diagrams, index));
 
+    // Sections come from the active diagram's notation contract.
+    let sections = notation::notation(state.active_notation()).element_sections;
+    if sections.contains(&InspectorSection::Members) {
+        members(ui, &class);
+    }
+    if sections.contains(&InspectorSection::Appearance)
+        || sections.contains(&InspectorSection::Advanced)
+    {
+        appearance_and_advanced(ui, state, false);
+    }
+}
+
+/// Attributes and operations of a class, with the unavailable Add buttons.
+fn members(ui: &mut egui::Ui, class: &PreviewClass) {
     ui.add_space(theme::SPACING);
     components::field_label(ui, "Attributes");
     if class.attributes.is_empty() {
@@ -1385,7 +1408,6 @@ fn class_inspector(ui: &mut egui::Ui, state: &mut ShellState, index: usize) {
             );
         }
     });
-    appearance_and_advanced(ui, state, false);
 }
 
 fn relation_inspector(ui: &mut egui::Ui, state: &mut ShellState, index: usize) {
