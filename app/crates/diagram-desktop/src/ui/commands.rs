@@ -6,7 +6,7 @@
 
 use std::cmp::Reverse;
 
-use eframe::egui::{InputState, Key, KeyboardShortcut, Modifiers};
+use eframe::egui::{InputState, Key, KeyboardShortcut, ModifierNames, Modifiers};
 
 /// Every command the application knows about.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -388,6 +388,12 @@ pub fn search(query: &str) -> Vec<&'static CommandSpec> {
                 || spec.group.label().to_lowercase().contains(&query)
         })
         .collect()
+}
+
+/// A shortcut as the user reads it, such as "Ctrl+Shift+Z" (or "Cmd" names on
+/// macOS), matching egui's own formatting on Windows and Linux.
+pub fn shortcut_text(shortcut: &KeyboardShortcut) -> String {
+    shortcut.format(&ModifierNames::NAMES, cfg!(target_os = "macos"))
 }
 
 fn modifier_count(shortcut: &KeyboardShortcut) -> u8 {
