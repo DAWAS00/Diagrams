@@ -6,6 +6,7 @@
 //! screens land.
 
 use diagram_desktop::shell::{self, ShellState};
+use diagram_desktop::ui::header;
 use eframe::egui::accesskit::Rect;
 use eframe::egui::{Key, Modifiers, Vec2};
 use egui_kittest::Harness;
@@ -39,7 +40,7 @@ fn run_from_search(harness: &mut Harness<'_, ShellState>, query: &str) {
 }
 
 fn run_from_menu(harness: &mut Harness<'_, ShellState>, group: &str, item: &str) {
-    harness.get_by_label("Menu").click();
+    harness.get_by_label(header::PROJECT_MENU).click();
     harness.run();
     harness.get_by_label(group).hover();
     harness.run();
