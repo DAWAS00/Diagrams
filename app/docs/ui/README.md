@@ -14,7 +14,7 @@ This page is for anyone following the project. It summarises the user-interface 
 |---|---|---|
 | UI-01 | Design tokens and base components | In progress — [evidence](UI-01-TOKENS-AND-COMPONENTS.md); showcase and state checks remain |
 | UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
-| UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
+| UI-03 | Responsive workspace | Built and checked — [evidence](UI-03-RESPONSIVE-WORKSPACE.md); done once UI-01 is done |
 | UI-04 | Welcome, new-project and open screens | Next |
 | UI-05 | Navigator and diagram tabs | Not started |
 | UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |

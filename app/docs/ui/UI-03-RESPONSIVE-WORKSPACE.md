@@ -1,6 +1,6 @@
 # UI-03 — Responsive workspace composition
 
-Status: **done** (2026-11-05). Plan: [UI-DESIGN-AND-INTEGRATION.md §1, §3, §4](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md).
+Status: **in progress** (2026-11-05). The implementation and every acceptance check are complete; the tracker keeps it in progress until its prerequisite **UI-01** is done (component showcase and state checks). Plan: [UI-DESIGN-AND-INTEGRATION.md §1, §3, §4](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md).
 
 ## What was built
 
