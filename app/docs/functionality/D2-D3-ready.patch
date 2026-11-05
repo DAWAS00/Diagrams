@@ -1,0 +1,267 @@
+diff --git a/app/crates/diagram-desktop/src/dispatch.rs b/app/crates/diagram-desktop/src/dispatch.rs
+index 46b84ce..58302d4 100644
+--- a/app/crates/diagram-desktop/src/dispatch.rs
++++ b/app/crates/diagram-desktop/src/dispatch.rs
+@@ -123,7 +123,7 @@ fn run(state: &mut AppState, input: &InputContext, id: CommandId) {
+             }
+         }
+         CommandId::SelectTool => set_tool(state, held, Tool::Select),
+-        CommandId::PanTool => set_tool(state, held, Tool::Hand),
++        CommandId::HandTool => set_tool(state, held, Tool::Hand),
+         CommandId::SelectAll => {
+             if resolve_draft(state, held) {
+                 state.set_selection((0..state.classes.len()).collect());
+@@ -176,7 +176,6 @@ fn run(state: &mut AppState, input: &InputContext, id: CommandId) {
+         | CommandId::Export
+         | CommandId::AddClass
+         | CommandId::Connect
+-        | CommandId::AddNote
+         | CommandId::Arrange
+         | CommandId::NewDiagram
+         | CommandId::NewProject
+diff --git a/app/crates/diagram-desktop/src/presentation.rs b/app/crates/diagram-desktop/src/presentation.rs
+index 123bb01..7889adb 100644
+--- a/app/crates/diagram-desktop/src/presentation.rs
++++ b/app/crates/diagram-desktop/src/presentation.rs
+@@ -9,6 +9,8 @@
+ use eframe::egui::{Id, Pos2, ThemePreference, Vec2};
+ 
+ use crate::app_state::{AppState, BLANK_NAME_WARNING};
++use diagram_core::notation::{Notation, NotationId};
++
+ use crate::editor_state::{Gesture, Tool};
+ use crate::intent::{DraftField, Region, Target};
+ use crate::ui::commands::{self, Availability, CommandContext, CommandGroup, CommandId, Placement};
+@@ -349,11 +351,15 @@ pub fn build(state: &AppState) -> Presentation {
+                 .collect(),
+         })
+         .collect();
+-    let tools = placed(Placement::ToolRow, context)
+-        .into_iter()
++    // The tool row is the active notation's tools (only Class in v0.1),
++    // so tools a notation does not offer never appear.
++    let tools = Notation::get(NotationId::Class)
++        .tools
++        .iter()
++        .map(|tool| command_view(commands::tool_command(*tool), context))
+         .map(|view| match view.id {
+             CommandId::SelectTool => pressed(view, editor.tool == Tool::Select),
+-            CommandId::PanTool => pressed(view, editor.tool == Tool::Hand),
++            CommandId::HandTool => pressed(view, editor.tool == Tool::Hand),
+             _ => view,
+         })
+         .collect();
+diff --git a/app/crates/diagram-desktop/src/ui/commands.rs b/app/crates/diagram-desktop/src/ui/commands.rs
+index 71702c4..3255319 100644
+--- a/app/crates/diagram-desktop/src/ui/commands.rs
++++ b/app/crates/diagram-desktop/src/ui/commands.rs
+@@ -28,14 +28,12 @@ pub enum CommandId {
+     Export,
+     /// Select tool: click objects to select them.
+     SelectTool,
+-    /// Pan tool: drag to move the view (becomes "Hand", decision D3).
+-    PanTool,
++    /// Hand tool: drag to move the view (decision D3; formerly "Pan").
++    HandTool,
+     /// Class tool: place a new class.
+     AddClass,
+     /// Relationship tool: connect two classes.
+     Connect,
+-    /// Note tool (leaves the catalog, decision D2).
+-    AddNote,
+     /// Arrange menu for the selected views.
+     Arrange,
+     /// Add a diagram to the project.
+@@ -151,17 +149,16 @@ pub enum CommandId {
+ 
+ impl CommandId {
+     /// Every command, in catalog order.
+-    pub const ALL: [Self; 65] = [
++    pub const ALL: [Self; 64] = [
+         Self::Undo,
+         Self::Redo,
+         Self::SearchCommands,
+         Self::Save,
+         Self::Export,
+         Self::SelectTool,
+-        Self::PanTool,
++        Self::HandTool,
+         Self::AddClass,
+         Self::Connect,
+-        Self::AddNote,
+         Self::Arrange,
+         Self::NewDiagram,
+         Self::ToggleNavigator,
+@@ -415,7 +412,7 @@ use CommandId as C;
+ use Placement as P;
+ 
+ /// The catalog, in [`CommandId`] order.
+-pub const CATALOG: [CommandSpec; 65] = [
++pub const CATALOG: [CommandSpec; 64] = [
+     spec(C::Undo, "Undo", G::Edit, P::Header)
+         .keys(CTRL, Key::Z)
+         .text_owns(),
+@@ -435,10 +432,11 @@ pub const CATALOG: [CommandSpec; 65] = [
+         .keys(NONE, Key::V)
+         .canvas()
+         .aka(&["pointer", "arrow"]),
+-    spec(C::PanTool, "Pan", G::Tools, P::ToolRow)
++    // D3: "Pan" is now "Hand".
++    spec(C::HandTool, "Hand", G::Tools, P::ToolRow)
+         .keys(NONE, Key::H)
+         .canvas()
+-        .aka(&["hand", "move view", "scroll"]),
++        .aka(&["pan", "move view", "scroll"]),
+     spec(C::AddClass, "Class", G::Tools, P::ToolRow)
+         .keys(NONE, Key::C)
+         .canvas()
+@@ -447,7 +445,6 @@ pub const CATALOG: [CommandSpec; 65] = [
+         .keys(NONE, Key::R)
+         .canvas()
+         .aka(&["relationship", "connect", "link", "edge"]),
+-    spec(C::AddNote, "Note", G::Tools, P::ToolRow).aka(&["comment"]),
+     spec(C::Arrange, "Arrange", G::Tools, P::ToolRow).aka(&["align", "distribute", "layout"]),
+     spec(C::NewDiagram, "New diagram", G::File, P::TabRow)
+         .keys(CTRL_SHIFT, Key::N)
+@@ -683,16 +680,12 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
+         CommandId::NewProject | CommandId::CloseProject => Disabled(
+             "Not available yet: replacing the open project needs the unsaved-changes dialog.",
+         ),
+-        CommandId::PanTool => {
+-            Disabled("Not available yet: panning arrives with canvas scrolling and zoom.")
+-        }
+         CommandId::AddClass => {
+             Disabled("Not available yet: adding classes needs the project model.")
+         }
+         CommandId::Connect | CommandId::RelationshipKind | CommandId::EditRelationEnds => {
+             Disabled("Not available yet: relationships need the project model.")
+         }
+-        CommandId::AddNote => Disabled("Not available yet: notes need the project model."),
+         CommandId::Arrange
+         | CommandId::AlignLeft
+         | CommandId::AlignCenter
+@@ -769,6 +762,7 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
+         }
+         CommandId::SearchCommands
+         | CommandId::SelectTool
++        | CommandId::HandTool
+         | CommandId::ToggleNavigator
+         | CommandId::ToggleInspector
+         | CommandId::ShowComponentShowcase => Enabled,
+@@ -784,7 +778,7 @@ pub const fn tool_command(tool: diagram_core::notation::ToolKind) -> CommandId {
+     use diagram_core::notation::ToolKind;
+     match tool {
+         ToolKind::Select => CommandId::SelectTool,
+-        ToolKind::Hand => CommandId::PanTool,
++        ToolKind::Hand => CommandId::HandTool,
+         ToolKind::Class => CommandId::AddClass,
+         ToolKind::Relationship => CommandId::Connect,
+         ToolKind::Arrange => CommandId::Arrange,
+diff --git a/app/crates/diagram-desktop/tests/commands.rs b/app/crates/diagram-desktop/tests/commands.rs
+index 88e9d44..c8d53de 100644
+--- a/app/crates/diagram-desktop/tests/commands.rs
++++ b/app/crates/diagram-desktop/tests/commands.rs
+@@ -82,7 +82,7 @@ fn header_rows_and_menus_should_come_from_the_catalog() {
+     );
+     assert_eq!(
+         labels(&placed(Placement::ToolRow)),
+-        ["Select", "Pan", "Class", "Association", "Note", "Arrange"]
++        ["Select", "Hand", "Class", "Association", "Arrange"]
+     );
+     assert_eq!(labels(&placed(Placement::TabRow)), ["New diagram"]);
+     assert_eq!(
+diff --git a/app/crates/diagram-desktop/tests/contract.rs b/app/crates/diagram-desktop/tests/contract.rs
+index ae592f0..99c29f9 100644
+--- a/app/crates/diagram-desktop/tests/contract.rs
++++ b/app/crates/diagram-desktop/tests/contract.rs
+@@ -222,7 +222,8 @@ fn search_aliases_should_reach_one_canonical_label() {
+         ("reuse", CommandId::ShowInDiagram),
+         ("fit", CommandId::FitAll),
+         ("issues", CommandId::ShowIssues),
+-        ("hand", CommandId::PanTool),
++        ("hand", CommandId::HandTool),
++        ("pan", CommandId::HandTool),
+         ("svg", CommandId::Export),
+     ] {
+         let results = commands::search(word);
+diff --git a/app/crates/diagram-desktop/tests/journeys.rs b/app/crates/diagram-desktop/tests/journeys.rs
+index 19bb188..4c8a536 100644
+--- a/app/crates/diagram-desktop/tests/journeys.rs
++++ b/app/crates/diagram-desktop/tests/journeys.rs
+@@ -5,10 +5,11 @@
+ //! The full journeys J1–J7 of TASKS-AND-TESTS §5 are added as their
+ //! screens land.
+ 
++use diagram_desktop::editor_state::Tool;
+ use diagram_desktop::shell::{self, ShellState};
+ use diagram_desktop::ui::header;
+ use eframe::egui::accesskit::Rect;
+-use eframe::egui::{Key, Modifiers, Vec2};
++use eframe::egui::{Key, Modifiers, Pos2, Vec2};
+ use egui_kittest::Harness;
+ use egui_kittest::kittest::{NodeT, Queryable};
+ 
+@@ -171,3 +172,63 @@ fn a_blank_name_should_hold_the_selection_until_escape_restores_it() {
+     harness.run();
+     assert_eq!(harness.state().selected, Some(1));
+ }
++
++/// Drags with the primary button from `from` to `to` in small steps.
++fn drag(harness: &mut Harness<'_, ShellState>, from: Pos2, to: Pos2) {
++    harness.hover_at(from);
++    harness.run();
++    harness.drag_at(from);
++    harness.run();
++    for step in 1..=4u8 {
++        let t = f32::from(step) / 4.0;
++        harness.hover_at(from + (to - from) * t);
++        harness.run();
++    }
++    harness.drop_at(to);
++    harness.run();
++}
++
++#[test]
++fn j1_hand_drag_then_fit_and_100_percent_should_never_move_a_node() {
++    // J1 (TASKS-AND-TESTS section 5), in the shell that exists now.
++    let mut harness = harness_at(1280.0, 800.0);
++    harness.get_by_label("Hand").click();
++    harness.run();
++    assert_eq!(harness.state().editor.tool, Tool::Hand);
++    let before = bounds(&harness, "Class Customer");
++
++    // The drag starts on Customer: in Hand mode it pans the view.
++    #[expect(clippy::cast_possible_truncation, reason = "screen points")]
++    let start = Pos2::new(before.x0 as f32 + 20.0, before.y0 as f32 + 20.0);
++    drag(&mut harness, start, start + Vec2::new(60.0, 40.0));
++
++    // The view moved with the pointer. (Today's canvas view reports the
++    // press where egui recognizes the drag, so the first step is not
++    // counted yet; requested from Agent A.)
++    let after = bounds(&harness, "Class Customer");
++    let (dx, dy) = (after.x0 - before.x0, after.y0 - before.y0);
++    assert!(dx > 30.0 && dx <= 60.5, "{before:?} -> {after:?}");
++    assert!(dy > 20.0 && dy <= 40.5, "{before:?} -> {after:?}");
++    assert_eq!(harness.state().classes, ShellState::default().classes);
++    assert!(harness.state().selection.is_empty(), "Hand never selects");
++
++    run_from_search(&mut harness, "fit all");
++    harness.key_press_modifiers(Modifiers::COMMAND, Key::Plus);
++    harness.run();
++    run_from_search(&mut harness, "actual size");
++    assert_eq!(harness.state().editor.viewport().zoom_percent(), 100);
++    // No edit was recorded: the document is exactly the sample.
++    assert_eq!(harness.state().classes, ShellState::default().classes);
++}
++
++#[test]
++fn h_should_choose_hand_and_escape_should_return_to_select() {
++    let mut harness = harness_at(1280.0, 800.0);
++    harness.key_press(Key::H);
++    harness.run();
++    assert_eq!(harness.state().editor.tool, Tool::Hand);
++
++    harness.key_press(Key::Escape);
++    harness.run();
++    assert_eq!(harness.state().editor.tool, Tool::Select);
++}
