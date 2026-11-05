@@ -13,6 +13,9 @@ pub const TEXT_CONTRAST: f32 = 4.5;
 /// Minimum contrast for essential control boundaries and focus indicators (WCAG 2.2, 1.4.11).
 pub const NON_TEXT_CONTRAST: f32 = 3.0;
 
+/// Opacity egui applies to disabled widgets (set explicitly in [`style`]).
+pub const DISABLED_ALPHA: f32 = 0.5;
+
 /// Height of buttons and single-line fields, in logical points.
 pub const CONTROL_HEIGHT: f32 = 34.0;
 /// Minimum height of clickable list rows (plan: hit targets of at least 32).
@@ -288,6 +291,66 @@ pub fn contrast_pairs(palette: &Palette) -> Vec<ContrastPair> {
     ]
 }
 
+/// `color` as it appears on `background` when a widget is disabled.
+pub fn disabled_color(color: Color32, background: Color32) -> Color32 {
+    let mix = |foreground: u8, back: u8| {
+        let value =
+            f32::from(foreground) * DISABLED_ALPHA + f32::from(back) * (1.0 - DISABLED_ALPHA);
+        value.round().clamp(0.0, 255.0) as u8
+    };
+    Color32::from_rgb(
+        mix(color.r(), background.r()),
+        mix(color.g(), background.g()),
+        mix(color.b(), background.b()),
+    )
+}
+
+/// Contrast of interaction states: focus, error and disabled. WCAG exempts
+/// disabled controls; this project still keeps disabled text at 3:1 so it
+/// stays readable.
+pub fn state_contrast_pairs(palette: &Palette) -> Vec<ContrastPair> {
+    let p = palette;
+    let pair = |name, foreground, background, minimum| ContrastPair {
+        name,
+        foreground,
+        background,
+        minimum,
+    };
+    vec![
+        pair(
+            "focus ring on panel",
+            p.selection_text,
+            p.panel,
+            NON_TEXT_CONTRAST,
+        ),
+        pair(
+            "focus ring on workspace",
+            p.selection_text,
+            p.workspace,
+            NON_TEXT_CONTRAST,
+        ),
+        pair(
+            "error border on panel",
+            p.danger,
+            p.panel,
+            NON_TEXT_CONTRAST,
+        ),
+        pair("error text on panel", p.danger, p.panel, TEXT_CONTRAST),
+        pair(
+            "disabled text on a button",
+            disabled_color(p.text, p.workspace),
+            p.workspace,
+            NON_TEXT_CONTRAST,
+        ),
+        pair(
+            "disabled text on panel",
+            disabled_color(p.text, p.panel),
+            p.panel,
+            NON_TEXT_CONTRAST,
+        ),
+    ]
+}
+
 /// Complete egui style for `theme`: colors, text roles, spacing and corner radii.
 pub fn style(theme: Theme) -> Style {
     let p = palette(theme);
@@ -311,6 +374,7 @@ pub fn style(theme: Theme) -> Style {
     visuals.window_stroke = Stroke::new(1.0, p.separator);
     visuals.window_corner_radius = CornerRadius::same(DIALOG_RADIUS);
     visuals.menu_corner_radius = CornerRadius::same(CONTROL_RADIUS);
+    visuals.disabled_alpha = DISABLED_ALPHA;
     visuals.selection.bg_fill = p.selection_fill;
     visuals.selection.stroke = Stroke::new(1.5, p.selection_text);
 

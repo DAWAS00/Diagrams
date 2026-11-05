@@ -1,6 +1,6 @@
 # UI-01 — Design tokens and base components
 
-Status: **in progress** (2026-11-05). Done: tokens, controls, measured contrast, live theme switching. **Remaining** for the tracker definition: a component showcase fixture and checks of focus, error and disabled states. Plan: [UI-DESIGN-AND-INTEGRATION.md §3](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md).
+Status: **done** (2026-11-05). Tokens, controls, measured contrast, live theme switching, focus/error/disabled states and the component showcase. Plan: [UI-DESIGN-AND-INTEGRATION.md §3](../../../plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md).
 
 ## What was built
 
@@ -34,11 +34,33 @@ The control-border colour in the original plan measured only 1.2–2.3:1. A seco
 
 Disabled controls are faded by egui and are exempt under WCAG. Their contrast is checked with the other interaction states in UI-10.
 
+## States and the component showcase
+
+- **Error state:** `text_field_with_error` draws a danger-colored border and an "Error: …" message below the field; `error_text` and `warning_text` always carry a word prefix, never color alone. The field keeps its normal focus highlight.
+- **Disabled state:** egui fades disabled widgets to 50% opacity (`DISABLED_ALPHA`, now set explicitly). WCAG exempts disabled controls, but this project keeps disabled text readable at 3:1 or more.
+- **Focus:** a focused field or button gets the selected-text color as its border (7.6:1 on panels in both themes).
+- **Component showcase** (`ui/showcase.rs`): every reusable control in each state, labeled "Design fixture: these controls change nothing in the project". Open it from **Menu → View → Component showcase** or Ctrl+K "showcase". Close it with its **Close** button or Escape, and focus returns.
+
+| State pair | Light | Dark | Minimum |
+|---|---|---|---|
+| Focus ring on panel / workspace | 7.6 / 7.0 | 7.6 / 8.7 | 3.0 |
+| Error border on panel | 6.6 | 9.0 | 3.0 |
+| Error text on panel | 6.6 | 9.0 | 4.5 |
+| Disabled text on a button / on panel | 3.1 / 3.1 | 4.75 / 4.5 | 3.0 (project target; WCAG exempt) |
+| Disabled border on panel | 1.8 | 1.9 | none (WCAG exempt) |
+
+| Showcase, light | Showcase, dark |
+|---|---|
+| ![Showcase light](ui-01-showcase-light.png) | ![Showcase dark](ui-01-showcase-dark.png) |
+
+![Focused field (blue), field with an error (red), disabled field (faded)](ui-01-field-states.png)
+
 ## Verification
 
 | Check | Result |
 |---|---|
-| `tests/theme.rs` (8 tests) | Pass: contrast formula, every light and dark pair, border stronger than separator, styles use the tokens, light default, Dark ↔ Light switching live, System follows the OS |
+| `tests/theme.rs` (10 tests) | Pass: contrast formula, every light and dark pair, border stronger than separator, styles use the tokens, light default, Dark ↔ Light switching live, System follows the OS, focus/error/disabled state pairs, disabled blending |
+| `tests/showcase.rs` (5 tests) | Pass: opens from search, labels itself as a fixture and shows every component, disabled states reach assistive technology, choices and rows respond, Close and Escape close only the showcase |
 | Existing `tests/shell.rs` (11 tests) and `tests/diagnostics.rs` (8 tests) | Pass unchanged |
 | `cargo fmt`, `cargo clippy --all-targets -D warnings` | Clean |
 | Real window (Linux, virtual display) | Light start, class selected, switched to Dark live: [light](ui-01-light.png), [dark](ui-01-dark.png) |
@@ -48,4 +70,4 @@ Disabled controls are faded by egui and are exempt under WCAG. Their contrast is
 
 ## Not covered here
 - Windows screenshots of both themes are collected at the UI-12 review.
-- Hover, pressed and disabled-state contrast, and screen-reader checks, are UI-10.
+- Real screen-reader checks (Narrator/NVDA) are UI-10 and R0-04.

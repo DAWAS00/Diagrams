@@ -110,3 +110,31 @@ fn system_choice_should_follow_the_operating_system() {
         ThemePreference::System
     );
 }
+
+fn failing_state_pairs(palette: &Palette) -> Vec<String> {
+    theme::state_contrast_pairs(palette)
+        .into_iter()
+        .filter(|pair| pair.ratio() < pair.minimum)
+        .map(|pair| format!("{}: {:.2} < {}", pair.name, pair.ratio(), pair.minimum))
+        .collect()
+}
+
+#[test]
+fn focus_error_and_disabled_states_should_stay_visible_in_both_themes() {
+    assert_eq!(failing_state_pairs(&LIGHT), Vec::<String>::new());
+    assert_eq!(failing_state_pairs(&DARK), Vec::<String>::new());
+}
+
+#[test]
+fn disabled_color_should_blend_halfway_to_the_background() {
+    assert_eq!(
+        theme::disabled_color(Color32::BLACK, Color32::WHITE),
+        Color32::from_rgb(128, 128, 128)
+    );
+    for theme_choice in [Theme::Light, Theme::Dark] {
+        assert_eq!(
+            theme::style(theme_choice).visuals.disabled_alpha,
+            theme::DISABLED_ALPHA
+        );
+    }
+}

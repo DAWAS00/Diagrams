@@ -41,11 +41,13 @@ pub enum CommandId {
     ToggleInspector,
     /// Clear the current selection.
     ClearSelection,
+    /// Show every reusable control in each state (design fixture).
+    ShowComponentShowcase,
 }
 
 impl CommandId {
     /// Every command, in catalog order.
-    pub const ALL: [Self; 15] = [
+    pub const ALL: [Self; 16] = [
         Self::Undo,
         Self::Redo,
         Self::SearchCommands,
@@ -61,6 +63,7 @@ impl CommandId {
         Self::ToggleNavigator,
         Self::ToggleInspector,
         Self::ClearSelection,
+        Self::ShowComponentShowcase,
     ];
 
     /// This command's catalog entry.
@@ -186,7 +189,7 @@ const fn keys(modifiers: Modifiers, key: Key) -> Option<KeyboardShortcut> {
 }
 
 /// The catalog, in [`CommandId`] order.
-pub const CATALOG: [CommandSpec; 15] = [
+pub const CATALOG: [CommandSpec; 16] = [
     spec(
         CommandId::Undo,
         "Undo",
@@ -307,6 +310,14 @@ pub const CATALOG: [CommandSpec; 15] = [
         true,
         Placement::MenuOnly,
     ),
+    spec(
+        CommandId::ShowComponentShowcase,
+        "Component showcase",
+        CommandGroup::View,
+        None,
+        false,
+        Placement::MenuOnly,
+    ),
 ];
 
 /// The state that command availability depends on.
@@ -339,7 +350,8 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
         CommandId::SearchCommands
         | CommandId::SelectTool
         | CommandId::ToggleNavigator
-        | CommandId::ToggleInspector => Enabled,
+        | CommandId::ToggleInspector
+        | CommandId::ShowComponentShowcase => Enabled,
         CommandId::ClearSelection if context.has_selection => Enabled,
         CommandId::ClearSelection => Disabled("Nothing is selected."),
     }

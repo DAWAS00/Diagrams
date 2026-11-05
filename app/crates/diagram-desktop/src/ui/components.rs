@@ -87,6 +87,33 @@ pub fn action_button(
     }
 }
 
+/// Labeled text field with a problem: a danger-colored border and the
+/// message as text below it. The field keeps its normal focus highlight.
+pub fn text_field_with_error(
+    ui: &mut egui::Ui,
+    label: &str,
+    value: &mut String,
+    error: &str,
+) -> Response {
+    let response = ui
+        .scope(|ui| {
+            let danger = ui.visuals().error_fg_color;
+            let widgets = &mut ui.visuals_mut().widgets;
+            for state in [&mut widgets.inactive, &mut widgets.hovered] {
+                state.bg_stroke = egui::Stroke::new(1.5, danger);
+            }
+            text_field(ui, label, value)
+        })
+        .inner;
+    error_text(ui, error);
+    response
+}
+
+/// Error shown as text with an "Error:" prefix, never by color alone.
+pub fn error_text(ui: &mut egui::Ui, text: &str) -> Response {
+    ui.label(RichText::new(format!("Error: {text}")).color(ui.visuals().error_fg_color))
+}
+
 /// Warning shown as text with a "Warning:" prefix, never by color alone.
 pub fn warning_text(ui: &mut egui::Ui, text: &str) -> Response {
     ui.label(RichText::new(format!("Warning: {text}")).color(ui.visuals().warn_fg_color))

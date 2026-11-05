@@ -13,6 +13,7 @@ use eframe::egui::{
 use crate::ui::commands::{self, Availability, CommandContext, CommandId, CommandSpec, Placement};
 use crate::ui::components;
 use crate::ui::palette::{self, PaletteEntry, PaletteState};
+use crate::ui::showcase::{self, ShowcaseState};
 use crate::ui::theme::{self, Palette, TextRole};
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
 
@@ -75,6 +76,10 @@ pub struct ShellState {
     pub layout: LayoutMode,
     /// Widget to focus when the open drawer closes (usually its toggle).
     drawer_return: Option<Id>,
+    /// The component showcase window, while it is open.
+    pub showcase: Option<ShowcaseState>,
+    /// Widget to focus when the showcase closes.
+    showcase_return: Option<Id>,
     /// Widget to focus at the start of the next frame, after a dialog closes.
     pending_focus: Option<Id>,
     /// Theme preference currently installed in the egui context.
@@ -103,6 +108,8 @@ impl Default for ShellState {
             drawer: None,
             layout: LayoutMode::Docked,
             drawer_return: None,
+            showcase: None,
+            showcase_return: None,
             pending_focus: None,
             applied_theme: None,
             text_had_focus: false,
@@ -149,6 +156,12 @@ fn run(state: &mut ShellState, ctx: &egui::Context, id: CommandId) {
         }
         CommandId::ToggleNavigator => toggle_panel(state, ctx, Drawer::Navigator),
         CommandId::ToggleInspector => toggle_panel(state, ctx, Drawer::Inspector),
+        CommandId::ShowComponentShowcase => {
+            if state.showcase.is_none() {
+                state.showcase_return = ctx.memory(|memory| memory.focused());
+                state.showcase = Some(ShowcaseState::default());
+            }
+        }
         // Select is the only tool so far, so it is always the active one.
         CommandId::SelectTool => {}
         // Always unavailable until the project model exists (M1/M2).
@@ -184,6 +197,37 @@ fn toggle_panel(state: &mut ShellState, ctx: &egui::Context, which: Drawer) {
 fn close_drawer(state: &mut ShellState) {
     state.drawer = None;
     state.pending_focus = state.drawer_return.take();
+}
+
+/// Closes the component showcase and returns focus to where it came from.
+fn close_showcase(state: &mut ShellState) {
+    state.showcase = None;
+    state.pending_focus = state.showcase_return.take();
+}
+
+/// The component showcase as a movable window with an explicit Close button.
+fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
+    let Some(mut fixture) = state.showcase.take() else {
+        return;
+    };
+    let mut close = false;
+    egui::Window::new("Component showcase")
+        .id(Id::unique("component-showcase"))
+        .collapsible(false)
+        .default_size([460.0, 640.0])
+        .default_pos([260.0, 60.0])
+        .max_height((ctx.content_rect().height() - 80.0).max(200.0))
+        .show(ctx, |ui| {
+            if components::action_button(ui, "Close showcase", None, Some("Escape")).clicked() {
+                close = true;
+            }
+            ui.separator();
+            ScrollArea::vertical().show(ui, |ui| showcase::show(ui, &mut fixture));
+        });
+    state.showcase = Some(fixture);
+    if close {
+        close_showcase(state);
+    }
 }
 
 /// Whether a panel's toggle shows as pressed.
@@ -224,6 +268,12 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     // the frame Escape is pressed, and Escape must first leave the field.
     // An open drawer takes Escape before the canvas selection does.
     let text_had_focus = state.text_had_focus;
+    if state.showcase.is_some()
+        && !text_had_focus
+        && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
+    {
+        close_showcase(state);
+    }
     if state.drawer.is_some()
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
@@ -279,6 +329,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         })
         .inner;
     drawer(ui.ctx(), state, canvas_rect, &palette);
+    showcase_window(ui.ctx(), state);
     command_palette(ui.ctx(), state);
     // Only a focused text field keeps editing keys; a focused button must not
     // swallow Escape (egui_wants_keyboard_input is true for any focus).

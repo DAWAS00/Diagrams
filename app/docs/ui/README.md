@@ -12,9 +12,9 @@ This page is for anyone following the project. It summarises the user-interface 
 
 | Task | What it delivers | Status |
 |---|---|---|
-| UI-01 | Design tokens and base components | In progress — [evidence](UI-01-TOKENS-AND-COMPONENTS.md); showcase and state checks remain |
+| UI-01 | Design tokens, components and states | **Done** — [evidence](UI-01-TOKENS-AND-COMPONENTS.md) |
 | UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
-| UI-03 | Responsive workspace | Built and checked — [evidence](UI-03-RESPONSIVE-WORKSPACE.md); done once UI-01 is done |
+| UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
 | UI-04 | Welcome, new-project and open screens | Next |
 | UI-05 | Navigator and diagram tabs | Not started |
 | UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |
@@ -39,6 +39,12 @@ This page is for anyone following the project. It summarises the user-interface 
 | Light | Dark |
 |---|---|
 | ![Light theme](ui-01-light.png) | ![Dark theme](ui-01-dark.png) |
+
+- **Completed later:** focus, error and disabled states are measured in both themes, fields can show an error (red border plus an "Error:" message), and a **component showcase** (Menu → View → Component showcase, or Ctrl+K "showcase") displays every control in every state as a labeled design fixture.
+
+| Component showcase, light | Dark |
+|---|---|
+| ![Showcase light](ui-01-showcase-light.png) | ![Showcase dark](ui-01-showcase-dark.png) |
 
 ### UI-02 — Type scale and text roles
 - Five text roles define every text size in one place: page title 24, panel title 16, body 15, labels 14, code 14 (monospace).

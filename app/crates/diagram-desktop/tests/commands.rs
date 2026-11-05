@@ -89,7 +89,10 @@ fn header_rows_and_menus_should_come_from_the_catalog() {
     assert_eq!(group_names, CommandGroup::ALL);
     assert_eq!(labels(&groups[0].1), ["Save", "Export", "New diagram"]);
     assert_eq!(labels(&groups[1].1), ["Undo", "Redo", "Clear selection"]);
-    assert_eq!(labels(&groups[2].1), ["Project panel", "Inspector"]);
+    assert_eq!(
+        labels(&groups[2].1),
+        ["Project panel", "Inspector", "Component showcase"]
+    );
     let listed: usize = groups.iter().map(|(_, specs)| specs.len()).sum();
     assert_eq!(listed, CATALOG.len());
 }
