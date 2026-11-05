@@ -12,6 +12,7 @@ use eframe::egui::{
 
 use crate::ui::commands::{self, Availability, CommandContext, CommandId, CommandSpec, Placement};
 use crate::ui::components;
+use crate::ui::intents::UiIntent;
 use crate::ui::navigator::{self, Diagram, OpenTab};
 use crate::ui::palette::{self, PaletteEntry, PaletteState};
 use crate::ui::showcase::{self, ShowcaseState};
@@ -100,6 +101,8 @@ pub struct ShellState {
     pub showcase: Option<ShowcaseState>,
     /// Widget to focus when the showcase closes.
     showcase_return: Option<Id>,
+    /// Intents queued by widgets this frame, applied after drawing.
+    intents: Vec<UiIntent>,
     /// Widget to focus at the start of the next frame, after a dialog closes.
     pending_focus: Option<Id>,
     /// Theme preference currently installed in the egui context.
@@ -142,6 +145,7 @@ impl Default for ShellState {
             project_name: String::from(SAMPLE_PROJECT),
             showcase: None,
             showcase_return: None,
+            intents: Vec::new(),
             pending_focus: None,
             applied_theme: None,
             text_had_focus: false,
@@ -255,10 +259,45 @@ impl ShellState {
         self.select(class);
     }
 
+    /// Queues `intent`; it is applied after the current frame is drawn.
+    pub fn queue(&mut self, intent: UiIntent) {
+        self.intents.push(intent);
+    }
+
     /// The state that decides which commands are available.
     pub fn command_context(&self) -> CommandContext {
         CommandContext {
             has_selection: self.selected_class().is_some(),
+        }
+    }
+}
+
+/// The coordinator: applies queued intents in order, after drawing.
+fn apply_intents(state: &mut ShellState, ctx: &egui::Context) {
+    for intent in std::mem::take(&mut state.intents) {
+        match intent {
+            UiIntent::Run { command, origin } => {
+                let drawer_before = state.drawer;
+                let showcase_before = state.showcase.is_some();
+                run(state, ctx, command);
+                // Whatever this control opened returns focus to it.
+                if let Some(origin) = origin {
+                    if state.drawer.is_some() && state.drawer != drawer_before {
+                        state.drawer_return = Some(origin);
+                    }
+                    if state.showcase.is_some() && !showcase_before {
+                        state.showcase_return = Some(origin);
+                    }
+                }
+            }
+            UiIntent::SelectClass(index) => state.select(index),
+            UiIntent::RevealClass(index) => state.reveal_class(index),
+            UiIntent::OpenDiagram(index) => state.open_diagram(index),
+            UiIntent::ActivateTab(index) => state.activate_tab(index),
+            UiIntent::CloseTab(index) => state.close_tab(index),
+            UiIntent::SetTheme(preference) => state.theme = preference,
+            UiIntent::CloseDrawer => close_drawer(state),
+            UiIntent::CloseShowcase => close_showcase(state),
         }
     }
 }
@@ -477,6 +516,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
 
     if state.entry.is_some() {
         entry_screens(ui, state, &palette);
+        apply_intents(state, ui.ctx());
         state.text_had_focus = ui.ctx().text_edit_focused();
         return;
     }
@@ -496,16 +536,16 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
     {
-        close_showcase(state);
+        state.queue(UiIntent::CloseShowcase);
     }
     if state.drawer.is_some()
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
     {
-        close_drawer(state);
+        state.queue(UiIntent::CloseDrawer);
     }
     if let Some(id) = ui.input_mut(|input| commands::take_shortcut(input, text_had_focus)) {
-        run(state, ui.ctx(), id);
+        state.queue(UiIntent::run(id));
     }
 
     let bar = Frame::side_top_panel(ui.style()).fill(palette.workspace);
@@ -555,6 +595,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     drawer(ui.ctx(), state, canvas_rect, &palette);
     showcase_window(ui.ctx(), state);
     command_palette(ui.ctx(), state);
+    apply_intents(state, ui.ctx());
     // Only a focused text field keeps editing keys; a focused button must not
     // swallow Escape (egui_wants_keyboard_input is true for any focus).
     state.text_had_focus = ui.ctx().text_edit_focused();
@@ -637,7 +678,7 @@ fn header(ui: &mut egui::Ui, state: &mut ShellState) {
         });
     });
     if let Some(id) = clicked {
-        run(state, ui.ctx(), id);
+        state.queue(UiIntent::run(id));
     }
 }
 
@@ -721,12 +762,12 @@ fn tab_row(ui: &mut egui::Ui, state: &mut ShellState) {
         }
     });
     match action {
-        Some(TabAction::Activate(index)) => state.activate_tab(index),
-        Some(TabAction::Close(index)) => state.close_tab(index),
+        Some(TabAction::Activate(index)) => state.queue(UiIntent::ActivateTab(index)),
+        Some(TabAction::Close(index)) => state.queue(UiIntent::CloseTab(index)),
         None => {}
     }
     if let Some(id) = clicked {
-        run(state, ui.ctx(), id);
+        state.queue(UiIntent::run(id));
     }
 }
 
@@ -767,14 +808,14 @@ fn tool_row(ui: &mut egui::Ui, state: &mut ShellState) {
         });
     });
     if let Some(id) = clicked {
-        run(state, ui.ctx(), id);
+        state.queue(UiIntent::run(id));
     }
     if let Some((id, button)) = toggle {
-        run(state, ui.ctx(), id);
         // A drawer opened from its button returns focus to that button.
-        if state.drawer.is_some() {
-            state.drawer_return = Some(button);
-        }
+        state.queue(UiIntent::Run {
+            command: id,
+            origin: Some(button),
+        });
     }
 }
 
@@ -830,7 +871,7 @@ fn drawer(ctx: &egui::Context, state: &mut ShellState, canvas_rect: Rect, palett
             });
         });
     if close {
-        close_drawer(state);
+        state.queue(UiIntent::CloseDrawer);
     }
 }
 
@@ -919,11 +960,11 @@ fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
     let ran = match chosen {
         Some(entry) if !entry_availability(entry).is_enabled() => false,
         Some(PaletteEntry::Command(id)) => {
-            run(state, ctx, id);
+            state.queue(UiIntent::run(id));
             true
         }
         Some(PaletteEntry::Object(index)) => {
-            state.select(index);
+            state.queue(UiIntent::RevealClass(index));
             true
         }
         None => false,
@@ -952,7 +993,7 @@ fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace: bool) {
                 (ThemePreference::Light, "Light"),
             ] {
                 if components::choice(ui, state.theme == preference, label).clicked() {
-                    state.theme = preference;
+                    state.queue(UiIntent::SetTheme(preference));
                 }
             }
             components::field_label(ui, "Theme:");
@@ -999,7 +1040,7 @@ fn sidebar(ui: &mut egui::Ui, state: &mut ShellState) {
         }
     });
     if let Some(index) = open {
-        state.open_diagram(index);
+        state.queue(UiIntent::OpenDiagram(index));
     }
 
     ui.add_space(theme::SPACING);
@@ -1031,7 +1072,7 @@ fn sidebar(ui: &mut egui::Ui, state: &mut ShellState) {
         }
     }
     if let Some(index) = reveal {
-        state.reveal_class(index);
+        state.queue(UiIntent::RevealClass(index));
     }
 }
 
@@ -1107,8 +1148,8 @@ fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) -> Rect 
     }
 
     match clicked_class {
-        Some(index) => state.select(index),
-        None if background.clicked() => state.clear_selection(),
+        Some(index) => state.queue(UiIntent::SelectClass(index)),
+        None if background.clicked() => state.queue(UiIntent::run(CommandId::ClearSelection)),
         None => {}
     }
     background.rect

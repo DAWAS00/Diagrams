@@ -5,8 +5,9 @@ use std::collections::HashSet;
 
 use diagram_desktop::shell::{self, ShellState};
 use diagram_desktop::ui::commands::{
-    self, Availability, CATALOG, CommandContext, CommandGroup, CommandId, Placement,
+    self, Availability, CATALOG, CommandContext, CommandGroup, CommandId, EffectOwner, Placement,
 };
+use diagram_desktop::ui::intents::UiIntent;
 use diagram_desktop::ui::palette::{self, PaletteEntry};
 use eframe::egui::{Key, Modifiers, Vec2};
 use egui_kittest::Harness;
@@ -320,4 +321,97 @@ fn escape_should_close_search_keep_selection_and_restore_focus() {
     assert!(harness.state().palette.is_none());
     assert_eq!(harness.state().selected, Some(0));
     assert!(harness.get_by_label("Name").is_focused());
+}
+
+/// Source of every integration test file, to check that contracts name real tests.
+fn test_sources() -> String {
+    let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
+    std::fs::read_dir(dir)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter_map(|entry| std::fs::read_to_string(entry.path()).ok())
+        .collect()
+}
+
+#[test]
+fn every_command_should_have_a_contract_naming_an_existing_test() {
+    let sources = test_sources();
+    for id in CommandId::ALL {
+        let contract = commands::contract(id);
+        assert!(!contract.prerequisite.is_empty(), "{id:?} prerequisite");
+        assert!(!contract.effect.is_empty(), "{id:?} effect");
+        assert!(
+            sources.contains(&format!("fn {}(", contract.test)),
+            "{id:?} names a test that does not exist: {}",
+            contract.test
+        );
+    }
+}
+
+#[test]
+fn model_and_worker_commands_should_stay_unavailable_until_the_model_exists() {
+    for has_selection in [false, true] {
+        let context = CommandContext { has_selection };
+        for id in CommandId::ALL {
+            let owner = commands::contract(id).owner;
+            let enabled = commands::availability(id, context).is_enabled();
+            if owner != EffectOwner::Editor {
+                assert!(!enabled, "{id:?} pretends to change the project");
+            }
+        }
+    }
+}
+
+#[test]
+fn queued_intents_should_apply_after_the_frame() {
+    let mut harness = harness();
+
+    harness.state_mut().queue(UiIntent::OpenDiagram(1));
+    harness.state_mut().queue(UiIntent::SelectClass(1));
+    harness.run();
+
+    assert_eq!(harness.state().active_diagram(), Some(1));
+    assert_eq!(harness.state().selected, Some(1));
+}
+
+#[test]
+fn queued_unavailable_commands_should_do_nothing() {
+    let mut harness = harness();
+    let before = harness.state().clone();
+
+    for id in [
+        CommandId::Save,
+        CommandId::Undo,
+        CommandId::AddClass,
+        CommandId::NewDiagram,
+    ] {
+        harness.state_mut().queue(UiIntent::run(id));
+    }
+    harness.run();
+
+    assert_eq!(harness.state().classes, before.classes);
+    assert_eq!(harness.state().diagrams, before.diagrams);
+    assert_eq!(harness.state().tabs, before.tabs);
+}
+
+#[test]
+fn search_result_for_a_class_should_reveal_it() {
+    let mut harness = harness();
+    harness.state_mut().queue(UiIntent::OpenDiagram(1));
+    harness.run();
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
+    harness.run();
+
+    harness.get_by_label(SEARCH_FIELD).type_text("customer");
+    harness.run();
+    harness.key_press(Key::Enter);
+    harness.run();
+
+    assert_eq!(
+        harness.state().active_diagram(),
+        Some(0),
+        "opened a diagram showing it"
+    );
+    assert_eq!(harness.state().selected, Some(0));
 }

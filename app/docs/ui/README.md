@@ -21,7 +21,7 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 | UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
 | UI-04 | Welcome, new-project and open screens | **Done** — [evidence](UI-04-WELCOME-AND-ENTRY.md) |
 | UI-05 | Navigator and diagram tabs | **Done** — [evidence](UI-05-NAVIGATOR-AND-TABS.md) |
-| UI-06 | Tool and command catalog | In progress — [evidence](UI-06-COMMAND-CATALOG.md); typed intents and action contracts remain |
+| UI-06 | Tool and command catalog | **Done** — [evidence](UI-06-COMMAND-CATALOG.md) |
 | UI-07 | Canvas state presentations | Not started |
 | UI-08 | Contextual inspector | Not started |
 | UI-09 | Dialogs, status bar and validation drawer | Not started |
@@ -97,10 +97,11 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 |---|---|
 | ![Two tabs](ui-05-two-tabs-dark.png) | ![No matches](ui-05-search-no-match.png) |
 
+- **Completed later (UI-06):** buttons, menus, tabs and lists no longer change anything directly. They send typed **intents** that one coordinator applies, which keeps behaviour consistent and testable. Every command also has a written **contract**: what it needs, what it changes, who carries it out and how it interacts with undo, plus the test that covers it. A test fails if any contract points to a test that doesn't exist.
+
 ## What is next
-1. **UI-06 — finish the command catalog:** typed UI intents and a written prerequisite / effect / test contract for every action.
-2. **UI-08 — contextual inspector**, then **UI-11 — notation capability contract** (which needs UI-06 and UI-08 in the tracker's order).
-3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
+1. **UI-08 — contextual inspector**, then **UI-11 — notation capability contract** (which needs UI-06 and UI-08 in the tracker's order).
+2. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
 
 ## How to try it
 From `app/`:
