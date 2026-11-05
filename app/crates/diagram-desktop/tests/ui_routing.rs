@@ -19,7 +19,8 @@ use diagram_desktop::intent::{DraftField, PointerKind, Target, UiIntent};
 use diagram_desktop::presentation::{CommandView, Presentation};
 use diagram_desktop::ui::commands::{Availability, CommandId};
 use diagram_desktop::ui::{
-    canvas_view, fixtures, header, inspector, navigator, status, tabs, toolbar, workspace,
+    canvas_view, components, fixtures, header, inspector, navigator, status, tabs, toolbar,
+    workspace,
 };
 use eframe::egui::{self, Key, Modifiers, ThemePreference, Vec2};
 use egui_kittest::Harness;
@@ -183,7 +184,7 @@ fn h1_h2_every_catalog_command_should_be_in_the_project_menu_and_emit_once() {
 }
 
 #[test]
-fn disabled_menu_items_should_show_their_reason_as_visible_text() {
+fn disabled_menu_items_should_say_unavailable_and_give_the_reason_on_hover() {
     let view = fixtures::sample();
     let mut harness = light(view.clone(), rows);
     let group = view
@@ -200,20 +201,31 @@ fn disabled_menu_items_should_show_their_reason_as_visible_text() {
     harness.run();
     harness.get_by_label(group.label).hover();
     harness.run();
-    for command in group
+    let disabled: Vec<_> = group
         .commands
         .iter()
         .filter(|command| !command.is_enabled())
-    {
-        let reason = command.availability.reason().unwrap_or_default();
+        .collect();
+    for command in &disabled {
+        // The row's accessible name carries the visible "Unavailable".
+        let name = format!("{} {}", command.label, components::UNAVAILABLE);
         assert!(
-            harness
-                .query_all_by_label(reason)
-                .any(|node| node.accesskit_node().role() == egui::accesskit::Role::Label),
-            "{}: reason not visible",
+            harness.query_by_label(&name).is_some(),
+            "{}: no visible Unavailable",
             command.label
         );
     }
+    let first = disabled[0];
+    let reason = first.availability.reason().unwrap_or_default();
+    harness
+        .get_by_label(&format!("{} {}", first.label, components::UNAVAILABLE))
+        .hover();
+    harness.run();
+    assert!(
+        harness.query_by_label_contains(reason).is_some(),
+        "{}: reason not shown on hover",
+        first.label
+    );
 }
 
 fn panel_and_inspector(ui: &mut egui::Ui, view: &Presentation, out: &mut Vec<UiIntent>) {

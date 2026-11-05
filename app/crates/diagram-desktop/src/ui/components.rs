@@ -221,29 +221,29 @@ pub fn dropdown_button<R>(
     (response, inner.map(|inner| inner.inner))
 }
 
-/// Menu items for catalog commands: label, right-aligned shortcut text,
-/// and for a disabled item its reason as visible text below it. Returns the
-/// command chosen and closes the menu when one is.
+/// Right-hand text of a disabled menu item. The full reason is the item's
+/// hover text, and command search lists it as visible text.
+pub const UNAVAILABLE: &str = "Unavailable";
+
+/// Menu items for catalog commands, one row each: the label, then on the
+/// right the shortcut text, or [`UNAVAILABLE`] for a disabled item, whose
+/// reason is its hover text. Rows never grow, so long groups still fit at
+/// 800×500. Returns the command chosen and closes the menu when one is.
 pub fn menu_items(ui: &mut egui::Ui, items: &[CommandView]) -> Option<CommandId> {
     let mut chosen = None;
     for item in items {
         let mut button = Button::selectable(item.active == Some(true), item.label.as_str())
             .min_size(Vec2::new(ui.available_width(), ROW_HEIGHT));
-        if let Some(shortcut) = &item.shortcut_text {
-            button = button.shortcut_text(shortcut.as_str());
+        let right = if item.is_enabled() {
+            item.shortcut_text.as_deref()
+        } else {
+            Some(UNAVAILABLE)
+        };
+        if let Some(right) = right {
+            button = button.shortcut_text(right);
         }
         let response = ui.add_enabled(item.is_enabled(), button);
         let response = command_hover(response, item);
-        if let Some(reason) = item.availability.reason() {
-            ui.add(
-                Label::new(
-                    RichText::new(reason)
-                        .text_style(TextRole::Label.text_style())
-                        .weak(),
-                )
-                .wrap(),
-            );
-        }
         if response.clicked() {
             chosen = Some(item.id);
         }
