@@ -1,13 +1,19 @@
 //! Desktop application boundary for Diagram Studio.
 //!
-//! The native shell owns editor state, will coordinate commands and dispatch
-//! worker jobs. R0-02 provides the eframe/egui shell prototype in [`shell`].
+//! Every user action travels one path: a view pushes a [`intent::UiIntent`],
+//! [`dispatch::apply`] changes the [`app_state::AppState`], and
+//! [`presentation::build`] derives the read-only [`presentation::Presentation`]
+//! that the views in [`shell`] and [`ui`] draw next.
 
 #![deny(missing_docs)]
 
 use std::error::Error;
 use std::io::{self, Write};
 
+pub mod app_state;
+pub mod dispatch;
+pub mod intent;
+pub mod presentation;
 pub mod shell;
 pub mod ui;
 

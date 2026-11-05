@@ -1,8 +1,10 @@
-//! Native shell prototype: toolbar, sidebar, canvas, inspector and status bar.
+//! Native shell: header, tabs, tool row, project panel, canvas, inspector and
+//! status bar.
 //!
-//! The preview classes are prototype data owned by the desktop crate. They
-//! exercise layout, selection and real text editing before M1 introduces the
-//! core model, commands and history.
+//! The shell lays out views drawn from [`presentation::build`]. Views push
+//! [`UiIntent`]s, and [`dispatch::apply`] is the only code that changes the
+//! state. The preview classes are prototype data until M1 binds the core
+//! model, commands and history.
 
 use eframe::egui::{
     self, Align, Align2, Area, Button, Color32, CornerRadius, Frame, Id, Key, Layout, Modal,
@@ -10,17 +12,27 @@ use eframe::egui::{
     Vec2, WidgetInfo,
 };
 
-use crate::ui::commands::{self, Availability, CommandContext, CommandId, CommandSpec, Placement};
-use crate::ui::components;
-use crate::ui::palette::{self, PaletteEntry, PaletteState};
-use crate::ui::showcase::{self, ShowcaseState};
-use crate::ui::theme::{self, Palette, TextRole};
-use crate::ui::welcome::{self, EntryAction, EntryScreen, EntryState};
-use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
+pub use crate::app_state::{
+    AppState, BLANK_NAME_WARNING, PreviewClass, SAMPLE_PROJECT, ShellState,
+};
 
-const CLASS_WIDTH: f32 = 180.0;
-const HEADER_HEIGHT: f32 = 32.0;
-const ATTRIBUTE_HEIGHT: f32 = 20.0;
+use crate::app_state::{ATTRIBUTE_HEIGHT, CLASS_HEADER_HEIGHT};
+use crate::dispatch;
+use crate::intent::{
+    CanvasPointer, DraftField, InputContext, PointerKind, SearchScope, Surface, Target, UiIntent,
+};
+use crate::presentation::{
+    self, CanvasView, CommandView, HeaderView, InspectorKind, InspectorView, NavigatorView,
+    NodeView, Presentation, StatusView, TabsView, ToolsView,
+};
+use crate::ui::commands::{self, Availability};
+use crate::ui::components;
+use crate::ui::palette::{self, PaletteEntry};
+use crate::ui::showcase;
+use crate::ui::theme::{self, Palette, TextRole};
+use crate::ui::welcome::{self, EntryAction, EntryScreen};
+use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR};
+
 const TEXT_INSET: f32 = 10.0;
 
 /// Document colors for diagram objects. They do not follow the editor theme,
@@ -28,203 +40,35 @@ const TEXT_INSET: f32 = 10.0;
 const DOCUMENT_FILL: Color32 = Color32::from_rgb(0xFA, 0xFC, 0xFF);
 const DOCUMENT_INK: Color32 = Color32::from_rgb(0x22, 0x31, 0x47);
 
-/// Name of the built-in sample project.
-pub const SAMPLE_PROJECT: &str = "Sample project";
-
-/// Message shown when a class name has no visible characters.
-pub const BLANK_NAME_WARNING: &str = "A class name must contain a non-whitespace character.";
-
-/// A class box drawn on the prototype canvas.
-#[derive(Debug, Clone, PartialEq)]
-pub struct PreviewClass {
-    /// Editable class name, bound directly to the inspector text field.
-    pub name: String,
-    /// Attribute lines displayed below the name.
-    pub attributes: Vec<String>,
-    /// Top-left corner, relative to the canvas origin.
-    pub position: Vec2,
-}
-
-impl PreviewClass {
-    /// Name used in the canvas and accessibility tree; blank names get a placeholder.
-    pub fn display_name(&self) -> &str {
-        if self.name.trim().is_empty() {
-            "Unnamed class"
-        } else {
-            &self.name
-        }
-    }
-
-    fn size(&self) -> Vec2 {
-        let rows = self.attributes.len().max(1) as f32;
-        Vec2::new(CLASS_WIDTH, HEADER_HEIGHT + rows * ATTRIBUTE_HEIGHT + 8.0)
+/// This frame's UI facts, with `opener` as the widget focus returns to.
+fn input_context(ctx: &egui::Context, state: &AppState, opener: Option<Id>) -> InputContext {
+    InputContext {
+        text_had_focus: state.text_had_focus,
+        modal_open: ctx.memory(|memory| memory.top_modal_layer()).is_some(),
+        opener: opener.or_else(|| ctx.memory(|memory| memory.focused())),
+        ..InputContext::default()
     }
 }
 
-/// Editor state for the prototype shell.
-#[derive(Debug, Clone, PartialEq)]
-pub struct ShellState {
-    /// Classes shown on the canvas, in drawing order.
-    pub classes: Vec<PreviewClass>,
-    /// Index into [`Self::classes`] of the selected class, if any.
-    pub selected: Option<usize>,
-    /// Light, dark or follow the operating system. Light is the default.
-    pub theme: ThemePreference,
-    /// The command and object search, while it is open.
-    pub palette: Option<PaletteState>,
-    /// Which docked panels the user wants; kept across window sizes.
-    pub panels: PanelPreferences,
-    /// The open drawer on narrow windows, if any.
-    pub drawer: Option<Drawer>,
-    /// Docked or narrow, decided from the window width each frame.
-    pub layout: LayoutMode,
-    /// Widget to focus when the open drawer closes (usually its toggle).
-    drawer_return: Option<Id>,
-    /// The welcome or new-project screen, while one is shown instead of the workspace.
-    pub entry: Option<EntryState>,
-    /// Name of the open project, shown in the header.
-    pub project_name: String,
-    /// The component showcase window, while it is open.
-    pub showcase: Option<ShowcaseState>,
-    /// Widget to focus when the showcase closes.
-    showcase_return: Option<Id>,
-    /// Widget to focus at the start of the next frame, after a dialog closes.
-    pending_focus: Option<Id>,
-    /// Theme preference currently installed in the egui context.
-    applied_theme: Option<ThemePreference>,
-    /// Whether a text field (not just any widget) had keyboard focus at the
-    /// end of the last frame.
-    text_had_focus: bool,
-}
-
-impl Default for ShellState {
-    fn default() -> Self {
-        let class = |name: &str, attributes: &[&str], x, y| PreviewClass {
-            name: name.to_owned(),
-            attributes: attributes.iter().map(|a| (*a).to_owned()).collect(),
-            position: Vec2::new(x, y),
-        };
-        Self {
-            classes: vec![
-                class("Customer", &["id: CustomerId", "name: String"], 48.0, 48.0),
-                class("Order", &["id: OrderId", "total: Money"], 300.0, 96.0),
-            ],
-            selected: None,
-            theme: ThemePreference::Light,
-            palette: None,
-            panels: PanelPreferences::default(),
-            drawer: None,
-            layout: LayoutMode::Docked,
-            drawer_return: None,
-            entry: None,
-            project_name: String::from(SAMPLE_PROJECT),
-            showcase: None,
-            showcase_return: None,
-            pending_focus: None,
-            applied_theme: None,
-            text_had_focus: false,
-        }
-    }
-}
-
-impl ShellState {
-    /// State at application start: the welcome screen.
-    pub fn welcome() -> Self {
-        Self {
-            entry: Some(EntryState::default()),
-            ..Self::default()
-        }
-    }
-
-    /// The currently selected class, if the selection index is valid.
-    pub fn selected_class(&self) -> Option<&PreviewClass> {
-        self.selected.and_then(|index| self.classes.get(index))
-    }
-
-    /// Selects the class at `index`; out-of-range indices clear the selection.
-    pub fn select(&mut self, index: usize) {
-        self.selected = (index < self.classes.len()).then_some(index);
-    }
-
-    /// Clears the selection.
-    pub fn clear_selection(&mut self) {
-        self.selected = None;
-    }
-
-    /// The state that decides which commands are available.
-    pub fn command_context(&self) -> CommandContext {
-        CommandContext {
-            has_selection: self.selected_class().is_some(),
-        }
-    }
-}
-
-/// Runs `id` if it is available now; unavailable commands do nothing.
-fn run(state: &mut ShellState, ctx: &egui::Context, id: CommandId) {
-    if !commands::availability(id, state.command_context()).is_enabled() {
+/// Applies `intents` now and refreshes `view` so the rest of the frame draws
+/// the new state.
+fn commit(
+    ctx: &egui::Context,
+    state: &mut AppState,
+    view: &mut Presentation,
+    intents: Vec<UiIntent>,
+    opener: Option<Id>,
+) {
+    if intents.is_empty() {
         return;
     }
-    match id {
-        CommandId::ClearSelection => state.clear_selection(),
-        CommandId::SearchCommands => {
-            if state.palette.is_none() {
-                let focused = ctx.memory(|memory| memory.focused());
-                state.palette = Some(PaletteState::new(focused));
-            }
-        }
-        CommandId::ToggleNavigator => toggle_panel(state, ctx, Drawer::Navigator),
-        CommandId::ToggleInspector => toggle_panel(state, ctx, Drawer::Inspector),
-        CommandId::ShowComponentShowcase => {
-            if state.showcase.is_none() {
-                state.showcase_return = ctx.memory(|memory| memory.focused());
-                state.showcase = Some(ShowcaseState::default());
-            }
-        }
-        // Select is the only tool so far, so it is always the active one.
-        CommandId::SelectTool => {}
-        // Always unavailable until the project model exists (M1/M2).
-        CommandId::Undo
-        | CommandId::Redo
-        | CommandId::Save
-        | CommandId::Export
-        | CommandId::PanTool
-        | CommandId::AddClass
-        | CommandId::Connect
-        | CommandId::AddNote
-        | CommandId::Arrange
-        | CommandId::NewDiagram => {}
-    }
-}
-
-/// Shows or hides a docked panel, or opens and closes its drawer on narrow windows.
-fn toggle_panel(state: &mut ShellState, ctx: &egui::Context, which: Drawer) {
-    match state.layout {
-        LayoutMode::Docked => match which {
-            Drawer::Navigator => state.panels.navigator_visible ^= true,
-            Drawer::Inspector => state.panels.inspector_visible ^= true,
-        },
-        LayoutMode::Narrow if state.drawer == Some(which) => close_drawer(state),
-        LayoutMode::Narrow => {
-            state.drawer_return = ctx.memory(|memory| memory.focused());
-            state.drawer = Some(which);
-        }
-    }
-}
-
-/// Closes the open drawer and returns focus to where it came from.
-fn close_drawer(state: &mut ShellState) {
-    state.drawer = None;
-    state.pending_focus = state.drawer_return.take();
-}
-
-/// Closes the component showcase and returns focus to where it came from.
-fn close_showcase(state: &mut ShellState) {
-    state.showcase = None;
-    state.pending_focus = state.showcase_return.take();
+    let input = input_context(ctx, state, opener);
+    dispatch::apply(state, &input, intents);
+    *view = presentation::build(state);
 }
 
 /// The component showcase as a movable window with an explicit Close button.
-fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
+fn showcase_window(ctx: &egui::Context, state: &mut AppState) {
     let Some(mut fixture) = state.showcase.take() else {
         return;
     };
@@ -240,19 +84,22 @@ fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
                 close = true;
             }
             ui.separator();
+            // The fixture's controls are local widget state of a design fixture.
             ScrollArea::vertical().show(ui, |ui| showcase::show(ui, &mut fixture));
         });
     state.showcase = Some(fixture);
     if close {
-        close_showcase(state);
+        let input = input_context(ctx, state, None);
+        dispatch::apply(state, &input, [UiIntent::Close(Surface::Showcase)]);
     }
 }
 
 /// Welcome and new-project screens, shown instead of the workspace.
-fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
+fn entry_screens(ui: &mut egui::Ui, state: &mut AppState, palette: &Palette) {
     let Some(mut entry) = state.entry.take() else {
         return;
     };
+    let view = presentation::build(state);
     // Escape leaves the name field first, then cancels the form.
     let cancel_by_escape = entry.screen == EntryScreen::NewProject
         && !state.text_had_focus
@@ -265,9 +112,10 @@ fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
         .show(ui, |ui| {
             ui.horizontal_centered(|ui| ui.strong(crate::APPLICATION_NAME));
         });
-    egui::Panel::bottom("status")
+    let mut intents = egui::Panel::bottom("status")
         .frame(bar)
-        .show(ui, |ui| status_bar(ui, state, false));
+        .show(ui, |ui| status_bar(ui, &view.status, false))
+        .inner;
     let action = egui::CentralPanel::default()
         .frame(
             Frame::new()
@@ -293,6 +141,9 @@ fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
         action
     };
 
+    // Moving between the entry screens is local form state; opening or
+    // creating a project goes through the dispatcher.
+    let mut keep_entry = true;
     match action {
         Some(EntryAction::StartNewProject) => {
             entry.screen = EntryScreen::NewProject;
@@ -306,19 +157,15 @@ fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
         }
         Some(EntryAction::CreateProject(name)) => {
             if welcome::name_error(&name).is_none() {
-                state.project_name = name;
-                state.classes.clear();
-                state.selected = None;
-                return;
+                intents.push(UiIntent::CreateProject { name });
+                keep_entry = false;
+            } else {
+                entry.name_touched = true;
             }
-            entry.name_touched = true;
         }
         Some(EntryAction::OpenSample) => {
-            let sample = ShellState::default();
-            state.project_name = sample.project_name;
-            state.classes = sample.classes;
-            state.selected = None;
-            return;
+            intents.push(UiIntent::OpenSampleProject);
+            keep_entry = false;
         }
         Some(EntryAction::RemoveRecent(index)) => {
             if index < entry.recent.len() {
@@ -328,20 +175,15 @@ fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
         Some(EntryAction::DismissRecovery) => entry.recovery_visible = false,
         None => {}
     }
-    state.entry = Some(entry);
-}
-
-/// Whether a panel's toggle shows as pressed.
-fn panel_shown(state: &ShellState, which: Drawer) -> bool {
-    match (state.layout, which) {
-        (LayoutMode::Docked, Drawer::Navigator) => state.panels.navigator_visible,
-        (LayoutMode::Docked, Drawer::Inspector) => state.panels.inspector_visible,
-        (LayoutMode::Narrow, _) => state.drawer == Some(which),
+    if keep_entry {
+        state.entry = Some(entry);
     }
+    let input = input_context(ui.ctx(), state, None);
+    dispatch::apply(state, &input, intents);
 }
 
 /// Draws the complete shell into `ui` and applies the user's interactions to `state`.
-pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
+pub fn show(ui: &mut egui::Ui, state: &mut AppState) {
     if state.applied_theme != Some(state.theme) {
         theme::apply(ui.ctx(), state.theme);
         // This frame's root Ui was created before the styles were installed;
@@ -368,120 +210,133 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         return;
     }
 
-    let layout = workspace::layout_mode(ui.max_rect().width());
-    if layout != state.layout {
-        state.layout = layout;
-        state.drawer = None;
-        state.drawer_return = None;
-    }
+    dispatch::set_layout(state, workspace::layout_mode(ui.max_rect().width()));
+    let ctx = ui.ctx().clone();
+    let mut view = presentation::build(state);
 
     // Shortcuts use the text focus of the previous frame: egui drops focus in
     // the frame Escape is pressed, and Escape must first leave the field.
     // An open drawer takes Escape before the canvas selection does.
     let text_had_focus = state.text_had_focus;
+    let mut early = Vec::new();
     if state.showcase.is_some()
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
     {
-        close_showcase(state);
+        early.push(UiIntent::Close(Surface::Showcase));
     }
     if state.drawer.is_some()
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
     {
-        close_drawer(state);
+        early.push(UiIntent::Close(Surface::Drawer));
     }
     if let Some(id) = ui.input_mut(|input| commands::take_shortcut(input, text_had_focus)) {
-        run(state, ui.ctx(), id);
+        early.push(UiIntent::Command(id));
     }
+    commit(&ctx, state, &mut view, early, None);
 
     let bar = Frame::side_top_panel(ui.style()).fill(palette.workspace);
-    egui::Panel::top("header")
+    let intents = egui::Panel::top("header")
         .frame(bar)
         .exact_size(workspace::HEADER_HEIGHT)
-        .show(ui, |ui| header(ui, state));
-    egui::Panel::bottom("status")
+        .show(ui, |ui| header(ui, &view.header))
+        .inner;
+    commit(&ctx, state, &mut view, intents, None);
+    let intents = egui::Panel::bottom("status")
         .frame(bar)
-        .show(ui, |ui| status_bar(ui, state, true));
+        .show(ui, |ui| status_bar(ui, &view.status, true))
+        .inner;
+    commit(&ctx, state, &mut view, intents, None);
     if state.layout == LayoutMode::Docked {
         if state.panels.navigator_visible {
-            egui::Panel::left("navigator")
+            let intents = egui::Panel::left("navigator")
                 .resizable(true)
                 .default_size(NAVIGATOR.default)
                 .size_range(NAVIGATOR.min..=NAVIGATOR.max)
-                .show(ui, |ui| scrolling(ui, "navigator", |ui| sidebar(ui, state)));
+                .show(ui, |ui| {
+                    scrolling(ui, "navigator", |ui| sidebar(ui, &view.navigator))
+                })
+                .inner;
+            commit(&ctx, state, &mut view, intents, None);
         }
         if state.panels.inspector_visible {
-            egui::Panel::right("inspector")
+            let intents = egui::Panel::right("inspector")
                 .resizable(true)
                 .default_size(INSPECTOR.default)
                 .size_range(INSPECTOR.min..=INSPECTOR.max)
                 .show(ui, |ui| {
-                    scrolling(ui, "inspector", |ui| inspector(ui, state))
-                });
+                    scrolling(ui, "inspector", |ui| inspector(ui, &view.inspector))
+                })
+                .inner;
+            commit(&ctx, state, &mut view, intents, None);
         }
     }
     let canvas_rect = egui::CentralPanel::default()
         .frame(Frame::new().fill(palette.workspace))
         .show(ui, |ui| {
             let row = Frame::side_top_panel(ui.style()).fill(palette.panel);
-            egui::Panel::top("tabs")
+            let intents = egui::Panel::top("tabs")
                 .frame(row)
                 .exact_size(workspace::TAB_ROW_HEIGHT)
-                .show(ui, |ui| tab_row(ui, state));
-            egui::Panel::top("tools")
+                .show(ui, |ui| tab_row(ui, &view.tabs))
+                .inner;
+            commit(&ctx, state, &mut view, intents, None);
+            let (intents, opener) = egui::Panel::top("tools")
                 .frame(row)
                 .exact_size(workspace::TOOL_ROW_HEIGHT)
-                .show(ui, |ui| tool_row(ui, state));
-            Frame::new()
+                .show(ui, |ui| tool_row(ui, &view.tools))
+                .inner;
+            commit(&ctx, state, &mut view, intents, opener);
+            let (rect, intents) = Frame::new()
                 .inner_margin(theme::SPACING)
-                .show(ui, |ui| canvas(ui, state, &palette))
-                .inner
+                .show(ui, |ui| canvas(ui, &view.canvas, &palette))
+                .inner;
+            commit(&ctx, state, &mut view, intents, None);
+            rect
         })
         .inner;
-    drawer(ui.ctx(), state, canvas_rect, &palette);
-    showcase_window(ui.ctx(), state);
-    command_palette(ui.ctx(), state);
+    if let Some(which) = state.drawer {
+        let intents = drawer(&ctx, which, &view, canvas_rect, &palette);
+        commit(&ctx, state, &mut view, intents, None);
+    }
+    showcase_window(&ctx, state);
+    command_palette(&ctx, state);
     // Only a focused text field keeps editing keys; a focused button must not
     // swallow Escape (egui_wants_keyboard_input is true for any focus).
-    state.text_had_focus = ui.ctx().text_edit_focused();
+    state.text_had_focus = ctx.text_edit_focused();
 }
 
 /// A command button with its shortcut as a hover hint; disabled commands
 /// explain why.
-fn command_button(
-    ui: &mut egui::Ui,
-    spec: &CommandSpec,
-    context: CommandContext,
-    clicked: &mut Option<CommandId>,
-) {
-    let hint = spec
-        .shortcut
-        .map(|shortcut| format!("Shortcut: {}", ui.ctx().format_shortcut(&shortcut)));
-    let availability = commands::availability(spec.id, context);
-    if components::action_button(ui, spec.label, availability.reason(), hint.as_deref()).clicked() {
-        *clicked = Some(spec.id);
+fn command_button(ui: &mut egui::Ui, command: &CommandView, out: &mut Vec<UiIntent>) {
+    let hint = command
+        .shortcut_text
+        .as_ref()
+        .map(|text| format!("Shortcut: {text}"));
+    let reason = command.availability.reason();
+    if components::action_button(ui, &command.label, reason, hint.as_deref()).clicked() {
+        out.push(UiIntent::Command(command.id));
     }
 }
 
 /// The application menu: every catalog command, grouped, with shortcuts.
-fn command_menu(ui: &mut egui::Ui, context: CommandContext, clicked: &mut Option<CommandId>) {
+fn command_menu(ui: &mut egui::Ui, view: &HeaderView, out: &mut Vec<UiIntent>) {
     ui.menu_button("Menu", |ui| {
-        for (group, specs) in commands::menu_groups() {
-            ui.menu_button(group.label(), |ui| {
-                for spec in specs {
-                    let availability = commands::availability(spec.id, context);
-                    let mut item = Button::new(spec.label);
-                    if let Some(shortcut) = spec.shortcut {
-                        item = item.shortcut_text(ui.ctx().format_shortcut(&shortcut));
+        for group in &view.menu {
+            ui.menu_button(group.label, |ui| {
+                for command in &group.commands {
+                    let mut item = Button::new(command.label.as_str());
+                    if let Some(text) = &command.shortcut_text {
+                        item = item.shortcut_text(text.as_str());
                     }
-                    let response = ui.add_enabled(availability.is_enabled(), item);
-                    let response = match availability.reason() {
+                    let response = ui.add_enabled(command.is_enabled(), item);
+                    let response = match command.availability.reason() {
                         Some(reason) => response.on_disabled_hover_text(reason),
                         None => response,
                     };
                     if response.clicked() {
-                        *clicked = Some(spec.id);
+                        out.push(UiIntent::Command(command.id));
                         ui.close();
                     }
                 }
@@ -491,120 +346,102 @@ fn command_menu(ui: &mut egui::Ui, context: CommandContext, clicked: &mut Option
 }
 
 /// Header: menu, project name, then Undo, Redo, Search, Save and Export.
-fn header(ui: &mut egui::Ui, state: &mut ShellState) {
-    let context = state.command_context();
-    let mut clicked = None;
+fn header(ui: &mut egui::Ui, view: &HeaderView) -> Vec<UiIntent> {
+    let mut out = Vec::new();
     ui.horizontal_centered(|ui| {
-        command_menu(ui, context, &mut clicked);
+        command_menu(ui, view, &mut out);
         ui.separator();
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             // Right-to-left: add in reverse visual order, with a separator
             // between command groups.
             let mut previous_group = None;
-            for spec in commands::placed(Placement::Header)
-                .collect::<Vec<_>>()
-                .into_iter()
-                .rev()
-            {
-                if previous_group.is_some_and(|group| group != spec.group) {
+            for command in view.commands.iter().rev() {
+                let group = command.id.spec().group;
+                if previous_group.is_some_and(|previous| previous != group) {
                     ui.separator();
                 }
-                previous_group = Some(spec.group);
-                command_button(ui, spec, context, &mut clicked);
+                previous_group = Some(group);
+                command_button(ui, command, &mut out);
             }
             ui.separator();
             ui.allocate_ui_with_layout(
                 ui.available_size(),
                 Layout::left_to_right(Align::Center),
-                |ui| {
-                    let title = format!("{} · not saved", state.project_name);
-                    components::truncated_text(ui, &title)
-                },
+                |ui| components::truncated_text(ui, &view.title),
             );
         });
     });
-    if let Some(id) = clicked {
-        run(state, ui.ctx(), id);
-    }
+    out
 }
 
 /// Diagram tabs. The tab strip itself (overflow, close, per-tab state) is UI-05.
-fn tab_row(ui: &mut egui::Ui, state: &mut ShellState) {
-    let context = state.command_context();
-    let mut clicked = None;
+fn tab_row(ui: &mut egui::Ui, view: &TabsView) -> Vec<UiIntent> {
+    let mut out = Vec::new();
     ui.horizontal_centered(|ui| {
-        let _ = components::choice(ui, true, "Class diagram 1");
-        for spec in commands::placed(Placement::TabRow) {
-            command_button(ui, spec, context, &mut clicked);
+        for tab in &view.tabs {
+            let _ = components::choice(ui, tab.active, &tab.label);
+        }
+        for command in &view.commands {
+            command_button(ui, command, &mut out);
         }
     });
-    if let Some(id) = clicked {
-        run(state, ui.ctx(), id);
-    }
+    out
 }
 
-/// Tool row: project panel button, tools, inspector button.
-fn tool_row(ui: &mut egui::Ui, state: &mut ShellState) {
-    let context = state.command_context();
-    let mut clicked = None;
-    let mut toggle = None;
+/// Tool row: project panel button, tools, inspector button. Returns the
+/// intents and, for a panel toggle, the button focus returns to.
+fn tool_row(ui: &mut egui::Ui, view: &ToolsView) -> (Vec<UiIntent>, Option<Id>) {
+    let mut out = Vec::new();
+    let mut opener = None;
     ui.horizontal_centered(|ui| {
-        let navigator = components::choice(
-            ui,
-            panel_shown(state, Drawer::Navigator),
-            CommandId::ToggleNavigator.spec().label,
-        );
+        let toggle = &view.navigator_toggle;
+        let navigator = components::choice(ui, toggle.active == Some(true), &toggle.label);
         if navigator.clicked() {
-            toggle = Some((CommandId::ToggleNavigator, navigator.id));
+            out.push(UiIntent::Command(toggle.id));
+            opener = Some(navigator.id);
         }
         ui.separator();
-        for spec in commands::placed(Placement::ToolRow) {
-            if spec.id == CommandId::SelectTool {
+        for tool in &view.tools {
+            match tool.active {
                 // The active tool shows as pressed.
-                if components::choice(ui, true, spec.label).clicked() {
-                    clicked = Some(spec.id);
+                Some(true) if tool.is_enabled() => {
+                    if components::choice(ui, true, &tool.label).clicked() {
+                        out.push(UiIntent::Command(tool.id));
+                    }
                 }
-            } else {
-                command_button(ui, spec, context, &mut clicked);
+                _ => command_button(ui, tool, &mut out),
             }
         }
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            let inspector = components::choice(
-                ui,
-                panel_shown(state, Drawer::Inspector),
-                CommandId::ToggleInspector.spec().label,
-            );
+            let toggle = &view.inspector_toggle;
+            let inspector = components::choice(ui, toggle.active == Some(true), &toggle.label);
             if inspector.clicked() {
-                toggle = Some((CommandId::ToggleInspector, inspector.id));
+                out.push(UiIntent::Command(toggle.id));
+                opener = Some(inspector.id);
             }
         });
     });
-    if let Some(id) = clicked {
-        run(state, ui.ctx(), id);
-    }
-    if let Some((id, button)) = toggle {
-        run(state, ui.ctx(), id);
-        // A drawer opened from its button returns focus to that button.
-        if state.drawer.is_some() {
-            state.drawer_return = Some(button);
-        }
-    }
+    (out, opener)
 }
 
 /// Wraps panel contents in a vertical scroll area.
-fn scrolling(ui: &mut egui::Ui, id: &str, add_contents: impl FnOnce(&mut egui::Ui)) {
+fn scrolling<R>(ui: &mut egui::Ui, id: &str, add_contents: impl FnOnce(&mut egui::Ui) -> R) -> R {
     ScrollArea::vertical()
         .id_salt(id)
         .auto_shrink([false, false])
-        .show(ui, add_contents);
+        .show(ui, add_contents)
+        .inner
 }
 
 /// The open drawer, over the canvas only, never over the header, rows or
 /// status bar.
-fn drawer(ctx: &egui::Context, state: &mut ShellState, canvas_rect: Rect, palette: &Palette) {
-    let Some(which) = state.drawer else {
-        return;
-    };
+fn drawer(
+    ctx: &egui::Context,
+    which: Drawer,
+    view: &Presentation,
+    canvas_rect: Rect,
+    palette: &Palette,
+) -> Vec<UiIntent> {
     let width = which.width(canvas_rect.width());
     let rect = match which {
         Drawer::Navigator => {
@@ -624,7 +461,7 @@ fn drawer(ctx: &egui::Context, state: &mut ShellState, canvas_rect: Rect, palett
         .stroke(Stroke::new(1.0, palette.separator))
         .inner_margin(theme::SPACING);
     let inner_size = rect.size() - Vec2::splat(2.0 * (theme::SPACING + 1.0));
-    let mut close = false;
+    let mut out = Vec::new();
     Area::new(Id::unique("drawer"))
         .order(Order::Foreground)
         .fixed_pos(rect.min)
@@ -632,25 +469,24 @@ fn drawer(ctx: &egui::Context, state: &mut ShellState, canvas_rect: Rect, palett
             frame.show(ui, |ui| {
                 ui.set_min_size(inner_size);
                 ui.set_max_size(inner_size);
-                if components::action_button(ui, close_label, None, Some("Escape")).clicked() {
-                    close = true;
-                }
+                let close = components::action_button(ui, close_label, None, Some("Escape"));
                 ui.separator();
-                scrolling(ui, "drawer", |ui| match which {
-                    Drawer::Navigator => sidebar(ui, state),
-                    Drawer::Inspector => inspector(ui, state),
+                out = scrolling(ui, "drawer", |ui| match which {
+                    Drawer::Navigator => sidebar(ui, &view.navigator),
+                    Drawer::Inspector => inspector(ui, &view.inspector),
                 });
+                if close.clicked() {
+                    out.push(UiIntent::Close(Surface::Drawer));
+                }
             });
         });
-    if close {
-        close_drawer(state);
-    }
+    out
 }
 
 /// Command and object search. Enter runs the highlighted result, arrows move
 /// the highlight, Escape or a click outside closes it, and focus returns to
 /// where it was.
-fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
+fn command_palette(ctx: &egui::Context, state: &mut AppState) {
     let Some(mut search) = state.palette.take() else {
         return;
     };
@@ -673,6 +509,7 @@ fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
         PaletteEntry::Command(id) => commands::availability(id, context),
         PaletteEntry::Object(_) => Availability::Enabled,
     };
+    // The highlight is the dialog's own widget state.
     if search.highlight_pending {
         search.highlighted =
             palette::first_available(&results, |entry| entry_availability(entry).is_enabled());
@@ -685,16 +522,21 @@ fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
         None
     };
 
+    let mut intents = Vec::new();
+    let mut query = search.query.clone();
     let modal = Modal::new(Id::unique("command-palette")).show(ctx, |ui| {
         ui.set_width(480.0);
         components::panel_title(ui, "Search commands and objects");
-        let field = components::text_field(ui, "Find a command or object", &mut search.query);
+        let field = components::text_field(ui, "Find a command or object", &mut query);
         if !search.focused_once {
             field.request_focus();
             search.focused_once = true;
         }
         if field.changed() {
-            search.highlight_pending = true;
+            intents.push(UiIntent::Search {
+                scope: SearchScope::Commands,
+                query: query.clone(),
+            });
         }
         ui.add_space(theme::GAP);
         if results.is_empty() {
@@ -712,7 +554,7 @@ fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
                 if let PaletteEntry::Command(id) = entry
                     && let Some(shortcut) = id.spec().shortcut
                 {
-                    row = row.shortcut_text(ctx.format_shortcut(&shortcut));
+                    row = row.shortcut_text(commands::shortcut_text(&shortcut));
                 }
                 let response = ui.add_enabled(availability.is_enabled(), row);
                 if index == search.highlighted && (down || up) {
@@ -732,30 +574,32 @@ fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
     let ran = match chosen {
         Some(entry) if !entry_availability(entry).is_enabled() => false,
         Some(PaletteEntry::Command(id)) => {
-            run(state, ctx, id);
+            intents.push(UiIntent::Command(id));
             true
         }
         Some(PaletteEntry::Object(index)) => {
-            state.select(index);
+            intents.push(UiIntent::Select {
+                target: Target::Class(index),
+                toggle: false,
+            });
             true
         }
         None => false,
     };
     if ran || close_requested {
-        state.pending_focus = search.restore_focus;
+        intents.push(UiIntent::Close(Surface::CommandSearch));
         ctx.request_repaint();
-    } else {
-        state.palette = Some(search);
     }
+    state.palette = Some(search);
+    let input = input_context(ctx, state, None);
+    dispatch::apply(state, &input, intents);
 }
 
 /// Status bar. `in_workspace` adds the selection, which entry screens do not have.
-fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace: bool) {
+fn status_bar(ui: &mut egui::Ui, view: &StatusView, in_workspace: bool) -> Vec<UiIntent> {
+    let mut out = Vec::new();
     ui.horizontal(|ui| {
-        ui.label(
-            egui::RichText::new("Prototype · nothing is saved")
-                .text_style(TextRole::Label.text_style()),
-        );
+        ui.label(egui::RichText::new(view.save_text).text_style(TextRole::Label.text_style()));
         ui.separator();
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
             // Right-to-left layout: add the options in reverse visual order.
@@ -764,114 +608,147 @@ fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace: bool) {
                 (ThemePreference::Dark, "Dark"),
                 (ThemePreference::Light, "Light"),
             ] {
-                if components::choice(ui, state.theme == preference, label).clicked() {
-                    state.theme = preference;
+                if components::choice(ui, view.theme == preference, label).clicked() {
+                    out.push(UiIntent::SetTheme(preference));
                 }
             }
             components::field_label(ui, "Theme:");
             if in_workspace {
                 ui.separator();
-                let selection = match state.selected_class() {
-                    Some(class) => format!("Selected: {}", class.display_name()),
-                    None => String::from("No selection"),
-                };
-                components::truncated_text(ui, &selection);
+                components::truncated_text(ui, &view.selection_text);
             }
         });
     });
+    out
 }
 
-fn sidebar(ui: &mut egui::Ui, state: &mut ShellState) {
-    components::panel_title(ui, "Project");
+fn sidebar(ui: &mut egui::Ui, view: &NavigatorView) -> Vec<UiIntent> {
+    let mut out = Vec::new();
+    components::panel_title(ui, view.title);
     components::field_label(ui, "Diagrams");
     ui.indent("diagrams", |ui| {
-        let _ = components::list_row(ui, true, "Class diagram 1");
+        for row in &view.diagrams {
+            let _ = components::list_row(ui, row.selected, &row.label);
+        }
     });
     ui.add_space(theme::SPACING);
     components::field_label(ui, "Model");
     ui.indent("model", |ui| {
-        for index in 0..state.classes.len() {
-            let selected = state.selected == Some(index);
-            let label = state.classes[index].display_name().to_owned();
-            if components::list_row(ui, selected, &label).clicked() {
-                state.select(index);
+        for row in &view.model {
+            if components::list_row(ui, row.selected, &row.label).clicked()
+                && let Some(target) = row.target
+            {
+                out.push(UiIntent::Select {
+                    target,
+                    toggle: false,
+                });
             }
         }
     });
+    out
 }
 
-fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
-    components::panel_title(ui, "Selection");
-    let Some(class) = state
-        .selected
-        .and_then(|index| state.classes.get_mut(index))
-    else {
-        ui.label("Nothing selected. Select a class on the canvas or in the Model list.");
-        return;
+fn inspector(ui: &mut egui::Ui, view: &InspectorView) -> Vec<UiIntent> {
+    let mut out = Vec::new();
+    components::panel_title(ui, view.title);
+    let (name, attributes) = match &view.kind {
+        InspectorKind::Nothing { guidance } => {
+            ui.label(*guidance);
+            return out;
+        }
+        InspectorKind::Class { name, attributes } => (name, attributes),
     };
 
-    components::text_field(ui, "Name", &mut class.name);
-    if class.name.trim().is_empty() {
-        components::warning_text(ui, BLANK_NAME_WARNING);
+    let mut text = name.text.clone();
+    let changed = components::text_field(ui, name.label, &mut text).changed();
+    if changed {
+        out.push(UiIntent::DraftChanged {
+            field: DraftField::ClassName,
+            text: text.clone(),
+        });
+    }
+    // Show the problem for the text in the field, so it appears in the same
+    // frame as the keystroke that caused it.
+    let problem = if changed {
+        text.trim().is_empty().then_some(BLANK_NAME_WARNING)
+    } else {
+        name.problem.as_deref()
+    };
+    if let Some(problem) = problem {
+        components::warning_text(ui, problem);
     }
 
     ui.add_space(theme::SPACING);
     components::field_label(ui, "Attributes");
-    for attribute in &class.attributes {
+    for attribute in attributes {
         components::code_text(ui, attribute);
     }
+    out
 }
 
-fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) -> Rect {
+fn canvas(ui: &mut egui::Ui, view: &CanvasView, palette: &Palette) -> (Rect, Vec<UiIntent>) {
+    let mut out = Vec::new();
     let (background, painter) = ui.allocate_painter(ui.available_size(), Sense::click());
-    background.widget_info(|| WidgetInfo::labeled(Role::Canvas, true, "Diagram canvas"));
+    background.widget_info(|| WidgetInfo::labeled(Role::Canvas, true, view.accessible_name));
     painter.rect_filled(background.rect, CornerRadius::ZERO, palette.canvas);
-    if state.classes.is_empty() {
+    if let Some(text) = view.empty_text {
         painter.text(
             background.rect.center(),
             Align2::CENTER_CENTER,
-            "This diagram is empty. Adding classes arrives with the project model.",
+            text,
             TextRole::Body.font_id(),
             palette.text_secondary,
         );
     }
     let origin = background.rect.min;
 
-    let mut clicked_class = None;
-    for (index, class) in state.classes.iter().enumerate() {
-        let rect = Rect::from_min_size(origin + class.position, class.size());
-        let selected = state.selected == Some(index);
+    let mut clicked_node = None;
+    for (index, node) in view.nodes.iter().enumerate() {
+        let rect = Rect::from_min_size(origin + node.position.to_vec2(), node.size);
         let response = ui.interact(
             rect,
             ui.scope_id().with(("canvas-class", index)),
             Sense::click(),
         );
-        let name = class.display_name();
         response.widget_info(|| {
-            WidgetInfo::selected(Role::Button, true, selected, format!("Class {name}"))
+            WidgetInfo::selected(Role::Button, true, node.selected, &node.accessible_name)
         });
         if response.clicked() {
-            clicked_class = Some(index);
+            clicked_node = Some(node.target);
         }
-        paint_class(&painter, rect, class, selected, response.hovered(), palette);
+        paint_class(&painter, rect, node, response.hovered(), palette);
     }
 
-    match clicked_class {
-        Some(index) => state.select(index),
-        None if background.clicked() => state.clear_selection(),
+    match clicked_node {
+        Some(target) => out.push(UiIntent::Select {
+            target,
+            toggle: false,
+        }),
+        None if background.clicked() => {
+            let position = background.interact_pointer_pos().unwrap_or(origin);
+            let modifiers = ui.input(|input| input.modifiers);
+            for kind in [PointerKind::Down, PointerKind::Up] {
+                out.push(UiIntent::Pointer(CanvasPointer {
+                    kind,
+                    position,
+                    modifiers,
+                    hit: None,
+                }));
+            }
+        }
         None => {}
     }
-    background.rect
+    (background.rect, out)
 }
 
 fn paint_class(
     painter: &egui::Painter,
     rect: Rect,
-    class: &PreviewClass,
-    selected: bool,
+    node: &NodeView,
     hovered: bool,
     palette: &Palette,
 ) {
+    let selected = node.selected;
     // Selection and hover are editor overlays in the theme accent; the box
     // itself keeps its document colors.
     let border = if selected || hovered {
@@ -888,7 +765,7 @@ fn paint_class(
         Stroke::new(width, border),
         StrokeKind::Inside,
     );
-    let header_bottom = rect.top() + HEADER_HEIGHT;
+    let header_bottom = rect.top() + CLASS_HEADER_HEIGHT;
     painter.hline(
         rect.x_range(),
         header_bottom,
@@ -899,19 +776,19 @@ fn paint_class(
     let text_width = rect.width() - 2.0 * TEXT_INSET;
     let name = components::one_line_galley(
         painter,
-        class.display_name(),
+        &node.name,
         TextRole::Body.font_id(),
         DOCUMENT_INK,
         text_width,
     );
     let name_origin = Align2::CENTER_CENTER
         .anchor_size(
-            Pos2::new(rect.center().x, rect.top() + HEADER_HEIGHT / 2.0),
+            Pos2::new(rect.center().x, rect.top() + CLASS_HEADER_HEIGHT / 2.0),
             name.size(),
         )
         .min;
     painter.galley(name_origin, name, DOCUMENT_INK);
-    for (row, attribute) in class.attributes.iter().enumerate() {
+    for (row, attribute) in node.attributes.iter().enumerate() {
         let line = components::one_line_galley(
             painter,
             attribute,
@@ -943,16 +820,16 @@ fn paint_class(
     }
 }
 
-/// eframe application wrapper around [`ShellState`]; starts on the welcome screen.
+/// eframe application wrapper around [`AppState`]; starts on the welcome screen.
 #[derive(Debug)]
 pub struct ShellApp {
-    state: ShellState,
+    state: AppState,
 }
 
 impl Default for ShellApp {
     fn default() -> Self {
         Self {
-            state: ShellState::welcome(),
+            state: AppState::welcome(),
         }
     }
 }

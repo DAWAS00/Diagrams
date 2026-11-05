@@ -161,7 +161,7 @@ Read [AGENT-A-UI.md §6](AGENT-A-UI.md#6-requests-to-agent-b-a-appends-here-b-re
 
 | A's # | Answer: field, intent or command added | Merged in | Status |
 |---|---|---|---|
-| Phase 0 | `Presentation`, `UiIntent`, `InputContext`, `dispatch::apply` | — | not started |
+| Phase 0 | `Presentation` (`src/presentation.rs`), `UiIntent` and `InputContext` (`src/intent.rs`), `AppState` (`src/app_state.rs`, `ShellState` kept as an alias), `dispatch::apply(&mut AppState, &InputContext, intents)` (`src/dispatch.rs`). `shell.rs` now builds the presentation, draws from it and applies intents. A may edit `shell.rs` from this commit on. | `agent-b/functionality`, commit `B-0` | done (not yet merged to `main`) |
 
 ## 7. Task progress (Agent B only)
 
@@ -169,4 +169,4 @@ Task IDs come from [TASKS-AND-TESTS.md §3](TASKS-AND-TESTS.md#3-task-list). Add
 
 | Task | State | Branch / commit | Notes |
 |---|---|---|---|
-| — | — | — | — |
+| B-0 | done | `agent-b/functionality`, `B-0` commit | Contract types added; no visible change; all existing tests and the audit pass; new `tests/presentation.rs` (9) and `tests/contract.rs` (5). |
