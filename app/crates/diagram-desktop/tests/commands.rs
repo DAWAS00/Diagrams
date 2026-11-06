@@ -1,27 +1,19 @@
 //! UI-06: one command catalog feeds the header, tool row, menus, search and
 //! shortcuts; disabled commands explain why; text fields keep their keys.
 
+mod common;
 use std::collections::HashSet;
 
-use diagram_desktop::shell::{self, ShellState};
+use common::harness;
 use diagram_desktop::ui::commands::{
     self, Availability, CATALOG, CommandContext, CommandGroup, CommandId, EffectOwner, Placement,
 };
 use diagram_desktop::ui::intents::UiIntent;
 use diagram_desktop::ui::palette::{self, PaletteEntry};
-use eframe::egui::{Key, Modifiers, Vec2};
-use egui_kittest::Harness;
+use eframe::egui::{Key, Modifiers};
 use egui_kittest::kittest::{NodeT, Queryable};
 
 const SEARCH_FIELD: &str = "Find a command or object";
-
-fn harness() -> Harness<'static, ShellState> {
-    let mut harness = Harness::builder()
-        .with_size(Vec2::new(1280.0, 800.0))
-        .build_ui_state(shell::show, ShellState::default());
-    harness.run();
-    harness
-}
 
 fn labels(specs: &[&commands::CommandSpec]) -> Vec<&'static str> {
     specs.iter().map(|spec| spec.label).collect()

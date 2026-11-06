@@ -1,17 +1,13 @@
 //! Headless tests of the R0-02 shell, driven through the AccessKit tree the way
 //! a screen reader or keyboard user would reach each control.
 
+mod common;
+use common::harness_unrun;
 use diagram_desktop::shell::{self, BLANK_NAME_WARNING, ShellState};
 use eframe::egui::accesskit::Toggled;
 use eframe::egui::{Key, Vec2};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
-
-fn harness() -> Harness<'static, ShellState> {
-    Harness::builder()
-        .with_size(Vec2::new(1280.0, 800.0))
-        .build_ui_state(shell::show, ShellState::default())
-}
 
 /// egui reports a selected widget to assistive technology as toggled/pressed.
 fn is_pressed(harness: &Harness<'_, ShellState>, label: &str) -> bool {
@@ -20,7 +16,7 @@ fn is_pressed(harness: &Harness<'_, ShellState>, label: &str) -> bool {
 
 #[test]
 fn shell_should_show_toolbar_sidebar_canvas_inspector_and_status() {
-    let harness = harness();
+    let harness = harness_unrun();
 
     for label in [
         "Undo",
@@ -48,7 +44,7 @@ fn shell_should_show_toolbar_sidebar_canvas_inspector_and_status() {
 
 #[test]
 fn unimplemented_toolbar_actions_should_be_disabled() {
-    let harness = harness();
+    let harness = harness_unrun();
 
     for label in [
         "Undo",
@@ -71,7 +67,7 @@ fn unimplemented_toolbar_actions_should_be_disabled() {
 
 #[test]
 fn inspector_should_explain_how_to_select_when_nothing_is_selected() {
-    let harness = harness();
+    let harness = harness_unrun();
 
     harness.get_by_label_contains("Nothing selected");
     assert!(harness.query_by_label("Name").is_none());
@@ -79,7 +75,7 @@ fn inspector_should_explain_how_to_select_when_nothing_is_selected() {
 
 #[test]
 fn clicking_a_canvas_class_should_select_it() {
-    let mut harness = harness();
+    let mut harness = harness_unrun();
 
     harness.get_by_label("Class Order").click();
     harness.run();
@@ -92,7 +88,7 @@ fn clicking_a_canvas_class_should_select_it() {
 
 #[test]
 fn model_list_should_select_a_class_without_the_canvas() {
-    let mut harness = harness();
+    let mut harness = harness_unrun();
 
     harness.get_by_label("Customer").click();
     harness.run();
@@ -103,7 +99,7 @@ fn model_list_should_select_a_class_without_the_canvas() {
 
 #[test]
 fn clicking_empty_canvas_should_clear_the_selection() {
-    let mut harness = harness();
+    let mut harness = harness_unrun();
     harness.state_mut().select(0);
     harness.run();
 
@@ -115,7 +111,7 @@ fn clicking_empty_canvas_should_clear_the_selection() {
 
 #[test]
 fn escape_should_clear_the_selection_when_not_typing() {
-    let mut harness = harness();
+    let mut harness = harness_unrun();
     harness.state_mut().select(1);
     harness.run();
 
@@ -153,7 +149,7 @@ fn typing_in_the_name_field_should_rename_the_class_everywhere() {
 
 #[test]
 fn escape_while_typing_should_keep_the_selection() {
-    let mut harness = harness();
+    let mut harness = harness_unrun();
     harness.state_mut().select(0);
     harness.run();
 
@@ -174,7 +170,7 @@ fn escape_while_typing_should_keep_the_selection() {
 
 #[test]
 fn blank_name_should_show_a_text_warning_and_placeholder() {
-    let mut harness = harness();
+    let mut harness = harness_unrun();
     harness.state_mut().select(1);
     harness.state_mut().classes[1].name = String::from("   ");
     harness.run();

@@ -127,6 +127,10 @@ Generated from the [roadmap tracker](../../../plan-rust-diagram-editor/roadmap.j
 - Only **Class diagram** can be created today. Flowchart and Use Case (M4), and Entity-relationship and Sequence (M5), are described for planning but never offered. Sequence diagrams keep their own written rules (messages ordered top to bottom, aligned lifelines), so they won't be forced into the free-form class canvas.
 - 8 new automated tests.
 
+### Slice S2 — `shell.rs` split (no behaviour change)
+
+The entry screens, tab row and canvas now live in `ui/entry.rs`, `ui/tabs.rs` and `ui/canvas.rs`. The real window was checked on Windows at 800×500, 1280×800 and 1440×900, light and dark, by launching `diagram-desktop` and driving it with the mouse and keyboard. Screenshots are in [p0-split-shell](p0-split-shell/): Welcome, New project, Escape back to Welcome, the sample workspace and a selected class. Known and unchanged from `main`: the relationship line and its labels are faint on the dark canvas, because the document ink does not follow the theme.
+
 ## What is next
 1. **UI-07 — canvas states:** blank, selection, move/resize/connect previews, invalid targets, zoom and fit.
 2. **UI-09 — dialogs, status bar and validation drawer**, then **UI-02** font files and **UI-10** keyboard and accessibility checks (with R0-04 on Windows).
