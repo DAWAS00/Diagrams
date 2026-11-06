@@ -10,6 +10,7 @@ pub mod notation;
 pub mod palette;
 pub mod showcase;
 pub(crate) mod status;
+pub(crate) mod tabs;
 pub mod theme;
 pub mod welcome;
 pub mod workspace;
