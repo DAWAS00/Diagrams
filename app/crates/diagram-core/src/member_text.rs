@@ -370,6 +370,11 @@ fn attribute(
     })
 }
 
+/// A control character or a Unicode line or paragraph separator.
+fn breaks_line(character: char) -> bool {
+    character.is_control() || matches!(character, '\u{2028}' | '\u{2029}')
+}
+
 /// Reads one member from `text`.
 ///
 /// # Errors
@@ -381,7 +386,7 @@ pub fn parse(text: &str) -> Result<MemberDraft, MemberTextError> {
     }
     // Checked before trimming, so a newline or tab at either end is refused
     // too instead of being silently removed.
-    if text.chars().any(char::is_control) {
+    if text.chars().any(breaks_line) {
         return Err(MemberTextError::MultipleLines);
     }
     let text = text.trim();
@@ -395,8 +400,14 @@ pub fn parse(text: &str) -> Result<MemberDraft, MemberTextError> {
     let rest = rest.trim_start();
     let name_end = rest.find([':', '(', '[']).unwrap_or(rest.len());
     let name = checked_name(&rest[..name_end])?;
-    // Brackets are checked over the whole remainder before it is split.
-    scan(&rest[name_end..])?;
+    // Brackets are checked over the whole remainder before it is split, and a
+    // top-level `=` anywhere is a default value, whatever comes before it.
+    if scan(&rest[name_end..])?
+        .iter()
+        .any(|scanned| scanned.depth == 0 && scanned.character == '=')
+    {
+        return Err(MemberTextError::DefaultValue);
+    }
     if rest[name_end..].starts_with('(') {
         operation(visibility, name, &rest[name_end..])
     } else {

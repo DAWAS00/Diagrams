@@ -177,6 +177,11 @@ fn a_kind_change_should_be_refused_in_both_directions() {
 fn the_same_member_typed_again_should_be_no_change() {
     let (mut session, ids) = three_classes();
     let id = add(&mut session, ids.order, "- total: Money [0..1]");
+    // A saved state and a redo step, so keeping both is checked.
+    assert!(session.mark_saved(session.id(), session.state()));
+    let _ = add(&mut session, ids.order, "count: Int");
+    assert!(session.undo().is_some());
+    assert!(!session.is_dirty());
     let before = session.clone();
 
     for text in ["- total: Money [0..1]", "  -total :Money  [0..1] "] {
@@ -187,6 +192,10 @@ fn the_same_member_typed_again_should_be_no_change() {
         );
     }
     assert_eq!(session, before, "revision, saved state and redo unchanged");
+    assert!(!session.is_dirty());
+    assert_eq!(session.redo_label(), Some("Add member"));
+    assert!(session.redo().is_some());
+    assert_eq!(members(&session, ids.order).len(), 2, "redo still works");
 }
 
 #[test]
@@ -196,6 +205,7 @@ fn refusals_should_leave_the_whole_session_unchanged() {
     // Leave something on the redo stack so its survival is checked too.
     let _ = add(&mut session, ids.order, "count: Int");
     assert!(session.undo().is_some());
+    assert!(session.mark_saved(session.id(), session.state()));
     let before = session.clone();
 
     let refusals = [
@@ -238,7 +248,9 @@ fn refusals_should_leave_the_whole_session_unchanged() {
         session, before,
         "document, revision, saved state and redo kept"
     );
+    assert!(!session.is_dirty(), "still saved");
     assert_eq!(session.redo_label(), Some("Add member"));
+    assert!(session.redo().is_some());
 }
 
 #[test]

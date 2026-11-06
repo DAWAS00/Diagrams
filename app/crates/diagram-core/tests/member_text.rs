@@ -190,7 +190,7 @@ fn arabic_and_mixed_names_should_parse() {
 
 #[test]
 fn every_malformed_line_should_be_refused_with_a_reason() {
-    let cases: [(&str, MemberTextError); 16] = [
+    let cases: [(&str, MemberTextError); 20] = [
         ("", MemberTextError::Blank),
         ("   ", MemberTextError::Blank),
         ("a\nb", MemberTextError::MultipleLines),
@@ -213,6 +213,10 @@ fn every_malformed_line_should_be_refused_with_a_reason() {
         ),
         ("a: Int)", MemberTextError::Unopened(')')),
         ("count: Int = 0", MemberTextError::DefaultValue),
+        ("f() = 1", MemberTextError::DefaultValue),
+        ("a [1] = 1", MemberTextError::DefaultValue),
+        ("f(): Int = 1", MemberTextError::DefaultValue),
+        ("f(a: Int = 1)", MemberTextError::DefaultValue),
     ];
     for (text, expected) in cases {
         assert_eq!(refused(text), expected, "{text:?}");
@@ -222,7 +226,17 @@ fn every_malformed_line_should_be_refused_with_a_reason() {
 
 #[test]
 fn a_control_character_at_either_end_should_be_refused_not_trimmed() {
-    for text in ["name\n", "\nname", "name\t", "\tname: Int", "name\r\n"] {
+    for text in [
+        "a\u{2028}b",
+        "name\u{2029}",
+        "f(a: T\u{2028})",
+        "a: Map<K,\u{2028}V>",
+        "name\n",
+        "\nname",
+        "name\t",
+        "\tname: Int",
+        "name\r\n",
+    ] {
         assert_eq!(refused(text), MemberTextError::MultipleLines, "{text:?}");
     }
 }
