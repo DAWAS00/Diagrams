@@ -264,7 +264,7 @@ Single-letter and digit tool shortcuts below operate only with canvas focus, no 
 | Arrow keys | Nudge selected node views by 1 unit | In placement mode move preview; in list/text controls navigate normally |
 | Shift+Arrow keys | Nudge by 10 units | Same focus rules; text selection remains local |
 | Ctrl+Z | Undo | Text draft first; otherwise project history |
-| Ctrl+Shift+Z | Redo | Text draft first; otherwise project history |
+| Ctrl+Shift+Z or Ctrl+Y | Redo | Text draft first; otherwise project history |
 | Ctrl++ | Zoom in | Accept the plus key with its required keyboard-layout modifiers and numpad Add |
 | Ctrl+- | Zoom out | Also accept numpad Subtract |
 | Ctrl+0 | Actual size, 100% | Preserve canvas-center world position |

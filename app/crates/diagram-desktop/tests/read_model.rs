@@ -225,3 +225,10 @@ fn text_helpers_should_format_members_labels_and_multiplicities() {
         "# find(id: OrderId, flag): Order"
     );
 }
+
+#[test]
+fn classes_shown_should_count_in_words() {
+    assert_eq!(read_model::classes_shown(0), "No classes shown");
+    assert_eq!(read_model::classes_shown(1), "1 class shown");
+    assert_eq!(read_model::classes_shown(2), "2 classes shown");
+}

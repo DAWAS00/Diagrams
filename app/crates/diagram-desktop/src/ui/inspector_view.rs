@@ -113,7 +113,7 @@ pub(crate) fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
                 ui.add_space(theme::SPACING);
                 components::field_label(ui, "Diagram");
                 ui.label(diagram.name.as_str());
-                components::field_label(ui, &format!("{} classes shown", diagram.nodes.len()));
+                components::field_label(ui, &read_model::classes_shown(diagram.nodes.len()));
             }
             components::field_label(ui, "Tip: Ctrl+click adds classes to the selection.");
         }

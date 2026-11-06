@@ -528,3 +528,25 @@ fn generalization_inspector_should_pass_the_audit() {
         report(findings);
     }
 }
+
+#[test]
+fn one_class_diagram_in_dark_should_pass_the_audit() {
+    use eframe::egui::ThemePreference;
+    for size in [LARGE, SMALL] {
+        let mut state = ShellState::default();
+        state.theme = ThemePreference::Dark;
+        let details = common::diagram_id(&state, "Order details");
+        assert!(state.open_diagram(details));
+        let mut harness = harness_with(size, state);
+        if harness.query_by_label("1 class shown").is_none() {
+            harness.get_by_label("Inspector").click();
+            harness.run();
+        }
+        harness.get_by_label("1 class shown");
+        let findings: Vec<String> = audit_layout("one-class diagram, dark", &harness, size, false)
+            .into_iter()
+            .filter(|finding| !finding.contains("\"Class ") && !finding.contains("Diagram canvas"))
+            .collect();
+        report(findings);
+    }
+}

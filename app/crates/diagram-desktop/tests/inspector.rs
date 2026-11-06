@@ -82,6 +82,17 @@ fn no_selection_should_describe_the_diagram() {
 }
 
 #[test]
+fn a_diagram_with_one_class_should_say_class_in_the_singular() {
+    let mut state = ShellState::default();
+    let details = common::diagram_id(&state, "Order details");
+    assert!(state.open_diagram(details));
+
+    let harness = open(state);
+
+    harness.get_by_label("1 class shown");
+}
+
+#[test]
 fn name_should_stay_a_draft_until_enter() {
     let mut harness = selected("Customer");
     let customer = class_id(harness.state(), "Customer");

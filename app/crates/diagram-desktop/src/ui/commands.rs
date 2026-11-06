@@ -160,8 +160,12 @@ pub struct CommandSpec {
     pub label: &'static str,
     /// Menu group.
     pub group: CommandGroup,
-    /// Keyboard shortcut, if any.
+    /// Keyboard shortcut, if any. Menus and search show this one.
     pub shortcut: Option<KeyboardShortcut>,
+    /// A second shortcut for the same command, for a platform convention
+    /// (Ctrl+Y for Redo on Windows). Never shown; the text-field rule below
+    /// applies to it too.
+    pub alternate_shortcut: Option<KeyboardShortcut>,
     /// True when a focused text field uses the same keys (for example Ctrl+Z
     /// or Escape). The field then keeps them and the command does not run.
     pub text_field_owns_shortcut: bool,
@@ -182,8 +186,19 @@ const fn spec(
         label,
         group,
         shortcut,
+        alternate_shortcut: None,
         text_field_owns_shortcut,
         placement,
+    }
+}
+
+impl CommandSpec {
+    /// The same entry with a second shortcut.
+    const fn also(self, modifiers: Modifiers, key: Key) -> Self {
+        Self {
+            alternate_shortcut: Some(KeyboardShortcut::new(modifiers, key)),
+            ..self
+        }
     }
 }
 
@@ -208,7 +223,8 @@ pub const CATALOG: [CommandSpec; 17] = [
         keys(Modifiers::COMMAND.plus(Modifiers::SHIFT), Key::Z),
         true,
         Placement::Header,
-    ),
+    )
+    .also(Modifiers::COMMAND, Key::Y),
     spec(
         CommandId::SearchCommands,
         "Search",
@@ -428,7 +444,12 @@ pub fn take_shortcut(input: &mut InputState, text_had_focus: bool) -> Option<Com
     let mut candidates: Vec<(&CommandSpec, KeyboardShortcut)> = CATALOG
         .iter()
         .filter(|spec| !(text_had_focus && spec.text_field_owns_shortcut))
-        .filter_map(|spec| spec.shortcut.map(|shortcut| (spec, shortcut)))
+        .flat_map(|spec| {
+            spec.shortcut
+                .into_iter()
+                .chain(spec.alternate_shortcut)
+                .map(move |shortcut| (spec, shortcut))
+        })
         .collect();
     candidates.sort_by_key(|(_, shortcut)| Reverse(modifier_count(shortcut)));
     candidates
