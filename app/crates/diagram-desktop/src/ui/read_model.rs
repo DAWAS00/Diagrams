@@ -219,6 +219,16 @@ pub fn canvas_model(document: &Document, diagram: DiagramId) -> CanvasModel {
     CanvasModel { classes, edges }
 }
 
+/// How many classes a diagram shows, in words: "No classes shown",
+/// "1 class shown", "3 classes shown".
+pub fn classes_shown(count: usize) -> String {
+    match count {
+        0 => String::from("No classes shown"),
+        1 => String::from("1 class shown"),
+        _ => format!("{count} classes shown"),
+    }
+}
+
 /// Multiplicity as text; empty when there is none.
 pub fn multiplicity_text(multiplicity: Option<Multiplicity>) -> String {
     multiplicity

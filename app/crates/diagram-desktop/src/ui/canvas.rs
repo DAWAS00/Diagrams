@@ -145,7 +145,7 @@ fn paint_relation(
     let (color, width) = if selected {
         (palette.accent, 2.5)
     } else {
-        (DOCUMENT_INK, 1.0)
+        (palette.diagram_line, 1.0)
     };
     painter.line_segment([start, end], Stroke::new(width, color));
     // Multiplicities below the line near each end, so they never collide with it.

@@ -144,13 +144,20 @@ The entry screens, tab row and canvas now live in `ui/entry.rs`, `ui/tabs.rs` an
 
 The project panel, canvas and inspector now read a `diagram-core` document through `ui/read_model.rs`; rename and association edits are commands, Undo and Redo follow the history, and File > Close project asks first when work would be lost. Checked in the real Windows window by mouse and keyboard: Welcome, sample project, select a class, rename it (the canvas, panel and relationship change together), Undo and Redo with their status sentences, Menu > File > Close project, the dialog (Cancel has focus, Escape cancels and focus returns to Menu, Discard returns to Welcome), at 1280×800 light and dark and the dialog at 800×500. Screenshots: [p1-session-binding](p1-session-binding/). The headless audit covers the dialog at 1280×800 and 800×500. Notes: `0..*` is shown as `*` (the core's form); the model has no relationship name, so the old name field is gone.
 
+### Bug slice B1 — readable relationships on the dark canvas, "1 class shown", Ctrl+Y
+
+Fixed the three failures from the 2026-11-06 hand test:
+- relationship lines and multiplicities now use a theme token (`diagram_line`) that meets 4.5:1 on the canvas in both themes, selected or not;
+- the inspector says "1 class shown";
+- Redo also answers Ctrl+Y.
+
+Each fix has a test proven to fail without it. Evidence and screenshots: [B1-CANVAS-DARK-INK.md](B1-CANVAS-DARK-INK.md).
+
 ## What is next
 The order is set in [BUILD-PROGRAM.md](../next-steps/BUILD-PROGRAM.md):
-1. **S10 storage core:** finish the review and merge it.
-2. **B1 bug slice:** readable relationship lines on the dark canvas, "1 class shown", and Ctrl+Y for Redo.
-3. **S4 to S9:** member parser, Class tool, member editing, canvas gestures, drag and connect, reuse and delete.
-4. **S11, S12 and S13:** Save and Open in the window, pan, zoom and SVG export, then the keyboard journey and the final acceptance test.
-5. **In parallel (needs a Windows desktop):** the R0-04 text and accessibility matrix (Arabic and mixed text, IME, Narrator/NVDA, 100/150/200% scaling), then the R0-05 framework decision.
+1. **S4 to S9:** member parser, Class tool, member editing, canvas gestures, drag and connect, reuse and delete.
+2. **S11, S12 and S13:** Save and Open in the window, pan, zoom and SVG export, then the keyboard journey and the final acceptance test.
+3. **In parallel (needs a Windows desktop):** the R0-04 text and accessibility matrix (Arabic and mixed text, IME, Narrator/NVDA, 100/150/200% scaling), then the R0-05 framework decision.
 
 ## How to try it
 From `app/`:

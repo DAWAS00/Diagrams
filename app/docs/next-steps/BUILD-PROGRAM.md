@@ -31,8 +31,8 @@ This is slice progress (which pull requests are merged), not task status; task s
 | S1 `docs/p0-decisions` | Merged (PR #12) | ADR-003, tracker rule |
 | S2 `refactor/p0-split-shell` | Merged (PR #13) | [p0-split-shell](../ui/p0-split-shell/) |
 | S3 `feat/p1-session-binding` | Merged (PR #14) | [p1-session-binding](../ui/p1-session-binding/) |
-| S10 `feat/p5-storage-core` | Built on its branch (commits `cba403a`, `5be8720`), all gates green, 56 storage tests. Codex code review round 4 asked for one fix (journal next to the target), which is in `5be8720`; round 5, push, PR and merge are still to do. | `diagram-storage/tests/` |
-| B1 | Not started. Comes next, after S10 merges and before S4. | Hand-test findings 1 to 3 |
+| S10 `feat/p5-storage-core` | Merged (PR #15); Codex approved in round 5 | `diagram-storage/tests/` |
+| B1 `fix/canvas-dark-ink` | Fixed on its branch, with all gates and the real-window check passing; pull request next | [B1-CANVAS-DARK-INK.md](../ui/B1-CANVAS-DARK-INK.md) |
 | S4, S5, S6, S7, S8, S9, S11, S12, S13 | Not started, in that order | — |
 
 **What a user can do today** (on `main`): start a blank or sample project; select classes and relationships; rename a class; edit role names and multiplicities, with errors in words; Undo and Redo (Ctrl+Z, Ctrl+Shift+Z) with a status sentence; open several diagram tabs; search commands and objects (Ctrl+K); close a project, with a prompt when changes would be lost; and switch between light and dark.

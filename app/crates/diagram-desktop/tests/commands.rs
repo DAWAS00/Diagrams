@@ -28,7 +28,11 @@ fn catalog_should_list_each_command_once_in_id_order() {
         assert_eq!(id.spec().id, id);
     }
     let labels: HashSet<_> = CATALOG.iter().map(|spec| spec.label).collect();
-    let shortcuts: Vec<_> = CATALOG.iter().filter_map(|spec| spec.shortcut).collect();
+    // Primary and alternate shortcuts together: no key combination runs two commands.
+    let shortcuts: Vec<_> = CATALOG
+        .iter()
+        .flat_map(|spec| spec.shortcut.into_iter().chain(spec.alternate_shortcut))
+        .collect();
     let unique_shortcuts: HashSet<_> = shortcuts.iter().collect();
 
     assert_eq!(labels.len(), CATALOG.len());
@@ -700,4 +704,37 @@ fn requests_queued_for_an_old_project_should_not_touch_the_next_one() {
         "no edit reached the new project's history"
     );
     harness.get_by_label_contains("remaining requests were dropped");
+}
+
+#[test]
+fn ctrl_y_should_redo_like_ctrl_shift_z() {
+    let mut harness = harness();
+    let customer = class_id(harness.state(), "Customer");
+    rename(&mut harness, "Customer", "Client");
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::Z);
+    harness.run();
+    assert_eq!(name_of(&harness, customer), "Customer");
+
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::Y);
+    harness.run();
+
+    assert_eq!(name_of(&harness, customer), "Client");
+    harness.get_by_label_contains("Redid: Rename class.");
+}
+
+#[test]
+fn ctrl_y_in_a_text_field_should_be_left_to_the_field() {
+    let mut harness = harness();
+    let customer = class_id(harness.state(), "Customer");
+    rename(&mut harness, "Customer", "Client");
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::Z);
+    harness.run();
+    harness.get_by_label("Search project").click();
+    harness.run();
+
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::Y);
+    harness.run();
+
+    assert_eq!(name_of(&harness, customer), "Customer", "history untouched");
+    assert!(!harness.get_by_label("Redo").accesskit_node().is_disabled());
 }

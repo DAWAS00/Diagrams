@@ -9,7 +9,7 @@ Status: **done** (2026-11-05). One catalog for header, tool row, tab row, menu, 
 | Command | Group | Shortcut | Text field keeps the keys | Today |
 |---|---|---|---|---|
 | Undo | Edit | Ctrl+Z | Yes | Disabled: needs the project history |
-| Redo | Edit | Ctrl+Shift+Z | Yes | Disabled: needs the project history |
+| Redo | Edit | Ctrl+Shift+Z (also Ctrl+Y) | Yes | Disabled: needs the project history |
 | Add class | Insert | — | — | Disabled: needs the project model |
 | Connect | Insert | — | — | Disabled: needs the project model |
 | Save | File | Ctrl+S | No | Disabled: this prototype cannot save |
@@ -24,7 +24,8 @@ Status: **done** (2026-11-05). One catalog for header, tool row, tab row, menu, 
   - **Shortcuts** go through `take_shortcut()`.
 - **Shortcut rules:**
   - The more specific shortcut wins, so Ctrl+Shift+Z is never read as Ctrl+Z.
-  - When a text field had focus in the previous frame, keys the field uses (Ctrl+Z, Ctrl+Shift+Z, Escape) stay with the field.
+  - When a text field had focus in the previous frame, keys the field uses (Ctrl+Z, Ctrl+Shift+Z, Ctrl+Y, Escape) stay with the field.
+  - A command may have a second, unshown shortcut for a platform convention: Redo also answers Ctrl+Y. No key combination belongs to two commands.
   - Ctrl+K and Ctrl+S still work while typing.
 - **Command and object search (`ui/palette.rs`)**, opened with Ctrl+K or the toolbar **Search** button:
   - Results are labeled "Group: Command" or "Class: Name" and show their shortcut. Unavailable commands show their reason under the row.

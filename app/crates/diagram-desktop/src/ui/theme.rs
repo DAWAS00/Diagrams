@@ -1,8 +1,11 @@
 //! Design tokens, text roles and their mapping to egui styles (UI-01, UI-02).
 //!
 //! Every chrome color comes from a [`Palette`]; widgets never use raw RGB
-//! values. Diagram objects on the canvas keep their own document colors so a
-//! theme change never recolors saved diagrams or exported files.
+//! values. Class boxes on the canvas keep their own document colors so a
+//! theme change never recolors saved diagrams or exported files. What is
+//! painted straight onto the canvas surface (relationship lines and their
+//! multiplicities) uses [`Palette::diagram_line`], so it stays readable on a
+//! dark canvas; an export draws its own background and document ink.
 
 use eframe::egui::{
     self, Color32, CornerRadius, FontId, Stroke, Style, TextStyle, Theme, ThemePreference, Vec2,
@@ -97,6 +100,9 @@ pub struct Palette {
     pub panel: Color32,
     /// Diagram canvas background.
     pub canvas: Color32,
+    /// Relationship lines and their multiplicities, painted directly on
+    /// [`Self::canvas`]. In the light theme it equals the document ink.
+    pub diagram_line: Color32,
     /// Primary text.
     pub text: Color32,
     /// Secondary text such as section labels and hints.
@@ -130,6 +136,7 @@ pub const LIGHT: Palette = Palette {
     workspace: rgb(0xF4F6FA),
     panel: rgb(0xFFFFFF),
     canvas: rgb(0xFCFCFD),
+    diagram_line: rgb(0x223147),
     text: rgb(0x182438),
     text_secondary: rgb(0x526078),
     accent: rgb(0x245CC5),
@@ -148,6 +155,7 @@ pub const DARK: Palette = Palette {
     workspace: rgb(0x141A24),
     panel: rgb(0x1D2633),
     canvas: rgb(0x202B39),
+    diagram_line: rgb(0xC9D4E3),
     text: rgb(0xEDF2F8),
     text_secondary: rgb(0xB6C2D3),
     accent: rgb(0x91B8FF),
@@ -220,6 +228,12 @@ pub fn contrast_pairs(palette: &Palette) -> Vec<ContrastPair> {
         pair("text on workspace", p.text, p.workspace, TEXT_CONTRAST),
         pair("text on panel", p.text, p.panel, TEXT_CONTRAST),
         pair("text on canvas", p.text, p.canvas, TEXT_CONTRAST),
+        pair(
+            "diagram line on canvas",
+            p.diagram_line,
+            p.canvas,
+            TEXT_CONTRAST,
+        ),
         pair("text on hover", p.text, p.hover_fill, TEXT_CONTRAST),
         pair("text on selection", p.text, p.selection_fill, TEXT_CONTRAST),
         pair(
@@ -247,6 +261,12 @@ pub fn contrast_pairs(palette: &Palette) -> Vec<ContrastPair> {
             p.accent,
             p.canvas,
             NON_TEXT_CONTRAST,
+        ),
+        pair(
+            "selected diagram line on canvas",
+            p.accent,
+            p.canvas,
+            TEXT_CONTRAST,
         ),
         pair("text on accent", p.on_accent, p.accent, TEXT_CONTRAST),
         pair(
