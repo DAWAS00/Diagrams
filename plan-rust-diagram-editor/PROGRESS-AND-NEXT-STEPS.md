@@ -92,6 +92,8 @@ Per-task UI status and evidence are generated on the [UI progress page](../app/d
 
 ### C. M1 — model, commands and storage (in parallel with UX)
 All headless: no window needed, so it can be tested fully in this environment. M1 needs only R0-01 and runs in parallel with the UX milestone; both gate M2. R1-01 to R1-04 (typed IDs, validation, reversible commands, undo/redo) form one chain; their status is in the tables above. The remaining storage work, in order:
+*2026-11-06:* R1-05 and R1-06 are built and tested in slice S10 (`feat/p5-storage-core`, not yet merged). The window does not use them until S11. Their status stays open until S11 holds, as stated in [BUILD-PROGRAM.md](../app/docs/next-steps/BUILD-PROGRAM.md#where-the-build-stands-2026-11-06).
+
 1. **R1-05** Persistence DTOs and SQLite schema v1; refuse malformed or newer files without rewriting them. Per [ADR-003](decisions/ADR-003-UI-DECISIONS.md) D5, this comes before any UI save code.
 2. **R1-06** Transactional save and Save As with fault injection.
 3. **R1-07** Bounded worker protocol so an old save result cannot mark newer edits saved.
