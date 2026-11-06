@@ -10,6 +10,7 @@ description = "Persistence and recovery boundary for Diagram Studio"
 [dependencies]
 diagram-core.workspace = true
 rusqlite.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

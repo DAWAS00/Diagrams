@@ -12,8 +12,17 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 
 ## Where the project stands
 
-- **Working today:** a native Windows/Linux desktop window (egui) with a toolbar, project sidebar, canvas with two sample classes, inspector and status bar. It opens on a welcome screen where you can start a new (empty) project or the sample project; in the sample you can select and rename classes, search commands and classes with Ctrl+K, open the panels as drawers on small windows, and switch between light and dark themes instantly.
-- **Not built yet:** the real project model, adding or connecting classes, undo, saving and export. Those buttons are visible but disabled, with an explanation.
+- **Working today:** a native Windows/Linux desktop window (egui) bound to the real `diagram-core` document. The window opens on a welcome screen where you can start a new, empty project or the sample project. In a project you can:
+  - select classes and relationships, and rename classes;
+  - edit role names and multiplicities, with errors in words;
+  - use Undo and Redo (Ctrl+Z, Ctrl+Shift+Z);
+  - open several diagram tabs and search with Ctrl+K;
+  - close the project, with a prompt when changes would be lost;
+  - open the panels as drawers on small windows and switch between light and dark.
+
+  The storage engine (save, load, recovery) is built and tested on its branch but not yet wired to the window.
+- **Not built yet:** adding or connecting classes on the canvas, member editing, drag, Save and Open in the window, and export. Those buttons are visible but disabled, with an explanation. Slice-by-slice progress: [BUILD-PROGRAM.md](../next-steps/BUILD-PROGRAM.md#where-the-build-stands-2026-11-06).
+- **Last full check:** [progress test, 2026-11-06](progress-test-2026-11-06.md). 287 tests pass and the hand test passes 13 of 16 rows. The 3 rows that fail go to bug slice B1.
 - **Order of work:** three streams run in parallel: the remaining native foundation checks (M0), designing every screen as native fixtures (UX milestone, UI-01 to UI-12), and building the model and storage (M1, which needs only the R0-01 workspace). All three gate connecting the screens to the model (M2), then reliability and the v0.1 release (M3).
 
 ## UI task status
@@ -136,9 +145,12 @@ The entry screens, tab row and canvas now live in `ui/entry.rs`, `ui/tabs.rs` an
 The project panel, canvas and inspector now read a `diagram-core` document through `ui/read_model.rs`; rename and association edits are commands, Undo and Redo follow the history, and File > Close project asks first when work would be lost. Checked in the real Windows window by mouse and keyboard: Welcome, sample project, select a class, rename it (the canvas, panel and relationship change together), Undo and Redo with their status sentences, Menu > File > Close project, the dialog (Cancel has focus, Escape cancels and focus returns to Menu, Discard returns to Welcome), at 1280×800 light and dark and the dialog at 800×500. Screenshots: [p1-session-binding](p1-session-binding/). The headless audit covers the dialog at 1280×800 and 800×500. Notes: `0..*` is shown as `*` (the core's form); the model has no relationship name, so the old name field is gone.
 
 ## What is next
-1. **UI-07 — canvas states:** blank, selection, move/resize/connect previews, invalid targets, zoom and fit.
-2. **UI-09 — dialogs, status bar and validation drawer**, then **UI-02** font files and **UI-10** keyboard and accessibility checks (with R0-04 on Windows).
-3. **In parallel (needs a Windows desktop):** R0-04 text and accessibility matrix — Arabic and mixed text, IME, Narrator/NVDA and 100/150/200% scaling — then the R0-05 framework decision.
+The order is set in [BUILD-PROGRAM.md](../next-steps/BUILD-PROGRAM.md):
+1. **S10 storage core:** finish the review and merge it.
+2. **B1 bug slice:** readable relationship lines on the dark canvas, "1 class shown", and Ctrl+Y for Redo.
+3. **S4 to S9:** member parser, Class tool, member editing, canvas gestures, drag and connect, reuse and delete.
+4. **S11, S12 and S13:** Save and Open in the window, pan, zoom and SVG export, then the keyboard journey and the final acceptance test.
+5. **In parallel (needs a Windows desktop):** the R0-04 text and accessibility matrix (Arabic and mixed text, IME, Narrator/NVDA, 100/150/200% scaling), then the R0-05 framework decision.
 
 ## How to try it
 From `app/`:

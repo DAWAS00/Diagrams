@@ -20,6 +20,24 @@ Each slice has its own branch off up-to-date `main` and its own pull request. S1
 | S11 | `feat/p5-save-open-ui` | `worker.rs` (a late result never marks newer edits as saved). Save, Save As, Open, `ui/recent.rs`, the unsaved-changes prompt, recovery in the UI. Headless foundation fixtures that go through public APIs. | R1-07, R1-08, UI-16, UI-09 (save, open and recovery states), UI-13 (real Open), R3-03 |
 | S12 | `feat/p6-viewport-svg` | Pan, zoom, zoom-to-fit, multi-select, alignment. `svg.rs` export from the shared scene, with golden files. | R3-01, R3-02 |
 | S13 | `feat/p7-journey` | `tests/journey.rs` (the whole path by keyboard). `app/docs/R0-04-VERIFICATION.md` (text, IME, NVDA, DPI). `app/docs/R3-05-PROFILE.md` (frame time, save, load and idle measurements on a representative project). `app/docs/R3-06-DISTRIBUTION.md` (measured startup and memory, runtime requirements; a clean-machine run is recorded only if one is available, otherwise listed as a gap). | R2-08, UI-17, R0-04, R3-05, R3-06 |
+| B1 | `fix/canvas-dark-ink` | Bug slice from the 2026-11-06 hand test (see below). Relationship lines and multiplicities readable on the dark canvas; "1 class shown" in the inspector; Ctrl+Y as a second Redo shortcut on Windows. Each fix starts with a test that fails without it. | UI-07, UI-06 (evidence only) |
+
+## Where the build stands (2026-11-06)
+
+This is slice progress (which pull requests are merged), not task status; task status stays in `roadmap.json`. Checked on 2026-11-06 by the full test run and a hand test in the real window: [progress-test-2026-11-06.md](../ui/progress-test-2026-11-06.md).
+
+| Slice | State | Evidence |
+|---|---|---|
+| S1 `docs/p0-decisions` | Merged (PR #12) | ADR-003, tracker rule |
+| S2 `refactor/p0-split-shell` | Merged (PR #13) | [p0-split-shell](../ui/p0-split-shell/) |
+| S3 `feat/p1-session-binding` | Merged (PR #14) | [p1-session-binding](../ui/p1-session-binding/) |
+| S10 `feat/p5-storage-core` | Built on its branch (commits `cba403a`, `5be8720`), all gates green, 56 storage tests. Codex code review round 4 asked for one fix (journal next to the target), which is in `5be8720`; round 5, push, PR and merge are still to do. | `diagram-storage/tests/` |
+| B1 | Not started. Comes next, after S10 merges and before S4. | Hand-test findings 1 to 3 |
+| S4, S5, S6, S7, S8, S9, S11, S12, S13 | Not started, in that order | — |
+
+**What a user can do today** (on `main`): start a blank or sample project; select classes and relationships; rename a class; edit role names and multiplicities, with errors in words; Undo and Redo (Ctrl+Z, Ctrl+Shift+Z) with a status sentence; open several diagram tabs; search commands and objects (Ctrl+K); close a project, with a prompt when changes would be lost; and switch between light and dark.
+
+**Still to build before v0.1:** creating classes on the canvas (S5), editing members (S4, S6), dragging and connecting (S7, S8), reusing and deleting across diagrams (S9), Save, Open, recent projects and recovery in the window (S11, which uses S10), pan, zoom and SVG export (S12), and the keyboard journey with text, profile and distribution evidence (S13). Then the final hand test and `acceptance-2026-11-06.md`.
 
 ## Gates no slice closes
 
