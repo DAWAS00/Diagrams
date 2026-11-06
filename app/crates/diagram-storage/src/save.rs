@@ -218,6 +218,22 @@ fn id(value: u64) -> Result<i64, SaveError> {
 /// or an empty file (such as one a file dialog just created). A project from
 /// a newer version, or any other file, is refused.
 fn check_target(path: &Path) -> Result<(), SaveError> {
+    // A leftover journal or log next to the target would attach itself to the
+    // new file and corrupt it, so refuse until it is dealt with.
+    for suffix in ["-journal", "-wal", "-shm"] {
+        let mut sidecar = path.as_os_str().to_owned();
+        sidecar.push(suffix);
+        if Path::new(&sidecar).exists() {
+            return Err(SaveError::SidecarsPresent {
+                path: path.to_path_buf(),
+                sidecar: format!(
+                    "{}{suffix}",
+                    path.file_name()
+                        .map_or_else(String::new, |n| n.to_string_lossy().into_owned())
+                ),
+            });
+        }
+    }
     let Ok(metadata) = fs::metadata(path) else {
         return Ok(());
     };

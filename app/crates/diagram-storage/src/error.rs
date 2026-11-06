@@ -63,6 +63,17 @@ pub enum SaveError {
         /// The project path being saved.
         path: PathBuf,
     },
+    /// SQLite sidecar files (`-journal`, `-wal`, `-shm`) sit next to the target;
+    /// a new file swapped in would inherit them.
+    #[error(
+        "{path} has an unfinished SQLite journal next to it ({sidecar});          open and close the project in the program that wrote it, or remove that file, then save again"
+    )]
+    SidecarsPresent {
+        /// The project path being saved.
+        path: PathBuf,
+        /// The file name found.
+        sidecar: String,
+    },
     /// The file could not be flushed to disk.
     #[error("could not flush the saved file to disk: {0}")]
     Flush(io::Error),

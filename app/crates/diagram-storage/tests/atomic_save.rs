@@ -307,3 +307,31 @@ fn a_truncated_foreign_database_should_not_be_taken_for_a_damaged_project()
     assert_eq!(bytes(&path), before);
     Ok(())
 }
+
+#[test]
+fn a_journal_or_log_next_to_the_target_should_stop_the_save_untouched() -> Result<(), Box<dyn Error>>
+{
+    for suffix in ["-journal", "-wal", "-shm"] {
+        let (dir, path) = folder()?;
+        save(&path, "Shop", &project())?;
+        let sidecar = dir.path().join(format!("shop.dgram{suffix}"));
+        fs::write(&sidecar, [1_u8])?;
+        let before = bytes(&path);
+        let names_before = names_in(dir.path());
+
+        let outcome = save(&path, "Shop", &other_project());
+
+        assert!(
+            matches!(outcome, Err(SaveError::SidecarsPresent { .. })),
+            "{suffix}: {outcome:?}"
+        );
+        assert!(outcome.is_err_and(|error| error.to_string().contains("journal")));
+        assert_eq!(bytes(&path), before, "{suffix}");
+        assert_eq!(
+            names_in(dir.path()),
+            names_before,
+            "{suffix}: nothing added or removed"
+        );
+    }
+    Ok(())
+}
