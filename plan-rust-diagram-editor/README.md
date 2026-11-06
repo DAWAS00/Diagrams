@@ -1,6 +1,10 @@
 # Rust diagram editor — implementation plan
 
-Plan date: 2026-11-04. Status updated 2026-11-05. Working label: Diagram Studio. R0-01/R0-02/R0-03 are verified on Windows; R0-04 is in progress and R0-05 remains pending. See [workspace instructions](../app/README.md) and [verification evidence](../app/docs/R0-01-VERIFICATION.md).
+Plan date: 2026-11-04. Working label: Diagram Studio. See [workspace instructions](../app/README.md) and [verification evidence](../app/docs/R0-01-VERIFICATION.md).
+
+<!-- roadmap:summary:begin (generated from roadmap.json by build_rust_roadmap.py; edit roadmap.json instead) -->
+**Status** (generated from [roadmap.json](roadmap.json), last updated 2026-11-05): 57 tasks in 8 milestones, 46 of them through v0.1. 14 done, 2 in progress (R0-04, UI-02), 0 blocked, 41 not started. Complete milestones: none. Current gate: M0, 3 of 5 tasks done.
+<!-- roadmap:summary:end -->
 
 Build a local Windows desktop modeling tool in Rust, designed to make the basic workflow clear and dependable before expanding diagram coverage.
 
@@ -10,9 +14,9 @@ Build a local Windows desktop modeling tool in Rust, designed to make the basic 
 
 **Progress and next steps:** [what is done and what comes next](PROGRESS-AND-NEXT-STEPS.md).
 
-**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) tracks 57 tasks with prerequisites and acceptance conditions; 46 lead through v0.1. Three tasks are complete; R0-04 is in progress and 53 tasks are not started. Edit [roadmap.json](roadmap.json) and run `python build_rust_roadmap.py` to regenerate the dashboard and CSV.
+**Rust execution roadmap:** open the [searchable milestone and task dashboard](ROADMAP.html), [detailed Rust roadmap](RUST-ROADMAP.md), and [Rust engineering rules](RUST-ENGINEERING.md). The [CSV backlog](rust-backlog.csv) lists every task with prerequisites and acceptance conditions. [roadmap.json](roadmap.json) is the only status source ([ADR-003](decisions/ADR-003-UI-DECISIONS.md), D6): edit it and run `python build_rust_roadmap.py` to regenerate the dashboard, the CSV and the status summaries in these documents; `python build_rust_roadmap.py --check` fails when a summary is stale.
 
-**UI-first revision:** [complete UI specification](UI-DESIGN-AND-INTEGRATION.md), [interactive final design preview](UI-DESIGN.html), and 18 new UI tasks. UX design/native presentation now precedes M1; real feature binding remains in M2/M3. Existing completed tasks retain their evidence. UI progress: [app/docs/ui/README.md](../app/docs/ui/README.md). **Every UI change follows [UI-RULES.md](UI-RULES.md).**
+**UI-first revision:** [complete UI specification](UI-DESIGN-AND-INTEGRATION.md), [interactive final design preview](UI-DESIGN.html), and 18 new UI tasks. UX design/native presentation runs in parallel with M1, and both gate M2; real feature binding remains in M2/M3. Existing completed tasks retain their evidence. UI progress: [app/docs/ui/README.md](../app/docs/ui/README.md). **Every UI change follows [UI-RULES.md](UI-RULES.md).**
 
 **New design reference:** [functionality, Rust implementation and keyboard shortcuts](../app/docs/ui/new-design/NEW-DESIGN-FUNCTIONAL-SPEC.md) specifies every planned v0.1 surface, action, edit/cancel rule, model-versus-view behavior and failure state, plus the proposed Windows shortcut map and acceptance workflows informed by the FigJam review.
 
@@ -40,13 +44,13 @@ The GUI choice is a project recommendation, not a claim that one framework guara
 4. [Tooling and dependencies](04-TOOLING.md): installed prerequisites and proposed libraries.
 5. [Rust execution roadmap](RUST-ROADMAP.md) and [engineering rules](RUST-ENGINEERING.md): detailed tasks, crate boundaries and development gates. [Milestone overview](05-ROADMAP.md) remains the shorter summary.
 6. [Quality and validation](06-QUALITY.md): meaningful tests, performance targets and recovery.
-7. [Decision records](decisions/ADR-001-GUI.md), [storage decision](decisions/ADR-002-STORAGE.md).
+7. [Decision records](decisions/ADR-001-GUI.md), [storage decision](decisions/ADR-002-STORAGE.md), [UI decisions D1 to D6](decisions/ADR-003-UI-DECISIONS.md).
 
 Open [the interactive layout concept](GUI-CONCEPT.html) to review the proposed workspace. It is a local HTML planning artifact, not the implementation technology or a working Rust application. Its selection, tab and inspector interactions illustrate the proposed design only.
 
 ## Next development action
 
-Finish R0-04/R0-05 while starting UI-01/UI-02 design work. Complete the UX native presentation milestone and UI-12 review before M1. Then bind the UI to real domain/storage behavior in M2/M3.
+Current task status is in the generated summary at the top of this page. The order of work is in the [execution plan](../app/docs/next-steps/EXECUTION-PLAN.md): M1 needs only the R0-01 workspace, so it runs in parallel with the UX milestone and the remaining M0 checks; M2 needs M1, the UI-12 review and the R0-05 foundation gate, and then M2/M3 bind the UI to real domain and storage behavior. UI decisions D1 to D6 are recorded in [ADR-003](decisions/ADR-003-UI-DECISIONS.md).
 
 ## Assumptions and scope decisions
 

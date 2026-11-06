@@ -4,7 +4,11 @@ Ordered deliverables with observable exit conditions. These are milestones, not 
 
 For the detailed Rust execution sequence, use [RUST-ROADMAP.md](RUST-ROADMAP.md), the [interactive dashboard](ROADMAP.html) and [Rust engineering rules](RUST-ENGINEERING.md). The `R0-01` through `R6-03` IDs in [roadmap.json](roadmap.json) are the detailed task tracker; the `BAS` IDs below remain high-level acceptance references.
 
-Status on 2026-11-05: **R0-01/R0-02/R0-03 complete**; R0-04 in progress, R0-05 not started. M0 remains incomplete. See [Windows verification](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
+<!-- roadmap:summary:begin (generated from roadmap.json by build_rust_roadmap.py; edit roadmap.json instead) -->
+**Status** (generated from [roadmap.json](roadmap.json), last updated 2026-11-05): 57 tasks in 8 milestones, 46 of them through v0.1. 14 done, 2 in progress (R0-04, UI-02), 0 blocked, 41 not started. Complete milestones: none. Current gate: M0, 3 of 5 tasks done.
+<!-- roadmap:summary:end -->
+
+See [Windows verification](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
 
 ## M0 — Prove the desktop foundation
 
@@ -21,7 +25,7 @@ Exit gate: native debug/release build launches repeatedly on this computer; test
 
 ## UX — UI design and native presentation
 
-New priority: complete UI-01–UI-12 before M1, with design exploration starting alongside remaining M0 checks. Use [the complete specification](UI-DESIGN-AND-INTEGRATION.md) and [interactive design](UI-DESIGN.html). UI-13–UI-17 connect the presentation to real behavior in M2; UI-18 is part of M3 release review. All new tasks are pending.
+UX runs in parallel with M1, with design exploration starting alongside the remaining M0 checks; UI-12 gates M2 through R2-08. Use [the complete specification](UI-DESIGN-AND-INTEGRATION.md) and [interactive design](UI-DESIGN.html). UI-13–UI-17 connect the presentation to real behavior in M2; UI-18 is part of M3 release review.
 
 ## M1 — Trustworthy model and persistence
 
