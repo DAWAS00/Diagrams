@@ -14,6 +14,8 @@ Date: 2026-11-06. Turns [IDEAS-PLAN.md](IDEAS-PLAN.md) into ordered work. It fol
 
 ## Phase 0: housekeeping and decisions (S)
 
+Decisions D1 to D6 are settled in [ADR-003](../../../plan-rust-diagram-editor/decisions/ADR-003-UI-DECISIONS.md). The first slice is planned in [SLICE-p0-decisions.md](SLICE-p0-decisions.md).
+
 | Work | Files | Tests |
 |---|---|---|
 | Make decisions D1 to D6 from the ideas plan and record them as ADRs | `plan-rust-diagram-editor/decisions/ADR-003-UI-DECISIONS.md` *(new)* | none (documentation) |

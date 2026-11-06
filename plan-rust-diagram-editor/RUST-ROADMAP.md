@@ -1,14 +1,20 @@
 # Rust implementation roadmap
 
-Plan date: 2026-11-04. Status updated 2026-11-05: R0-01/R0-02/R0-03 are complete with Windows evidence. R0-04 is in progress; **M0 remains incomplete**. See [progress and next steps](PROGRESS-AND-NEXT-STEPS.md) and [the Windows review](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
+Plan date: 2026-11-04. See [progress and next steps](PROGRESS-AND-NEXT-STEPS.md) and [the Windows review](../app/docs/WINDOWS-REVIEW-2026-11-05.md).
+
+<!-- roadmap:summary:begin (generated from roadmap.json by build_rust_roadmap.py; edit roadmap.json instead) -->
+**Status** (generated from [roadmap.json](roadmap.json), last updated 2026-11-05): 57 tasks in 8 milestones, 46 of them through v0.1. 14 done, 2 in progress (R0-04, UI-02), 0 blocked, 41 not started. Complete milestones: none. Current gate: M0, 3 of 5 tasks done.
+<!-- roadmap:summary:end -->
 
 ## Product path
 
 ```mermaid
 flowchart LR
-    M0[M0 Native prototype gate] --> UX[UX Complete UI design and native presentation]
-    UX --> M1[M1 Model commands and storage]
-    M1 --> M2[M2 Complete class workflow]
+    M0[M0 Native prototype gate] -->|R0-05 gate| M2[M2 Complete class workflow]
+    M0 -.->|R0-01 workspace| M1[M1 Model commands and storage]
+    M0 -.->|R0-02 shell| UX[UX Complete UI design and native presentation]
+    UX -->|UI-12 review| M2
+    M1 --> M2
     M2 --> M3[M3 Reliability usability and release]
     M3 --> V1[v0.1 Basic class editor]
     V1 --> M4[M4 Flowchart and use case]
@@ -18,7 +24,7 @@ flowchart LR
 
 The first runnable prototype arrives in **M0**. The first useful class-modeling workflow arrives in **M2**. The first release requires **M3**, including failures, recovery, export, native usability and distribution checks. A window that opens is not a release.
 
-Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadmap.json](roadmap.json) as the editable tracking source, and [rust-backlog.csv](rust-backlog.csv) for spreadsheet/task tracking. R0-01/R0-02/R0-03 are `done`; R0-04 is `in_progress`; 53 tasks remain `not_started`. No remote issues are created by this tracker.
+Use [ROADMAP.html](ROADMAP.html) to browse stages and task dependencies, [roadmap.json](roadmap.json) as the editable tracking source, and [rust-backlog.csv](rust-backlog.csv) for spreadsheet/task tracking. The status summary above is generated from roadmap.json. No remote issues are created by this tracker.
 
 ## Implementation stack
 
@@ -82,11 +88,11 @@ Dependency rule: desktop → core/canvas/storage; canvas → core; storage → c
 
 **Exit:** debug/release startup works on this computer; text/focus/DPI/accessibility limitations are measured and accepted or fixed; a headless library test and docs check run. Do not mark M0 complete on screenshots alone.
 
-## UX — Complete the native UI design before M1
+## UX — Native UI design (in parallel with M1)
 
-UI-01 through UI-12 implement the token/component system, fonts, responsive shell, welcome/navigation/tools/canvas/inspector/dialog states, accessible focus paths and notation capability contract. Start design on the prototype while completing M0; UI-12 requires R0-05 and all UX tasks. R1-01 now requires UI-12. Fixture scenarios prove presentation behavior, not real persistence or model commands. UI-13–UI-17 add real bindings in M2; UI-18 joins the M3 release gate.
+UI-01 through UI-12 implement the token/component system, fonts, responsive shell, welcome/navigation/tools/canvas/inspector/dialog states, accessible focus paths and notation capability contract. Start design on the prototype while completing M0; UI-12 requires R0-05 and all UX tasks. M1 needs only R0-01 and runs in parallel with UX and the remaining M0 checks; R2-08 requires UI-12 and R0-05, so M0, UX and M1 all gate M2. Fixture scenarios prove presentation behavior, not real persistence or model commands. UI-13–UI-17 add real bindings in M2; UI-18 joins the M3 release gate.
 
-Read the [full UI specification](UI-DESIGN-AND-INTEGRATION.md) and [final design preview](UI-DESIGN.html). The roadmap now has 57 tasks across eight milestones; 46 fall through v0.1. New UI tasks are all not started.
+Read the [full UI specification](UI-DESIGN-AND-INTEGRATION.md) and [final design preview](UI-DESIGN.html).
 
 ## M1 — Domain, commands, history and safe storage
 
@@ -153,7 +159,7 @@ Reporting, PNG/PDF, VP XML/native interoperability, advanced layout, other catal
 
 ## First executable workflow and release gates
 
-**R0-01 is complete.** **R0-02/R0-03** are implemented and verified on Linux ([evidence](../app/docs/R0-02-R0-03-VERIFICATION.md)); they stay in progress until the Windows launch and MSVC build are recorded. Then R0-04 and the native gate. Detailed log and ordered next steps: [PROGRESS-AND-NEXT-STEPS.md](PROGRESS-AND-NEXT-STEPS.md). Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist; 36 tasks remain not started.
+Current status is the generated summary at the top of this page. Detailed log and ordered next steps: [PROGRESS-AND-NEXT-STEPS.md](PROGRESS-AND-NEXT-STEPS.md). Task prerequisites and current status are explicit in [roadmap.json](roadmap.json). A task is complete only when its implementation and verification evidence exist.
 
 The project-level definition of done combines:
 

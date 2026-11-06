@@ -4,14 +4,18 @@ A planned offline desktop diagram editor written in Rust. The working product na
 
 The first release focuses on a dependable class-modeling workflow: classes and members, associations and inheritance, reusable model views, undo/redo, project persistence, recovery and SVG export. Broader diagram families follow after this foundation is verified.
 
-**Status:** R0-01, R0-02 and R0-03 are verified on Windows. The native shell and bundled SQLite smoke test work; R0-04 text/accessibility validation is in progress, and M0 remains open. Real diagram editing and project persistence are not implemented yet.
+<!-- roadmap:summary:begin (generated from roadmap.json by build_rust_roadmap.py; edit roadmap.json instead) -->
+**Status** (generated from [roadmap.json](plan-rust-diagram-editor/roadmap.json), last updated 2026-11-05): 57 tasks in 8 milestones, 46 of them through v0.1. 14 done, 2 in progress (R0-04, UI-02), 0 blocked, 41 not started. Complete milestones: none. Current gate: M0, 3 of 5 tasks done.
+<!-- roadmap:summary:end -->
+
+The native shell and bundled SQLite smoke test work; real diagram editing and project persistence are not implemented yet.
 
 ## Start here
 
 - [Rust implementation roadmap](plan-rust-diagram-editor/RUST-ROADMAP.md)
 - [Rust engineering rules](plan-rust-diagram-editor/RUST-ENGINEERING.md)
 - [Product and architecture plan](plan-rust-diagram-editor/README.md)
-- [57-task backlog](plan-rust-diagram-editor/rust-backlog.csv)
+- [Task backlog (CSV)](plan-rust-diagram-editor/rust-backlog.csv)
 - [Visual Paradigm comparison](plan-rust-diagram-editor/comparison/README.md)
 - [Supporting product research](research/visual-paradigm/README.md)
 - [Build and run the workspace](app/README.md)
@@ -25,7 +29,7 @@ The roadmap has eight milestones. M0 proves the desktop foundation; UX delivers 
 
 Read the [new design documentation](app/docs/ui/new-design/README.md) for the [full functionality and shortcut specification](app/docs/ui/new-design/NEW-DESIGN-FUNCTIONAL-SPEC.md), FigJam findings, UI research and action map. Current implementation evidence is on the [UI progress page](app/docs/ui/README.md).
 
-The [complete UI specification](plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md) defines the final v0.1 workspace, all screen states, technology and command contracts. Open the [interactive UI design](plan-rust-diagram-editor/UI-DESIGN.html) locally to compare themes and scenarios. Eighteen new UI tasks prioritize native presentation before M1, with real functional bindings in M2/M3. Progress on the UI work, with screenshots and what is next: [app/docs/ui/README.md](app/docs/ui/README.md). Every UI change follows the [UI rules](plan-rust-diagram-editor/UI-RULES.md), which include an automated usability audit.
+The [complete UI specification](plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md) defines the final v0.1 workspace, all screen states, technology and command contracts. Open the [interactive UI design](plan-rust-diagram-editor/UI-DESIGN.html) locally to compare themes and scenarios. Eighteen UI tasks: native presentation runs in parallel with M1, with real functional bindings in M2/M3. Progress on the UI work, with screenshots and what is next: [app/docs/ui/README.md](app/docs/ui/README.md). Every UI change follows the [UI rules](plan-rust-diagram-editor/UI-RULES.md), which include an automated usability audit.
 
 ## Browse the planning dashboards
 

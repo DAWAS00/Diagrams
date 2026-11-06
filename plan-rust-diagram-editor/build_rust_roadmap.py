@@ -1,9 +1,19 @@
-"""Validate the roadmap and regenerate its offline dashboard and CSV backlog."""
+"""Validate the roadmap and regenerate its offline dashboard, CSV backlog and Markdown status blocks.
+
+roadmap.json is the only status source (ADR-003, D6). Run `python build_rust_roadmap.py` after
+editing it; `python build_rust_roadmap.py --check` writes nothing and exits 1 when a block is stale.
+"""
 
 import csv
 import json
+import os
+import posixpath
+import re
+import sys
+import tempfile
 from collections import Counter
 from pathlib import Path
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent
 
@@ -50,6 +60,235 @@ def validate(data):
     return milestones, tasks
 
 
+PLAN_DIR = "plan-rust-diagram-editor"
+
+# Markdown files whose status summaries are regenerated from roadmap.json, with their
+# blocks in file order. Paths are relative to the repository root. Nothing else is written.
+GENERATED_BLOCKS = {
+    "README.md": ("summary",),
+    f"{PLAN_DIR}/README.md": ("summary",),
+    f"{PLAN_DIR}/RUST-ROADMAP.md": ("summary",),
+    f"{PLAN_DIR}/05-ROADMAP.md": ("summary",),
+    f"{PLAN_DIR}/PROGRESS-AND-NEXT-STEPS.md": ("summary", "milestones", "in-progress"),
+    "app/docs/ui/README.md": ("ui-tasks",),
+}
+
+STATUS_ORDER = ("done", "in_progress", "blocked", "not_started")
+STATUS_WORDS = {"done": "Done", "in_progress": "In progress", "blocked": "Blocked", "not_started": "Not started"}
+BEGIN_RE = re.compile(r"<!-- roadmap:([a-z][a-z0-9-]*):begin\b[^>]*-->")
+END_RE = re.compile(r"<!-- roadmap:([a-z][a-z0-9-]*):end -->")
+
+
+def status_of(data, item):
+    return item.get("status", data["default_task_status"])
+
+
+def status_counts(data):
+    """Validate the roadmap, then count tasks per status and milestone and find the current gate."""
+    milestones, tasks = validate(data)
+    statuses = list(dict.fromkeys((*STATUS_ORDER, *data["status_values"])))
+    rows = {key: {"id": key, "title": item.get("title", ""), "total": 0, **{status: 0 for status in statuses}}
+            for key, item in milestones.items()}
+    for item in tasks.values():
+        row = rows[item["milestone"]]
+        row[status_of(data, item)] += 1
+        row["total"] += 1
+    order = list(milestones)
+    release = next((index for index, key in enumerate(order) if milestones[key].get("release") == "v0.1"), None)
+    gate = next((key for key in order if rows[key]["done"] < rows[key]["total"]), None)
+    return {
+        "total": len(tasks),
+        "milestone_count": len(milestones),
+        "by_status": {status: sum(row[status] for row in rows.values()) for status in data["status_values"]},
+        "milestones": [rows[key] for key in order],
+        "through_v01": None if release is None else sum(rows[key]["total"] for key in order[: release + 1]),
+        "in_progress": [key for key, item in tasks.items() if status_of(data, item) == "in_progress"],
+        "blocked": [key for key, item in tasks.items() if status_of(data, item) == "blocked"],
+        "complete": [key for key in order if rows[key]["total"] and rows[key]["done"] == rows[key]["total"]],
+        "gate": None if gate is None else {"id": gate, "done": rows[gate]["done"], "total": rows[gate]["total"]},
+    }
+
+
+# Escaping `[` and `]` also defeats image syntax `![...]`, so `!` stays as it is.
+MARKDOWN_SYNTAX = re.compile(r"([\\`*_\[\]~|])")
+
+
+def cell(value):
+    """Show a roadmap value literally in Markdown text or a table cell.
+
+    The result is one line; Markdown syntax (links, images, emphasis, code, `|`) is
+    backslash-escaped and HTML (including roadmap markers) becomes entities.
+    """
+    text = MARKDOWN_SYNTAX.sub(r"\\\1", re.sub(r"\r\n|\r|\n", " ", str(value)))
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def link(path):
+    return quote(path, safe="/")
+
+
+def render_summary(data, roadmap_link):
+    """One paragraph with every status count; `roadmap_link` is the relative path to roadmap.json."""
+    counts = status_counts(data)
+    by_status = counts["by_status"]
+    updated = cell(data.get("last_updated") or data.get("date", "unknown"))
+    scope = f"{counts['total']} tasks in {counts['milestone_count']} milestones"
+    if counts["through_v01"] is None:
+        scope += " (no milestone is marked v0.1)"
+    else:
+        scope += f", {counts['through_v01']} of them through v0.1"
+
+    def listed(status, ids):
+        count = f"{by_status.get(status, 0)} {STATUS_WORDS[status].lower()}"
+        return count + (f" ({', '.join(map(cell, ids))})" if ids else "")
+
+    parts = [f"{by_status.get('done', 0)} done", listed("in_progress", counts["in_progress"]),
+             listed("blocked", counts["blocked"]), f"{by_status.get('not_started', 0)} not started"]
+    complete = ", ".join(map(cell, counts["complete"])) or "none"
+    gate = counts["gate"]
+    gate_text = (f"{cell(gate['id'])}, {gate['done']} of {gate['total']} tasks done" if gate
+                 else "none, every task is done")
+    return (f"**Status** (generated from [roadmap.json]({link(roadmap_link)}), last updated {updated}): "
+            f"{scope}. {', '.join(parts)}. Complete milestones: {complete}. Current gate: {gate_text}.")
+
+
+def render_milestones(data):
+    """A Markdown table of task counts per milestone with a totals row."""
+    counts = status_counts(data)
+    lines = ["| Milestone | Title | Done | In progress | Blocked | Not started | Total |",
+             "|---|---|---|---|---|---|---|"]
+    for row in counts["milestones"]:
+        values = " | ".join(str(row[status]) for status in STATUS_ORDER)
+        lines.append(f"| {cell(row['id'])} | {cell(row['title'])} | {values} | {row['total']} |")
+    totals = " | ".join(str(counts["by_status"].get(status, 0)) for status in STATUS_ORDER)
+    lines.append(f"| **All** | | {totals} | {counts['total']} |")
+    return "\n".join(lines)
+
+
+def render_in_progress(data):
+    """A Markdown table of the tasks in progress or blocked, or a sentence when there are none."""
+    validate(data)
+    rows = [item for item in data["tasks"] if status_of(data, item) in ("in_progress", "blocked")]
+    if not rows:
+        return "No task is in progress or blocked."
+    lines = ["| Task | Title | Milestone | Status |", "|---|---|---|---|"]
+    for item in rows:
+        lines.append(f"| {cell(item['id'])} | {cell(item['title'])} | {cell(item['milestone'])} "
+                     f"| {STATUS_WORDS[status_of(data, item)]} |")
+    return "\n".join(lines)
+
+
+def evidence_path(item):
+    """The file named by a task's first evidence entry (text before its first ':'), or None."""
+    evidence = item.get("evidence")
+    entries = evidence if isinstance(evidence, list) else [evidence]
+    first = entries[0] if entries else None
+    if not isinstance(first, str) or not first.strip():
+        return None
+    return first.split(":", 1)[0].strip() or None
+
+
+def render_ui_tasks(data, from_dir):
+    """A Markdown table of UI tasks; evidence links are relative to `from_dir` (repository-relative)."""
+    validate(data)
+    lines = ["| Task | What it delivers | Status |", "|---|---|---|"]
+    for item in data["tasks"]:
+        if not item["id"].startswith("UI-"):
+            continue
+        status = status_of(data, item)
+        text = f"**{STATUS_WORDS[status]}**" if status == "done" else STATUS_WORDS[status]
+        path = evidence_path(item)
+        if path:
+            text += f" — [evidence]({link(posixpath.relpath(path, from_dir or '.'))})"
+        lines.append(f"| {cell(item['id'])} | {cell(item['title'])} | {text} |")
+    return "\n".join(lines)
+
+
+def fill_blocks(text, blocks):
+    """Replace the content of each marked block in `text` (`\\n` newlines) with `blocks[name]`.
+
+    Text outside the blocks is kept. Raise ValueError on any marker problem.
+    """
+    output, seen, current = [], set(), None
+    for line in text.splitlines(keepends=True):
+        if "<!-- roadmap:" not in line:
+            if current is None:
+                output.append(line)
+            continue
+        match = BEGIN_RE.search(line) or END_RE.search(line)
+        if match is None:
+            raise ValueError(f"Malformed roadmap marker: {line.strip()}")
+        if line.strip() != match.group(0):
+            raise ValueError(f"Roadmap marker must be on its own line: {line.strip()}")
+        name = match.group(1)
+        if match.re is BEGIN_RE:
+            if current is not None:
+                raise ValueError(f"Nested marker {name} inside block {current}")
+            if name in seen:
+                raise ValueError(f"Duplicate block {name}")
+            if name not in blocks:
+                raise ValueError(f"Unknown block {name}")
+            current = name
+            output.append(line if line.endswith("\n") else line + "\n")
+            output.append(blocks[name].rstrip("\n") + "\n")
+        else:
+            if current is None:
+                problem = "Duplicate end marker" if name in seen else "End marker"
+                raise ValueError(f"{problem} for block {name} has no begin marker before it")
+            if name != current:
+                raise ValueError(f"Nested marker {name} inside block {current}")
+            seen.add(name)
+            current = None
+            output.append(line)
+    if current is not None:
+        raise ValueError(f"Missing end marker for block {current}")
+    missing = [name for name in blocks if name not in seen]
+    if missing:
+        raise ValueError(f"Missing begin marker for block {', '.join(missing)}")
+    return "".join(output)
+
+
+def read_lf(path):
+    """Read a UTF-8 text file with its line endings normalized to `\\n`."""
+    with open(path, encoding="utf-8", newline=None) as stream:
+        return stream.read()
+
+
+def generated_texts(data, repo):
+    """The expected text (`\\n` newlines) of every file in GENERATED_BLOCKS, rendered in memory."""
+    repo = Path(repo)
+    result = {}
+    for relative, names in GENERATED_BLOCKS.items():
+        path = repo / relative
+        if not path.resolve().is_relative_to(repo.resolve()):
+            raise ValueError(f"{relative}: outside the repository")
+        folder = posixpath.dirname(relative) or "."
+        renderers = {
+            "summary": lambda: render_summary(data, posixpath.relpath(f"{PLAN_DIR}/roadmap.json", folder)),
+            "milestones": lambda: render_milestones(data),
+            "in-progress": lambda: render_in_progress(data),
+            "ui-tasks": lambda: render_ui_tasks(data, folder),
+        }
+        try:
+            result[relative] = fill_blocks(read_lf(path), {name: renderers[name]() for name in names})
+        except ValueError as error:
+            raise ValueError(f"{relative}: {error}") from error
+    return result
+
+
+def write_keeping_newlines(path, text):
+    """Replace `path` with `text` (`\\n` newlines) through a temporary file, keeping its line ending."""
+    newline = "\r\n" if b"\r\n" in path.read_bytes() else "\n"
+    handle, temporary = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(handle, "wb") as stream:
+            stream.write(text.replace("\n", newline).encode("utf-8"))
+        os.replace(temporary, path)
+    except BaseException:
+        Path(temporary).unlink(missing_ok=True)
+        raise
+
+
 HTML = r'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Diagram Studio · Rust roadmap</title>
@@ -93,11 +332,36 @@ const initial=$(location.hash.slice(1));if(initial&&initial.matches('details.tas
 '''
 
 
-def main():
-    data = json.loads((ROOT / "roadmap.json").read_text(encoding="utf-8"))
-    milestones, tasks = validate(data)
+def main(argv=None, root=ROOT):
+    """Validate the roadmap, then regenerate the CSV, the HTML and the Markdown status blocks.
+
+    With `--check`, write nothing and return 1 when a status block is stale. Return 2 on a
+    usage, roadmap or marker error; nothing is written then either.
+    """
+    args = sys.argv[1:] if argv is None else list(argv)
+    if any(arg != "--check" for arg in args):
+        print("usage: python build_rust_roadmap.py [--check]", file=sys.stderr)
+        return 2
+    root = Path(root)
+    repo = root.parent
+    try:
+        data = json.loads((root / "roadmap.json").read_text(encoding="utf-8"))
+        milestones, tasks = validate(data)
+        texts = generated_texts(data, repo)
+        stale = [relative for relative, text in texts.items() if read_lf(repo / relative) != text]
+    except (OSError, ValueError) as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 2
+    if "--check" in args:
+        if stale:
+            print("Stale roadmap status blocks; run python build_rust_roadmap.py:")
+            for relative in stale:
+                print(f"  {relative}")
+            return 1
+        print(f"Roadmap status blocks are current in {len(texts)} files.")
+        return 0
     fields = ["id", "milestone", "release", "title", "area", "status", "depends_on", "deliverable", "acceptance", "evidence"]
-    with (ROOT / "rust-backlog.csv").open("w", encoding="utf-8-sig", newline="") as stream:
+    with (root / "rust-backlog.csv").open("w", encoding="utf-8-sig", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
         for task in tasks.values():
@@ -109,12 +373,17 @@ def main():
                 row["evidence"] = "; ".join(row["evidence"])
             writer.writerow(row)
     payload = json.dumps(data, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-    (ROOT / "ROADMAP.html").write_text(HTML.replace("__DATA__", payload), encoding="utf-8")
+    (root / "ROADMAP.html").write_text(HTML.replace("__DATA__", payload), encoding="utf-8")
+    for relative in stale:
+        write_keeping_newlines(repo / relative, texts[relative])
     counts = Counter(task["milestone"] for task in tasks.values())
     print(f"Validated {len(tasks)} tasks across {len(milestones)} milestones; dependency graph is acyclic.")
     print("Tasks by stage:", ", ".join(f"{key}={counts[key]}" for key in milestones))
     print("Generated ROADMAP.html and rust-backlog.csv")
+    updated = f": {', '.join(stale)}" if stale else ""
+    print(f"Updated status blocks in {len(stale)} of {len(texts)} files{updated}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

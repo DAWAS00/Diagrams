@@ -47,6 +47,8 @@ Agreement is marked **both**, **Codex only** or **Claude only**.
 
 ## 5. Decisions the project must make
 
+**Decided 2026-11-06:** the user accepted every recommendation below. They are recorded in [ADR-003](../../../plan-rust-diagram-editor/decisions/ADR-003-UI-DECISIONS.md).
+
 | ID | Decision | Options | Recommendation |
 |---|---|---|---|
 | D1 | Generalization direction in the UI | drag child to parent, or parent to child | Draw child to parent and show "Parent: X, child: Y" in the inspector. Core already treats source as child. |

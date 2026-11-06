@@ -14,26 +14,34 @@ Every UI change follows the [UI rules](../../../plan-rust-diagram-editor/UI-RULE
 
 - **Working today:** a native Windows/Linux desktop window (egui) with a toolbar, project sidebar, canvas with two sample classes, inspector and status bar. It opens on a welcome screen where you can start a new (empty) project or the sample project; in the sample you can select and rename classes, search commands and classes with Ctrl+K, open the panels as drawers on small windows, and switch between light and dark themes instantly.
 - **Not built yet:** the real project model, adding or connecting classes, undo, saving and export. Those buttons are visible but disabled, with an explanation.
-- **Order of work:** finish the native foundation gate (M0) → design every screen as native fixtures (UX milestone, UI-01 to UI-12) → build the model and storage (M1) → connect the screens to the model (M2) → reliability and the v0.1 release (M3).
+- **Order of work:** three streams run in parallel: the remaining native foundation checks (M0), designing every screen as native fixtures (UX milestone, UI-01 to UI-12), and building the model and storage (M1, which needs only the R0-01 workspace). All three gate connecting the screens to the model (M2), then reliability and the v0.1 release (M3).
 
 ## UI task status
 
+Generated from the [roadmap tracker](../../../plan-rust-diagram-editor/roadmap.json); edit the tracker, not this table. Remaining work for a task in progress is listed in its evidence page.
+
+<!-- roadmap:ui-tasks:begin (generated from roadmap.json by build_rust_roadmap.py; edit roadmap.json instead) -->
 | Task | What it delivers | Status |
 |---|---|---|
-| UI-01 | Design tokens, components and states | **Done** — [evidence](UI-01-TOKENS-AND-COMPONENTS.md) |
-| UI-02 | Type scale, text roles and font files | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md); reviewed font files remain |
-| UI-03 | Responsive workspace | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
-| UI-04 | Welcome, new-project and open screens | **Done** — [evidence](UI-04-WELCOME-AND-ENTRY.md) |
-| UI-05 | Navigator and diagram tabs | **Done** — [evidence](UI-05-NAVIGATOR-AND-TABS.md) |
-| UI-06 | Tool and command catalog | **Done** — [evidence](UI-06-COMMAND-CATALOG.md) |
-| UI-07 | Canvas state presentations | Not started |
-| UI-08 | Contextual inspector | **Done** — [evidence](UI-08-CONTEXTUAL-INSPECTOR.md) |
-| UI-09 | Dialogs, status bar and validation drawer | Not started |
-| UI-10 | Keyboard, focus and accessibility checks | Not started |
-| UI-11 | Notation capability contract | **Done** — [evidence](UI-11-NOTATION-CONTRACT.md) |
-| UI-12 | Native UI review gate | Not started |
-| UI-13 – UI-17 | Bind the screens to the real model (M2) | Not started |
-| UI-18 | Final visual, accessibility, recovery and export review (M3) | Not started |
+| UI-01 | Implement design tokens and reusable controls | **Done** — [evidence](UI-01-TOKENS-AND-COMPONENTS.md) |
+| UI-02 | Specify and prove typography and font assets | In progress — [evidence](UI-02-TYPE-SCALE-AND-TEXT-ROLES.md) |
+| UI-03 | Build the responsive workspace composition | **Done** — [evidence](UI-03-RESPONSIVE-WORKSPACE.md) |
+| UI-04 | Design welcome and project entry screens | **Done** — [evidence](UI-04-WELCOME-AND-ENTRY.md) |
+| UI-05 | Build navigator and diagram-tab presentation | **Done** — [evidence](UI-05-NAVIGATOR-AND-TABS.md) |
+| UI-06 | Unify command catalog and tool availability | **Done** — [evidence](UI-06-COMMAND-CATALOG.md) |
+| UI-07 | Present every canvas interaction state | Not started |
+| UI-08 | Build contextual inspector presentation | **Done** — [evidence](UI-08-CONTEXTUAL-INSPECTOR.md) |
+| UI-09 | Design dialogs, validation and asynchronous status | Not started |
+| UI-10 | Verify designed keyboard and accessible layouts | Not started |
+| UI-11 | Define notation capability and surface contract | **Done** — [evidence](UI-11-NOTATION-CONTRACT.md) |
+| UI-12 | Pass the complete native UI design review | Not started |
+| UI-13 | Bind project lifecycle and navigation to sessions | Not started |
+| UI-14 | Bind inspector and member edits to commands | Not started |
+| UI-15 | Bind canvas tools and history to real document | Not started |
+| UI-16 | Bind real save and validation status to worker results | Not started |
+| UI-17 | Pass the integrated keyboard editing journey | Not started |
+| UI-18 | Pass final UI, export and recovery review | Not started |
+<!-- roadmap:ui-tasks:end -->
 
 ## What has been done
 
