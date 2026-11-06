@@ -449,3 +449,45 @@ fn closing_a_background_tab_should_keep_the_active_tabs_selection() {
 
     assert_eq!(harness.state().selected_elements(), [customer, order]);
 }
+
+#[test]
+fn a_background_tabs_selection_should_not_come_back_with_redo() {
+    use diagram_core::command::Command;
+    use diagram_desktop::ui::commands::CommandId;
+    use diagram_desktop::ui::intents::UiIntent;
+
+    let mut session = ProjectSession::sample();
+    let first = session.document().diagram_order[0];
+    common::run(
+        &mut session,
+        Command::CreateClass {
+            diagram: first,
+            name: String::from("Temp"),
+            bounds: common::bounds(400.0, 300.0),
+        },
+    );
+    let mut state = common::state_with(session);
+    let (temp, details) = (
+        class_id(&state, "Temp"),
+        diagram_id(&state, "Order details"),
+    );
+    state.select(temp);
+    state.open_diagram(details);
+    let mut harness = harness_with((1280.0, 800.0), state);
+
+    // Tab "Class diagram 1" remembers Temp as selected while another tab is active.
+    harness.state_mut().queue(UiIntent::run(CommandId::Undo));
+    harness.run();
+    harness.state_mut().queue(UiIntent::run(CommandId::Redo));
+    harness.run();
+    harness.state_mut().queue(UiIntent::ActivateTab(first));
+    harness.run();
+    harness.run();
+
+    harness.get_by_label("Class Temp");
+    assert_eq!(
+        harness.state().selected_element(),
+        None,
+        "the selection dropped by Undo stays dropped in the other tab"
+    );
+}

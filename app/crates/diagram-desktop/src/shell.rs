@@ -513,6 +513,14 @@ impl ShellState {
         for diagram in stale_tabs {
             self.close_tab(diagram);
         }
+        // A background tab remembers its own selection; forget classes that
+        // are gone, so a later Redo cannot bring a dropped selection back.
+        if let Some(project) = self.project.as_ref() {
+            let document = project.document();
+            for tab in &mut self.tabs {
+                tab.selected = tab.selected.filter(|id| document.elements.contains_key(id));
+            }
+        }
         if history_moved {
             self.drafts.clear();
         } else {
