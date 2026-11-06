@@ -5,7 +5,7 @@ use eframe::egui::{self, Align, Layout, ThemePreference};
 use super::components;
 use super::intents::UiIntent;
 use super::theme::TextRole;
-use crate::shell::{ShellState, relation_label};
+use crate::shell::ShellState;
 
 /// Status bar. `in_workspace` adds the selection, which entry screens do not have.
 pub(crate) fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace: bool) {
@@ -29,17 +29,12 @@ pub(crate) fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace
             components::field_label(ui, "Theme:");
             if in_workspace {
                 ui.separator();
-                let count = state.selected_classes().len();
-                let selection = match (state.selected_relation, state.selected_class()) {
-                    (Some(index), _) => state.relations.get(index).map_or_else(
-                        || String::from("No selection"),
-                        |relation| format!("Selected: {}", relation_label(state, relation)),
-                    ),
-                    (None, Some(_)) if count > 1 => format!("{count} classes selected"),
-                    (None, Some(class)) => format!("Selected: {}", class.display_name()),
-                    (None, None) => String::from("No selection"),
-                };
+                let selection = state.selection_summary();
                 components::truncated_text(ui, &selection);
+                if let Some(notice) = state.notice() {
+                    ui.separator();
+                    components::truncated_text(ui, notice).on_hover_text(notice);
+                }
             }
         });
     });

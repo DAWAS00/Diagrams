@@ -1,12 +1,12 @@
 //! Welcome and new-project screens, shown instead of the workspace.
 //!
-//! Moved out of `shell.rs` unchanged; the screens themselves live in
-//! `ui/welcome.rs`. This module applies their `EntryAction`s.
+//! The screens themselves live in `ui/welcome.rs`; this module turns their
+//! `EntryAction`s into intents.
 
 use eframe::egui::{self, Frame, Key, Modifiers, ScrollArea};
 
-use crate::shell::{FIRST_DIAGRAM, ShellState};
-use crate::ui::navigator::{Diagram, OpenTab};
+use crate::shell::ShellState;
+use crate::ui::intents::UiIntent;
 use crate::ui::status::status_bar;
 use crate::ui::theme::{self, Palette};
 use crate::ui::welcome::{self, EntryAction, EntryScreen};
@@ -70,31 +70,12 @@ pub(crate) fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: 
         }
         Some(EntryAction::CreateProject(name)) => {
             if welcome::name_error(&name).is_none() {
-                state.project_name = name;
-                state.classes.clear();
-                state.selected = None;
-                state.relations.clear();
-                state.diagrams = vec![Diagram::new(FIRST_DIAGRAM, &[])];
-                state.tabs = vec![OpenTab {
-                    diagram: 0,
-                    selected: None,
-                }];
-                state.active_tab = Some(0);
-                return;
+                state.queue(UiIntent::CreateProject(name));
+            } else {
+                entry.name_touched = true;
             }
-            entry.name_touched = true;
         }
-        Some(EntryAction::OpenSample) => {
-            let sample = ShellState::default();
-            state.project_name = sample.project_name;
-            state.classes = sample.classes;
-            state.selected = None;
-            state.relations = sample.relations;
-            state.diagrams = sample.diagrams;
-            state.tabs = sample.tabs;
-            state.active_tab = sample.active_tab;
-            return;
-        }
+        Some(EntryAction::OpenSample) => state.queue(UiIntent::OpenSample),
         Some(EntryAction::RemoveRecent(index)) => {
             if index < entry.recent.len() {
                 entry.recent.remove(index);

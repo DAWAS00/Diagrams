@@ -3,6 +3,7 @@
 pub(crate) mod canvas;
 pub mod commands;
 pub mod components;
+pub mod dialogs;
 pub(crate) mod entry;
 pub mod inspector;
 pub(crate) mod inspector_view;
@@ -11,6 +12,7 @@ pub mod navigator;
 pub mod notation;
 pub mod palette;
 pub(crate) mod project_panel;
+pub mod read_model;
 pub mod showcase;
 pub(crate) mod status;
 pub(crate) mod tabs;

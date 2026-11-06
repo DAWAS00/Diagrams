@@ -5,6 +5,10 @@
 
 #![allow(dead_code)] // each test binary uses only some of these helpers
 
+use diagram_core::command::Command;
+use diagram_core::ids::{DiagramId, ElementId};
+use diagram_core::{Point, Rect, Size};
+use diagram_desktop::session::ProjectSession;
 use diagram_desktop::shell::{self, ShellState};
 use eframe::egui::Vec2;
 use egui_kittest::Harness;
@@ -36,4 +40,181 @@ pub fn harness_unrun() -> Harness<'static, ShellState> {
     Harness::builder()
         .with_size(Vec2::new(LARGE.0, LARGE.1))
         .build_ui_state(shell::show, ShellState::default())
+}
+
+/// The workspace showing `session`.
+pub fn state_with(session: ProjectSession) -> ShellState {
+    let mut state = ShellState::welcome();
+    state.open_project(session);
+    state
+}
+
+/// The ID of the class named `name` in the sample project.
+pub fn class_id(state: &ShellState, name: &str) -> ElementId {
+    state
+        .element_id(name)
+        .unwrap_or(ElementId::from_raw(u64::MAX))
+}
+
+/// The ID of the diagram named `name`.
+pub fn diagram_id(state: &ShellState, name: &str) -> DiagramId {
+    state
+        .diagram_id(name)
+        .unwrap_or(DiagramId::from_raw(u64::MAX))
+}
+
+/// Executes `command` on `session`; the test then checks the document, so a
+/// refusal shows up as a failed assertion later.
+pub fn run(session: &mut ProjectSession, command: Command) {
+    let _ = session.execute(&command);
+}
+
+/// A rectangle for a new view.
+pub fn bounds(x: f64, y: f64) -> Rect {
+    Rect::new(
+        Point::new(x, y).unwrap_or(Point::ORIGIN),
+        Size::new(180.0, 80.0).unwrap_or(Size::UNIT),
+    )
+}
+
+/// The sample project with the class `name` renamed to `new_name`, as the
+/// workspace state.
+pub fn sample_with_renamed(name: &str, new_name: &str) -> ShellState {
+    let mut session = ProjectSession::sample();
+    let element = session
+        .document()
+        .elements
+        .values()
+        .find(|element| element.name.as_str() == name)
+        .map(|element| element.id);
+    if let Some(element) = element {
+        run(
+            &mut session,
+            Command::RenameElement {
+                element,
+                name: new_name.to_owned(),
+            },
+        );
+    }
+    state_with(session)
+}
+
+/// A project of `count` class diagrams, each showing Customer and Order, all
+/// open in tabs (the last one active).
+pub fn state_with_many_diagrams(count: usize) -> ShellState {
+    let mut session = ProjectSession::sample();
+    let (customer, order) = {
+        let document = session.document();
+        let find = |wanted: &str| {
+            document
+                .elements
+                .values()
+                .find(|element| element.name.as_str() == wanted)
+                .map(|element| element.id)
+        };
+        (find("Customer"), find("Order"))
+    };
+    for number in 1..=count {
+        run(
+            &mut session,
+            Command::AddDiagram {
+                name: format!("Customer overview part {number}"),
+            },
+        );
+        let Some(diagram) = session.document().diagram_order.last().copied() else {
+            continue;
+        };
+        for element in [customer, order].into_iter().flatten() {
+            run(
+                &mut session,
+                Command::ShowInDiagram {
+                    element,
+                    diagram,
+                    bounds: bounds(48.0, 48.0),
+                },
+            );
+        }
+    }
+    let mut state = state_with(session);
+    let diagrams: Vec<DiagramId> = state.document().diagram_order.clone();
+    for diagram in diagrams {
+        state.open_diagram(diagram);
+    }
+    state
+}
+
+/// Selects the class named `name` through the public selection method.
+pub fn select_class(harness: &mut Harness<'static, ShellState>, name: &str) {
+    let element = class_id(harness.state(), name);
+    harness.state_mut().select(element);
+}
+
+/// The name of the selected class, if exactly one is selected.
+pub fn selected_name(harness: &Harness<'_, ShellState>) -> Option<String> {
+    let state = harness.state();
+    let element = state.selected_element()?;
+    state
+        .document()
+        .elements
+        .get(&element)
+        .map(|element| element.name.as_str().to_owned())
+}
+
+/// The current name of `element`.
+pub fn name_of(harness: &Harness<'_, ShellState>, element: ElementId) -> String {
+    harness
+        .state()
+        .document()
+        .elements
+        .get(&element)
+        .map(|element| element.name.as_str().to_owned())
+        .unwrap_or_default()
+}
+
+/// The sample plus a class `Premium` that generalizes to `Customer`.
+pub fn state_with_generalization() -> ShellState {
+    use diagram_core::notation::RelationKind;
+
+    let mut session = diagram_desktop::session::ProjectSession::sample();
+    let diagram = session.document().diagram_order[0];
+    run(
+        &mut session,
+        Command::CreateClass {
+            diagram,
+            name: String::from("Premium"),
+            bounds: bounds(60.0, 260.0),
+        },
+    );
+    let views: Vec<_> = session
+        .document()
+        .diagrams
+        .get(&diagram)
+        .map(|diagram| {
+            diagram
+                .nodes
+                .iter()
+                .map(|node| (node.element, node.id))
+                .collect()
+        })
+        .unwrap_or_default();
+    let view_of = |name: &str| {
+        let state = state_with(session.clone());
+        let element = class_id(&state, name);
+        views
+            .iter()
+            .find(|(candidate, _)| *candidate == element)
+            .map(|(_, view)| *view)
+    };
+    if let (Some(child), Some(parent)) = (view_of("Premium"), view_of("Customer")) {
+        run(
+            &mut session,
+            Command::Connect {
+                diagram,
+                kind: RelationKind::Generalization,
+                source: child,
+                target: parent,
+            },
+        );
+    }
+    state_with(session)
 }

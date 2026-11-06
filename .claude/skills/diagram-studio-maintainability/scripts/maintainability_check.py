@@ -36,7 +36,8 @@ STATE_MUTATORS = (
 # Top-level functions allowed to apply state changes directly.
 COORDINATORS = {
     "apply_intents", "run", "toggle_panel", "close_drawer", "close_showcase",
-    "entry_screens",
+    "entry_screens", "rename_class", "set_relation_field", "answer_dialog",
+    "close_project_command",
 }
 # ShellState fields that drawing code may write directly: presentation and
 # frame bookkeeping, not editor or document state. Every other field, including
@@ -45,7 +46,7 @@ COORDINATORS = {
 PRESENTATION_FIELDS = {
     "drafts", "navigator_search", "inspector_sections", "palette", "showcase",
     "showcase_return", "pending_focus", "text_had_focus", "applied_theme",
-    "layout", "drawer", "drawer_return", "entry", "intents",
+    "layout", "drawer", "drawer_return", "entry", "intents", "dialog",
 }
 # Window sizes used by tests are not magic coordinates.
 WINDOW_SIZES = {"800.0", "500.0", "1280.0", "1440.0", "900.0", "400.0", "300.0"}

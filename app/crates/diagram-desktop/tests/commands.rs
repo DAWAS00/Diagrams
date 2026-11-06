@@ -4,13 +4,16 @@
 mod common;
 use std::collections::HashSet;
 
-use common::harness;
+use common::{class_id, diagram_id, harness, name_of, select_class, selected_name};
+use diagram_core::ids::ElementId;
+use diagram_desktop::shell::ShellState;
 use diagram_desktop::ui::commands::{
     self, Availability, CATALOG, CommandContext, CommandGroup, CommandId, EffectOwner, Placement,
 };
 use diagram_desktop::ui::intents::UiIntent;
 use diagram_desktop::ui::palette::{self, PaletteEntry};
 use eframe::egui::{Key, Modifiers};
+use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
 
 const SEARCH_FIELD: &str = "Find a command or object";
@@ -34,8 +37,13 @@ fn catalog_should_list_each_command_once_in_id_order() {
 
 #[test]
 fn every_disabled_command_should_state_a_reason() {
-    for has_selection in [false, true] {
-        let context = CommandContext { has_selection };
+    for bits in 0..16_u8 {
+        let context = CommandContext {
+            has_selection: bits & 1 != 0,
+            has_project: bits & 2 != 0,
+            can_undo: bits & 4 != 0,
+            can_redo: bits & 8 != 0,
+        };
         for id in CommandId::ALL {
             if let Availability::Disabled(reason) = commands::availability(id, context) {
                 assert!(
@@ -51,9 +59,11 @@ fn every_disabled_command_should_state_a_reason() {
 fn clear_selection_should_need_a_selection() {
     let none = CommandContext {
         has_selection: false,
+        ..CommandContext::default()
     };
     let some = CommandContext {
         has_selection: true,
+        ..CommandContext::default()
     };
 
     assert!(!commands::availability(CommandId::ClearSelection, none).is_enabled());
@@ -80,7 +90,10 @@ fn header_rows_and_menus_should_come_from_the_catalog() {
     let groups = commands::menu_groups();
     let group_names: Vec<_> = groups.iter().map(|(group, _)| *group).collect();
     assert_eq!(group_names, CommandGroup::ALL);
-    assert_eq!(labels(&groups[0].1), ["Save", "Export", "New diagram"]);
+    assert_eq!(
+        labels(&groups[0].1),
+        ["Save", "Export", "New diagram", "Close project"]
+    );
     assert_eq!(labels(&groups[1].1), ["Undo", "Redo", "Clear selection"]);
     assert_eq!(
         labels(&groups[2].1),
@@ -103,9 +116,13 @@ fn search_should_match_label_or_group_ignoring_case() {
 
 #[test]
 fn palette_entries_should_list_commands_then_matching_objects() {
-    let names = ["Customer", "Order"];
+    let (customer, order) = (ElementId::from_raw(1), ElementId::from_raw(2));
+    let names = [(customer, "Customer"), (order, "Order")];
 
-    assert_eq!(palette::entries("cust", &names), [PaletteEntry::Object(0)]);
+    assert_eq!(
+        palette::entries("cust", &names),
+        [PaletteEntry::Object(customer)]
+    );
     let all = palette::entries("", &names);
     assert!(!all.contains(&PaletteEntry::Command(CommandId::SearchCommands)));
     assert_eq!(all.len(), CATALOG.len() - 1 + names.len());
@@ -114,7 +131,7 @@ fn palette_entries_should_list_commands_then_matching_objects() {
         "File: Save"
     );
     assert_eq!(
-        palette::entry_label(PaletteEntry::Object(1), &names),
+        palette::entry_label(PaletteEntry::Object(order), &names),
         "Class: Order"
     );
 }
@@ -156,7 +173,7 @@ fn visible_buttons_should_match_catalog_availability() {
 #[test]
 fn unavailable_shortcuts_should_change_nothing() {
     let mut harness = harness();
-    harness.state_mut().select(1);
+    select_class(&mut harness, "Order");
     harness.run();
     let before = harness.state().clone();
 
@@ -165,8 +182,11 @@ fn unavailable_shortcuts_should_change_nothing() {
     harness.key_press_modifiers(Modifiers::COMMAND, Key::S);
     harness.run();
 
-    assert_eq!(harness.state().selected, before.selected);
-    assert_eq!(harness.state().classes, before.classes);
+    assert_eq!(
+        harness.state().selected_element(),
+        before.selected_element()
+    );
+    assert_eq!(harness.state().document(), before.document());
     assert!(harness.state().palette.is_none());
 }
 
@@ -202,16 +222,22 @@ fn typing_and_enter_should_select_the_matching_object_and_close() {
     harness.key_press(Key::Enter);
     harness.run();
 
-    assert_eq!(harness.state().selected, Some(1));
+    assert_eq!(selected_name(&harness).as_deref(), Some("Order"));
     assert!(harness.state().palette.is_none());
 }
 
 fn first_available_in_harness(query: &str) -> usize {
-    let results = palette::entries(query, &["Customer", "Order"]);
+    let objects = [
+        (ElementId::from_raw(1), "Customer"),
+        (ElementId::from_raw(2), "Order"),
+    ];
+    let results = palette::entries(query, &objects);
+    let context = CommandContext {
+        has_project: true,
+        ..CommandContext::default()
+    };
     palette::first_available(&results, |entry| match entry {
-        PaletteEntry::Command(id) => {
-            commands::availability(id, CommandContext::default()).is_enabled()
-        }
+        PaletteEntry::Command(id) => commands::availability(id, context).is_enabled(),
         PaletteEntry::Object(_) => true,
     })
 }
@@ -266,7 +292,7 @@ fn arrow_keys_should_move_the_highlight_to_the_next_result() {
 fn first_available_should_skip_unavailable_results() {
     let results = [
         PaletteEntry::Command(CommandId::Save),
-        PaletteEntry::Object(0),
+        PaletteEntry::Object(ElementId::from_raw(1)),
     ];
     let available = |entry| matches!(entry, PaletteEntry::Object(_));
 
@@ -298,7 +324,7 @@ fn unavailable_result_should_show_its_reason_and_stay_open_on_enter() {
 #[test]
 fn escape_should_close_search_keep_selection_and_restore_focus() {
     let mut harness = harness();
-    harness.state_mut().select(0);
+    select_class(&mut harness, "Customer");
     harness.run();
     harness.get_by_label("Name").focus();
     harness.run();
@@ -311,7 +337,7 @@ fn escape_should_close_search_keep_selection_and_restore_focus() {
     harness.run();
 
     assert!(harness.state().palette.is_none());
-    assert_eq!(harness.state().selected, Some(0));
+    assert_eq!(selected_name(&harness).as_deref(), Some("Customer"));
     assert!(harness.get_by_label("Name").is_focused());
 }
 
@@ -342,9 +368,13 @@ fn every_command_should_have_a_contract_naming_an_existing_test() {
 }
 
 #[test]
-fn model_and_worker_commands_should_stay_unavailable_until_the_model_exists() {
+fn model_and_worker_commands_should_stay_unavailable_until_their_prerequisites_exist() {
+    // Undo and Redo become available only with history, which this context lacks.
     for has_selection in [false, true] {
-        let context = CommandContext { has_selection };
+        let context = CommandContext {
+            has_selection,
+            ..CommandContext::default()
+        };
         for id in CommandId::ALL {
             let owner = commands::contract(id).owner;
             let enabled = commands::availability(id, context).is_enabled();
@@ -359,12 +389,14 @@ fn model_and_worker_commands_should_stay_unavailable_until_the_model_exists() {
 fn queued_intents_should_apply_after_the_frame() {
     let mut harness = harness();
 
-    harness.state_mut().queue(UiIntent::OpenDiagram(1));
-    harness.state_mut().queue(UiIntent::SelectClass(1));
+    let details = diagram_id(harness.state(), "Order details");
+    let order = class_id(harness.state(), "Order");
+    harness.state_mut().queue(UiIntent::OpenDiagram(details));
+    harness.state_mut().queue(UiIntent::SelectClass(order));
     harness.run();
 
-    assert_eq!(harness.state().active_diagram(), Some(1));
-    assert_eq!(harness.state().selected, Some(1));
+    assert_eq!(harness.state().active_diagram(), Some(details));
+    assert_eq!(harness.state().selected_element(), Some(order));
 }
 
 #[test]
@@ -382,15 +414,15 @@ fn queued_unavailable_commands_should_do_nothing() {
     }
     harness.run();
 
-    assert_eq!(harness.state().classes, before.classes);
-    assert_eq!(harness.state().diagrams, before.diagrams);
-    assert_eq!(harness.state().tabs, before.tabs);
+    assert_eq!(harness.state().document(), before.document());
+    assert_eq!(harness.state().tabs(), before.tabs());
 }
 
 #[test]
 fn search_result_for_a_class_should_reveal_it() {
     let mut harness = harness();
-    harness.state_mut().queue(UiIntent::OpenDiagram(1));
+    let details = diagram_id(harness.state(), "Order details");
+    harness.state_mut().queue(UiIntent::OpenDiagram(details));
     harness.run();
     harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
     harness.run();
@@ -400,10 +432,272 @@ fn search_result_for_a_class_should_reveal_it() {
     harness.key_press(Key::Enter);
     harness.run();
 
+    let first = diagram_id(harness.state(), "Class diagram 1");
     assert_eq!(
         harness.state().active_diagram(),
-        Some(0),
+        Some(first),
         "opened a diagram showing it"
     );
-    assert_eq!(harness.state().selected, Some(0));
+    assert_eq!(selected_name(&harness).as_deref(), Some("Customer"));
+}
+
+fn rename(harness: &mut Harness<'static, ShellState>, from: &str, to: &str) {
+    let element = class_id(harness.state(), from);
+    harness
+        .state_mut()
+        .queue(UiIntent::RenameClass(element, to.to_owned()));
+    harness.run();
+}
+
+#[test]
+fn undo_and_redo_should_follow_the_project_history() {
+    let mut harness = harness();
+    let customer = class_id(harness.state(), "Customer");
+    for label in ["Undo", "Redo"] {
+        assert!(
+            harness.get_by_label(label).accesskit_node().is_disabled(),
+            "{label} needs history"
+        );
+    }
+
+    rename(&mut harness, "Customer", "Client");
+
+    assert_eq!(name_of(&harness, customer), "Client");
+    assert!(!harness.get_by_label("Undo").accesskit_node().is_disabled());
+    assert!(harness.get_by_label("Redo").accesskit_node().is_disabled());
+
+    harness.get_by_label("Undo").click();
+    harness.run();
+
+    assert_eq!(name_of(&harness, customer), "Customer");
+    harness.get_by_label_contains("Undid: Rename class.");
+    assert!(!harness.get_by_label("Redo").accesskit_node().is_disabled());
+
+    harness.key_press_modifiers(Modifiers::COMMAND | Modifiers::SHIFT, Key::Z);
+    harness.run();
+
+    assert_eq!(name_of(&harness, customer), "Client");
+    harness.get_by_label_contains("Redid: Rename class.");
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::Z);
+    harness.run();
+    assert_eq!(name_of(&harness, customer), "Customer");
+}
+
+#[test]
+fn close_project_should_close_at_once_when_nothing_changed() {
+    let mut harness = harness();
+
+    harness
+        .state_mut()
+        .queue(UiIntent::run(CommandId::CloseProject));
+    harness.run();
+
+    assert!(harness.state().project().is_none());
+    assert!(
+        harness.state().entry.is_some(),
+        "back on the welcome screen"
+    );
+    assert!(!harness.state().has_dialog());
+    harness.get_by_label("New project");
+}
+
+#[test]
+fn close_project_should_ask_first_when_there_are_unsaved_changes() {
+    let mut harness = harness();
+    rename(&mut harness, "Customer", "Client");
+    harness.get_by_label("Search project").focus();
+    harness.run();
+
+    harness
+        .state_mut()
+        .queue(UiIntent::run(CommandId::CloseProject));
+    harness.run();
+
+    assert!(harness.state().has_dialog());
+    assert!(harness.state().project().is_some(), "nothing closed yet");
+    harness.get_by_label("Close project?");
+    harness.get_by_label_contains("has changes that are not saved");
+    assert!(
+        harness.get_by_label("Cancel").is_focused(),
+        "the safe answer has focus"
+    );
+
+    // Escape cancels, keeps the project and returns focus to where it was.
+    harness.key_press(Key::Escape);
+    harness.run();
+    harness.run();
+
+    assert!(!harness.state().has_dialog());
+    assert!(harness.state().project().is_some());
+    assert!(harness.get_by_label("Search project").is_focused());
+
+    // Ask again and confirm: the project closes and the changes are gone.
+    harness
+        .state_mut()
+        .queue(UiIntent::run(CommandId::CloseProject));
+    harness.run();
+    harness.get_by_label("Discard changes and close").click();
+    harness.run();
+
+    assert!(harness.state().project().is_none());
+    assert!(harness.state().entry.is_some());
+}
+
+#[test]
+fn shortcuts_should_do_nothing_behind_an_open_dialog() {
+    let mut harness = harness();
+    rename(&mut harness, "Customer", "Client");
+    harness
+        .state_mut()
+        .queue(UiIntent::run(CommandId::CloseProject));
+    harness.run();
+    let before = harness.state().document().clone();
+
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::Z);
+    harness.run();
+
+    assert_eq!(harness.state().document(), &before, "Undo must not run");
+    assert!(harness.state().has_dialog());
+}
+
+#[test]
+fn close_project_should_be_listed_in_the_file_menu_and_the_search() {
+    assert!(
+        commands::search("close project")
+            .iter()
+            .any(|spec| spec.id == CommandId::CloseProject)
+    );
+    let groups = commands::menu_groups();
+    assert!(groups.iter().any(|(group, specs)| group.label() == "File"
+        && specs.iter().any(|spec| spec.id == CommandId::CloseProject)));
+}
+
+fn open_changed_project_dialog_from_the_menu(harness: &mut Harness<'static, ShellState>) {
+    harness.get_by_label("Menu").click();
+    harness.run();
+    // Submenus open on hover.
+    harness.get_by_label("File").hover();
+    harness.run();
+    harness.get_by_label_contains("Close project").click();
+    harness.run();
+}
+
+#[test]
+fn closing_from_the_menu_should_return_focus_to_the_menu_button() {
+    let mut harness = harness();
+    rename(&mut harness, "Customer", "Client");
+
+    open_changed_project_dialog_from_the_menu(&mut harness);
+    assert!(harness.state().has_dialog());
+    harness.key_press(Key::Escape);
+    harness.run();
+    harness.run();
+
+    assert!(!harness.state().has_dialog());
+    assert!(harness.get_by_label("Menu").is_focused());
+}
+
+#[test]
+fn closing_from_the_search_should_return_focus_to_where_it_was() {
+    let mut harness = harness();
+    rename(&mut harness, "Customer", "Client");
+    harness.get_by_label("Search project").focus();
+    harness.run();
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
+    harness.run();
+    harness
+        .get_by_label(SEARCH_FIELD)
+        .type_text("close project");
+    harness.run();
+    harness.key_press(Key::Enter);
+    harness.run();
+    assert!(harness.state().has_dialog());
+
+    harness.key_press(Key::Escape);
+    harness.run();
+    harness.run();
+
+    assert!(!harness.state().has_dialog());
+    assert!(harness.get_by_label("Search project").is_focused());
+}
+
+#[test]
+fn escape_should_close_the_dialog_before_a_drawer() {
+    let mut harness = common::harness_at(800.0, 500.0);
+    rename(&mut harness, "Customer", "Client");
+    harness.get_by_label("Inspector").click();
+    harness.run();
+    assert!(harness.state().drawer.is_some());
+    harness
+        .state_mut()
+        .queue(UiIntent::run(CommandId::CloseProject));
+    harness.run();
+    assert!(harness.state().has_dialog());
+
+    harness.key_press(Key::Escape);
+    harness.run();
+
+    assert!(
+        !harness.state().has_dialog(),
+        "the dialog takes Escape first"
+    );
+    assert!(harness.state().drawer.is_some(), "the drawer stays open");
+    harness.key_press(Key::Escape);
+    harness.run();
+    assert!(harness.state().drawer.is_none());
+}
+
+#[test]
+fn dialog_should_work_from_the_keyboard() {
+    let mut harness = harness();
+    rename(&mut harness, "Customer", "Client");
+    harness
+        .state_mut()
+        .queue(UiIntent::run(CommandId::CloseProject));
+    harness.run();
+    assert!(harness.get_by_label("Cancel").is_focused());
+
+    harness.key_press(Key::Tab);
+    harness.run();
+    assert!(
+        harness
+            .get_by_label("Discard changes and close")
+            .is_focused()
+    );
+    harness.key_press(Key::Enter);
+    harness.run();
+    harness.run();
+
+    assert!(harness.state().project().is_none());
+}
+
+#[test]
+fn requests_queued_for_an_old_project_should_not_touch_the_next_one() {
+    // IDs restart in every project, so an old project's Customer ID names the
+    // new sample's Customer too. A rename queued before the sample opened
+    // must be dropped, not applied to it.
+    let old_customer = {
+        let state = ShellState::default();
+        class_id(&state, "Customer")
+    };
+    let mut harness = common::harness_with(common::LARGE, ShellState::welcome());
+
+    harness.state_mut().queue(UiIntent::OpenSample);
+    harness
+        .state_mut()
+        .queue(UiIntent::RenameClass(old_customer, String::from("Ghost")));
+    harness.run();
+    harness.run();
+
+    assert!(harness.state().project().is_some(), "the sample opened");
+    assert_eq!(name_of(&harness, old_customer), "Customer");
+    assert_eq!(
+        harness
+            .state()
+            .project()
+            .and_then(|project| project.undo_label()),
+        None,
+        "no edit reached the new project's history"
+    );
+    harness.get_by_label_contains("remaining requests were dropped");
 }

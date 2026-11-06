@@ -2,6 +2,7 @@
 //! catalog. It lists matching commands with their shortcut or the reason they
 //! are unavailable, and matching objects by name.
 
+use diagram_core::ids::ElementId;
 use eframe::egui;
 
 use super::commands::{self, CommandId};
@@ -11,8 +12,8 @@ use super::commands::{self, CommandId};
 pub enum PaletteEntry {
     /// A command from the catalog.
     Command(CommandId),
-    /// An object, by its index in the caller's list of names.
-    Object(usize),
+    /// A model element (class), by its typed ID.
+    Object(ElementId),
 }
 
 /// Search state while the palette is open.
@@ -44,30 +45,32 @@ impl PaletteState {
 
 /// Matching results for `query`: commands first (excluding the search
 /// command itself), then objects whose name contains the query.
-pub fn entries(query: &str, object_names: &[&str]) -> Vec<PaletteEntry> {
+pub fn entries(query: &str, objects: &[(ElementId, &str)]) -> Vec<PaletteEntry> {
     let needle = query.trim().to_lowercase();
     let commands = commands::search(query)
         .into_iter()
         .filter(|spec| spec.id != CommandId::SearchCommands)
         .map(|spec| PaletteEntry::Command(spec.id));
-    let objects = object_names
+    let objects = objects
         .iter()
-        .enumerate()
         .filter(|(_, name)| needle.is_empty() || name.to_lowercase().contains(&needle))
-        .map(|(index, _)| PaletteEntry::Object(index));
+        .map(|(id, _)| PaletteEntry::Object(*id));
     commands.chain(objects).collect()
 }
 
 /// Visible and accessible text of a result row, such as "File: Save" or
 /// "Class: Customer". The prefix keeps rows distinct from toolbar buttons.
-pub fn entry_label(entry: PaletteEntry, object_names: &[&str]) -> String {
+pub fn entry_label(entry: PaletteEntry, objects: &[(ElementId, &str)]) -> String {
     match entry {
         PaletteEntry::Command(id) => {
             let spec = id.spec();
             format!("{}: {}", spec.group.label(), spec.label)
         }
-        PaletteEntry::Object(index) => {
-            let name = object_names.get(index).copied().unwrap_or_default();
+        PaletteEntry::Object(id) => {
+            let name = objects
+                .iter()
+                .find(|(candidate, _)| *candidate == id)
+                .map_or("", |(_, name)| *name);
             format!("Class: {name}")
         }
     }

@@ -1,16 +1,19 @@
 //! The inspector: nothing selected, one class, several classes or a relationship.
 //!
-//! Moved out of `shell.rs` unchanged. Fields edit drafts; committed drafts are
-//! queued as intents.
+//! Fields edit drafts; committed drafts are queued as intents, which the
+//! coordinator turns into `diagram-core` commands.
 
 use eframe::egui::{self, Key};
 
-use crate::shell::{BLANK_NAME_WARNING, PreviewClass, ShellState};
+use diagram_core::ids::{ElementId, RelationId};
+use diagram_core::notation::RelationKind;
+
+use crate::shell::ShellState;
 use crate::ui::components;
 use crate::ui::inspector::{self as rules, DraftKey, DraftOutcome, RelationField};
 use crate::ui::intents::UiIntent;
-use crate::ui::navigator;
 use crate::ui::notation::{self, InspectorSection};
+use crate::ui::read_model;
 use crate::ui::theme;
 
 /// A text field bound to a draft. Enter or moving focus away commits a valid
@@ -95,28 +98,30 @@ fn appearance_and_advanced(ui: &mut egui::Ui, state: &mut ShellState, mixed: boo
 /// relationship. Edits are drafts committed through intents.
 pub(crate) fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
     components::panel_title(ui, "Selection");
-    if let Some(relation) = state.selected_relation {
+    if let Some(relation) = state.selected_relation() {
         relation_inspector(ui, state, relation);
         return;
     }
-    let selected = state.selected_classes();
+    let selected = state.selected_elements();
     match selected.as_slice() {
         [] => {
             ui.label("Nothing selected. Select a class on the canvas or in the Model list.");
-            if let Some(diagram) = state.active_diagram().and_then(|d| state.diagrams.get(d)) {
+            if let Some(diagram) = state
+                .active_diagram()
+                .and_then(|id| state.document().diagrams.get(&id))
+            {
                 ui.add_space(theme::SPACING);
                 components::field_label(ui, "Diagram");
-                ui.label(&diagram.name);
-                components::field_label(ui, &format!("{} classes shown", diagram.classes.len()));
+                ui.label(diagram.name.as_str());
+                components::field_label(ui, &format!("{} classes shown", diagram.nodes.len()));
             }
             components::field_label(ui, "Tip: Ctrl+click adds classes to the selection.");
         }
-        [index] => class_inspector(ui, state, *index),
+        [element] => class_inspector(ui, state, *element),
         several => {
             let names: Vec<&str> = several
                 .iter()
-                .filter_map(|&index| state.classes.get(index))
-                .map(PreviewClass::display_name)
+                .filter_map(|&id| read_model::element_name(state.document(), id))
                 .collect();
             components::field_label(ui, &format!("{} classes selected", several.len()));
             ui.label(format!("Names (mixed): {}", names.join(", ")));
@@ -128,32 +133,29 @@ pub(crate) fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
     }
 }
 
-fn class_inspector(ui: &mut egui::Ui, state: &mut ShellState, index: usize) {
-    let Some(class) = state.classes.get(index).cloned() else {
+fn class_inspector(ui: &mut egui::Ui, state: &mut ShellState, element: ElementId) {
+    let Some(name) = read_model::element_name(state.document(), element).map(str::to_owned) else {
         return;
     };
     components::field_label(ui, "Model: changes apply in every diagram");
     let outcome = draft_field(
         ui,
         &mut state.drafts,
-        DraftKey::ClassName(index),
+        DraftKey::ClassName(element),
         "Name",
-        &class.name,
+        &name,
         rules::class_name_error,
     );
-    if let DraftOutcome::Commit(name) = outcome {
-        state.queue(UiIntent::RenameClass(index, name));
-    }
-    if class.name.trim().is_empty() {
-        components::warning_text(ui, BLANK_NAME_WARNING);
+    if let DraftOutcome::Commit(new_name) = outcome {
+        state.queue(UiIntent::RenameClass(element, new_name));
     }
     // Model versus view: renaming changes the class in every diagram.
-    components::field_label(ui, &navigator::shown_in(&state.diagrams, index));
+    components::field_label(ui, &read_model::shown_in(state.document(), element));
 
     // Sections come from the active diagram's notation contract.
     let sections = notation::notation(state.active_notation()).element_sections;
     if sections.contains(&InspectorSection::Members) {
-        members(ui, &class);
+        members(ui, state, element);
     }
     if sections.contains(&InspectorSection::Appearance)
         || sections.contains(&InspectorSection::Advanced)
@@ -163,68 +165,81 @@ fn class_inspector(ui: &mut egui::Ui, state: &mut ShellState, index: usize) {
 }
 
 /// Attributes and operations of a class, with the unavailable Add buttons.
-fn members(ui: &mut egui::Ui, class: &PreviewClass) {
+fn members(ui: &mut egui::Ui, state: &ShellState, element: ElementId) {
     ui.add_space(theme::SPACING);
     components::field_label(ui, "Attributes");
-    if class.attributes.is_empty() {
+    let attributes = read_model::attribute_lines(state.document(), element);
+    if attributes.is_empty() {
         ui.label("No attributes.");
     }
-    for attribute in &class.attributes {
+    for attribute in &attributes {
         components::code_text(ui, attribute);
     }
     components::field_label(ui, "Operations");
-    ui.label("No operations.");
+    let operations = read_model::operation_lines(state.document(), element);
+    if operations.is_empty() {
+        ui.label("No operations.");
+    }
+    for operation in &operations {
+        components::code_text(ui, operation);
+    }
     ui.horizontal_wrapped(|ui| {
         for label in ["Add attribute", "Add operation"] {
             let _ = components::action_button(
                 ui,
                 label,
-                Some("Not available yet: members need the project model."),
+                Some("Not available yet: editing members arrives with the member editor."),
                 None,
             );
         }
     });
 }
 
-fn relation_inspector(ui: &mut egui::Ui, state: &mut ShellState, index: usize) {
-    let Some(relation) = state.relations.get(index).cloned() else {
+fn relation_inspector(ui: &mut egui::Ui, state: &mut ShellState, id: RelationId) {
+    let Some(relation) = state.document().relations.get(&id).cloned() else {
         return;
     };
-    let name_of = |class: usize| {
-        state
-            .classes
-            .get(class)
-            .map(|class| class.display_name().to_owned())
-            .unwrap_or_default()
+    let name_of = |element| {
+        read_model::element_name(state.document(), element)
+            .unwrap_or("?")
+            .to_owned()
     };
     let (source, target) = (name_of(relation.source), name_of(relation.target));
     components::field_label(ui, "Relationship (model)");
     ui.label(format!("From {source} to {target}"));
-    let fields = [
-        (RelationField::Name, String::from("Relationship name")),
-        (RelationField::SourceRole, format!("Role at {source}")),
-        (
-            RelationField::SourceMultiplicity,
-            format!("Multiplicity at {source}"),
-        ),
-        (RelationField::TargetRole, format!("Role at {target}")),
-        (
-            RelationField::TargetMultiplicity,
-            format!("Multiplicity at {target}"),
-        ),
-    ];
-    for (field, label) in fields {
-        let outcome = draft_field(
-            ui,
-            &mut state.drafts,
-            DraftKey::Relation(index, field),
-            &label,
-            field.value(&relation),
-            |value| field.error(value),
-        );
-        if let DraftOutcome::Commit(value) = outcome {
-            state.queue(UiIntent::SetRelationField(index, field, value));
+    ui.label(format!("Kind: {}", read_model::kind_word(relation.kind)));
+    if relation.kind == RelationKind::Association {
+        // The core refuses a class related to itself, so the two ends always
+        // have different names and every accessible name below is distinct.
+        let fields = [
+            (RelationField::SourceRole, format!("Role at {source}")),
+            (
+                RelationField::SourceMultiplicity,
+                format!("Multiplicity at {source}"),
+            ),
+            (RelationField::TargetRole, format!("Role at {target}")),
+            (
+                RelationField::TargetMultiplicity,
+                format!("Multiplicity at {target}"),
+            ),
+        ];
+        for (field, label) in fields {
+            let committed = field.value(&relation);
+            let outcome = draft_field(
+                ui,
+                &mut state.drafts,
+                DraftKey::Relation(id, field),
+                &label,
+                &committed,
+                |value| field.error(value),
+            );
+            if let DraftOutcome::Commit(value) = outcome {
+                state.queue(UiIntent::SetRelationField(id, field, value));
+            }
         }
+    }
+    if relation.kind != RelationKind::Association {
+        components::field_label(ui, "Roles and multiplicities apply to associations only.");
     }
     appearance_and_advanced(ui, state, false);
 }

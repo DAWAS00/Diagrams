@@ -2,8 +2,8 @@
 //! a screen reader or keyboard user would reach each control.
 
 mod common;
-use common::harness_unrun;
-use diagram_desktop::shell::{self, BLANK_NAME_WARNING, ShellState};
+use common::{class_id, harness_unrun, name_of, select_class, selected_name};
+use diagram_desktop::shell::{self, ShellState};
 use eframe::egui::accesskit::Toggled;
 use eframe::egui::{Key, Vec2};
 use egui_kittest::Harness;
@@ -80,7 +80,7 @@ fn clicking_a_canvas_class_should_select_it() {
     harness.get_by_label("Class Order").click();
     harness.run();
 
-    assert_eq!(harness.state().selected, Some(1));
+    assert_eq!(selected_name(&harness).as_deref(), Some("Order"));
     assert!(is_pressed(&harness, "Class Order"));
     assert!(!is_pressed(&harness, "Class Customer"));
     harness.get_by_label("Selected: Order");
@@ -93,32 +93,32 @@ fn model_list_should_select_a_class_without_the_canvas() {
     harness.get_by_label("Customer").click();
     harness.run();
 
-    assert_eq!(harness.state().selected, Some(0));
+    assert_eq!(selected_name(&harness).as_deref(), Some("Customer"));
     assert!(is_pressed(&harness, "Class Customer"));
 }
 
 #[test]
 fn clicking_empty_canvas_should_clear_the_selection() {
     let mut harness = harness_unrun();
-    harness.state_mut().select(0);
+    select_class(&mut harness, "Customer");
     harness.run();
 
     harness.get_by_label("Diagram canvas").click();
     harness.run();
 
-    assert_eq!(harness.state().selected, None);
+    assert_eq!(selected_name(&harness), None);
 }
 
 #[test]
 fn escape_should_clear_the_selection_when_not_typing() {
     let mut harness = harness_unrun();
-    harness.state_mut().select(1);
+    select_class(&mut harness, "Order");
     harness.run();
 
     harness.key_press(Key::Escape);
     harness.run();
 
-    assert_eq!(harness.state().selected, None);
+    assert_eq!(selected_name(&harness), None);
 }
 
 #[test]
@@ -129,7 +129,8 @@ fn typing_in_the_name_field_should_rename_the_class_everywhere() {
         .with_size(Vec2::new(1280.0, 800.0))
         .allow_missing_glyphs()
         .build_ui_state(shell::show, ShellState::default());
-    harness.state_mut().select(0);
+    select_class(&mut harness, "Customer");
+    let customer = class_id(harness.state(), "Customer");
     harness.run();
 
     let name = harness.get_by_label("Name");
@@ -138,11 +139,11 @@ fn typing_in_the_name_field_should_rename_the_class_everywhere() {
     name.type_text("Client عميل");
     harness.run();
     // A name is a draft until Enter commits it.
-    assert_eq!(harness.state().classes[0].name, "Customer");
+    assert_eq!(name_of(&harness, customer), "Customer");
     harness.key_press(Key::Enter);
     harness.run();
 
-    assert_eq!(harness.state().classes[0].name, "Client عميل");
+    assert_eq!(name_of(&harness, customer), "Client عميل");
     harness.get_by_label("Class Client عميل");
     harness.get_by_label("Selected: Client عميل");
 }
@@ -150,7 +151,7 @@ fn typing_in_the_name_field_should_rename_the_class_everywhere() {
 #[test]
 fn escape_while_typing_should_keep_the_selection() {
     let mut harness = harness_unrun();
-    harness.state_mut().select(0);
+    select_class(&mut harness, "Customer");
     harness.run();
 
     harness.get_by_label("Name").focus();
@@ -159,34 +160,23 @@ fn escape_while_typing_should_keep_the_selection() {
     harness.key_press(Key::Escape);
     harness.run();
 
-    assert_eq!(harness.state().selected, Some(0));
+    assert_eq!(selected_name(&harness).as_deref(), Some("Customer"));
     assert!(!harness.get_by_label("Name").is_focused());
 
     harness.key_press(Key::Escape);
     harness.run();
 
-    assert_eq!(harness.state().selected, None);
+    assert_eq!(selected_name(&harness), None);
 }
 
 #[test]
-fn blank_name_should_show_a_text_warning_and_placeholder() {
-    let mut harness = harness_unrun();
-    harness.state_mut().select(1);
-    harness.state_mut().classes[1].name = String::from("   ");
-    harness.run();
-
-    harness.get_by_label_contains(BLANK_NAME_WARNING);
-    harness.get_by_label("Class Unnamed class");
-    harness.get_by_label("Selected: Unnamed class");
-}
-
-#[test]
-fn select_should_ignore_out_of_range_indices() {
+fn select_should_ignore_stale_ids_and_keep_the_selection() {
     let mut state = ShellState::default();
-    state.select(0);
+    let customer = class_id(&state, "Customer");
+    state.select(customer);
 
-    state.select(99);
+    let selected = state.select(diagram_core::ids::ElementId::from_raw(99));
 
-    assert_eq!(state.selected, None);
-    assert_eq!(state.selected_class(), None);
+    assert!(!selected, "a class that does not exist cannot be selected");
+    assert_eq!(state.selected_element(), Some(customer));
 }

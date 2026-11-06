@@ -1,8 +1,7 @@
 //! Diagram tab row: one tab per open diagram, a labeled Close button, a
 //! "More tabs" menu for tabs that do not fit, and New diagram.
-//!
-//! Moved out of `shell.rs` unchanged.
 
+use diagram_core::ids::DiagramId;
 use eframe::egui::{self, Button, Color32, Role, Vec2, WidgetInfo};
 
 use crate::shell::{ShellState, command_button};
@@ -14,8 +13,8 @@ use crate::ui::theme::{self, TextRole};
 
 /// What the user did in the tab row.
 enum TabAction {
-    Activate(usize),
-    Close(usize),
+    Activate(DiagramId),
+    Close(DiagramId),
 }
 
 /// Space a tab takes: its title, its Close button and the gaps.
@@ -43,14 +42,15 @@ pub(crate) fn tab_row(ui: &mut egui::Ui, state: &mut ShellState) {
     let context = state.command_context();
     let mut clicked = None;
     let mut action = None;
-    let titles: Vec<String> = state
-        .tabs
+    let diagrams: Vec<DiagramId> = state.tabs().iter().map(|tab| tab.diagram).collect();
+    let titles: Vec<String> = diagrams
         .iter()
-        .map(|tab| {
+        .map(|id| {
             state
+                .document()
                 .diagrams
-                .get(tab.diagram)
-                .map(|diagram| diagram.name.clone())
+                .get(id)
+                .map(|diagram| diagram.name.as_str().to_owned())
                 .unwrap_or_default()
         })
         .collect();
@@ -58,21 +58,21 @@ pub(crate) fn tab_row(ui: &mut egui::Ui, state: &mut ShellState) {
         // Reserve room for New diagram and the overflow menu.
         let available = ui.available_width() - 260.0;
         let widths: Vec<f32> = titles.iter().map(|title| tab_width(ui, title)).collect();
-        let (shown, overflow) = navigator::tabs_that_fit(&widths, available, state.active_tab);
+        let (shown, overflow) = navigator::tabs_that_fit(&widths, available, state.active_tab());
         for index in shown {
             let title = &titles[index];
-            let active = state.active_tab == Some(index);
+            let active = state.active_tab() == Some(index);
             let tab = components::choice(ui, active, title);
             tab.widget_info(|| WidgetInfo::selected(Role::Tab, true, active, title));
             if tab.clicked() {
-                action = Some(TabAction::Activate(index));
+                action = Some(TabAction::Activate(diagrams[index]));
             }
             let close = ui
                 .add(Button::new("Close").min_size(Vec2::new(0.0, theme::CONTROL_HEIGHT)))
                 .on_hover_text(format!("Close {title}. Its classes stay in the project."));
             close.widget_info(|| WidgetInfo::labeled(Role::Button, true, format!("Close {title}")));
             if close.clicked() {
-                action = Some(TabAction::Close(index));
+                action = Some(TabAction::Close(diagrams[index]));
             }
             ui.separator();
         }
@@ -80,7 +80,7 @@ pub(crate) fn tab_row(ui: &mut egui::Ui, state: &mut ShellState) {
             ui.menu_button(format!("More tabs ({})", overflow.len()), |ui| {
                 for index in overflow {
                     if ui.button(&titles[index]).clicked() {
-                        action = Some(TabAction::Activate(index));
+                        action = Some(TabAction::Activate(diagrams[index]));
                         ui.close();
                     }
                 }
@@ -91,8 +91,8 @@ pub(crate) fn tab_row(ui: &mut egui::Ui, state: &mut ShellState) {
         }
     });
     match action {
-        Some(TabAction::Activate(index)) => state.queue(UiIntent::ActivateTab(index)),
-        Some(TabAction::Close(index)) => state.queue(UiIntent::CloseTab(index)),
+        Some(TabAction::Activate(id)) => state.queue(UiIntent::ActivateTab(id)),
+        Some(TabAction::Close(id)) => state.queue(UiIntent::CloseTab(id)),
         None => {}
     }
     if let Some(id) = clicked {

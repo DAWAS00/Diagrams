@@ -131,6 +131,10 @@ Generated from the [roadmap tracker](../../../plan-rust-diagram-editor/roadmap.j
 
 The entry screens, tab row and canvas now live in `ui/entry.rs`, `ui/tabs.rs` and `ui/canvas.rs`. The real window was checked on Windows at 800×500, 1280×800 and 1440×900, light and dark, by launching `diagram-desktop` and driving it with the mouse and keyboard. Screenshots are in [p0-split-shell](p0-split-shell/): Welcome, New project, Escape back to Welcome, the sample workspace and a selected class. Known and unchanged from `main`: the relationship line and its labels are faint on the dark canvas, because the document ink does not follow the theme.
 
+### Slice S3 — the window reads the real document
+
+The project panel, canvas and inspector now read a `diagram-core` document through `ui/read_model.rs`; rename and association edits are commands, Undo and Redo follow the history, and File > Close project asks first when work would be lost. Checked in the real Windows window by mouse and keyboard: Welcome, sample project, select a class, rename it (the canvas, panel and relationship change together), Undo and Redo with their status sentences, Menu > File > Close project, the dialog (Cancel has focus, Escape cancels and focus returns to Menu, Discard returns to Welcome), at 1280×800 light and dark and the dialog at 800×500. Screenshots: [p1-session-binding](p1-session-binding/). The headless audit covers the dialog at 1280×800 and 800×500. Notes: `0..*` is shown as `*` (the core's form); the model has no relationship name, so the old name field is gone.
+
 ## What is next
 1. **UI-07 — canvas states:** blank, selection, move/resize/connect previews, invalid targets, zoom and fit.
 2. **UI-09 — dialogs, status bar and validation drawer**, then **UI-02** font files and **UI-10** keyboard and accessibility checks (with R0-04 on Windows).

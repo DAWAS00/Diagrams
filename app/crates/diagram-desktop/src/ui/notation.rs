@@ -23,6 +23,20 @@ pub enum NotationId {
     Sequence,
 }
 
+impl NotationId {
+    /// The UI's notation for a document diagram's notation.
+    pub const fn from_core(id: diagram_core::notation::NotationId) -> Self {
+        use diagram_core::notation::NotationId as Core;
+        match id {
+            Core::Class => Self::Class,
+            Core::Flowchart => Self::Flowchart,
+            Core::UseCase => Self::UseCase,
+            Core::EntityRelationship => Self::EntityRelationship,
+            Core::Sequence => Self::Sequence,
+        }
+    }
+}
+
 /// Whether a notation can be used yet.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Delivery {
