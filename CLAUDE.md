@@ -2,6 +2,13 @@
 
 Diagram Studio: a native Rust/egui diagram editor. The application workspace is `app/`, and the plan and tracker are in `plan-rust-diagram-editor/`.
 
+## Where files go (mandatory)
+
+- **Work in `D:\REA visual\app`** (and the other project folders in `D:\REA visual`). Do not work in a copy of the project under `.claude`.
+- **Do not create any file or folder inside `.claude`** except skills (`.claude/skills/`) and memory. This includes worktrees, scratch files, reports, exports and screenshots.
+- Reports, documents and test evidence go in the project folders, for example `app/docs/`, not in `.claude`.
+- Do not create git worktrees for this project. Use the main checkout and a normal branch.
+
 ## Rules for any UI change (mandatory)
 
 Read and follow **[plan-rust-diagram-editor/UI-RULES.md](plan-rust-diagram-editor/UI-RULES.md)** before changing the UI. In short:
