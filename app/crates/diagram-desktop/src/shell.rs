@@ -12,6 +12,7 @@ use eframe::egui::{
 
 use crate::ui::commands::{self, Availability, CommandContext, CommandId, CommandSpec, Placement};
 use crate::ui::components;
+use crate::ui::entry::entry_screens;
 use crate::ui::inspector::{self as rules, DraftKey, DraftOutcome, PreviewRelation, RelationField};
 use crate::ui::intents::UiIntent;
 use crate::ui::navigator::{self, Diagram, OpenTab};
@@ -20,7 +21,7 @@ use crate::ui::palette::{self, PaletteEntry, PaletteState};
 use crate::ui::showcase::{self, ShowcaseState};
 use crate::ui::status::status_bar;
 use crate::ui::theme::{self, Palette, TextRole};
-use crate::ui::welcome::{self, EntryAction, EntryScreen, EntryState};
+use crate::ui::welcome::EntryState;
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
 
 const CLASS_WIDTH: f32 = 180.0;
@@ -325,6 +326,16 @@ impl ShellState {
         self.intents.push(intent);
     }
 
+    /// Whether a text field had keyboard focus at the end of the last frame.
+    pub(crate) fn text_had_focus(&self) -> bool {
+        self.text_had_focus
+    }
+
+    /// Asks for keyboard focus on `target` at the start of the next frame.
+    pub(crate) fn focus_next_frame(&mut self, target: Option<Id>) {
+        self.pending_focus = target;
+    }
+
     /// The state that decides which commands are available.
     pub fn command_context(&self) -> CommandContext {
         CommandContext {
@@ -466,100 +477,6 @@ fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
     if close {
         close_showcase(state);
     }
-}
-
-/// Welcome and new-project screens, shown instead of the workspace.
-fn entry_screens(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) {
-    let Some(mut entry) = state.entry.take() else {
-        return;
-    };
-    // Escape leaves the name field first, then cancels the form.
-    let cancel_by_escape = entry.screen == EntryScreen::NewProject
-        && !state.text_had_focus
-        && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape));
-
-    let bar = Frame::side_top_panel(ui.style()).fill(palette.workspace);
-    egui::Panel::top("header")
-        .frame(bar)
-        .exact_size(workspace::HEADER_HEIGHT)
-        .show(ui, |ui| {
-            ui.horizontal_centered(|ui| ui.strong(crate::APPLICATION_NAME));
-        });
-    egui::Panel::bottom("status")
-        .frame(bar)
-        .show(ui, |ui| status_bar(ui, state, false));
-    let action = egui::CentralPanel::default()
-        .frame(
-            Frame::new()
-                .fill(palette.panel)
-                .inner_margin(2.0 * theme::SPACING),
-        )
-        .show(ui, |ui| {
-            ScrollArea::vertical()
-                .auto_shrink([false, false])
-                .show(ui, |ui| {
-                    ui.set_max_width(560.0);
-                    match entry.screen {
-                        EntryScreen::Welcome => welcome::welcome(ui, &mut entry),
-                        EntryScreen::NewProject => welcome::new_project(ui, &mut entry),
-                    }
-                })
-                .inner
-        })
-        .inner;
-    let action = if cancel_by_escape {
-        Some(EntryAction::CancelNewProject)
-    } else {
-        action
-    };
-
-    match action {
-        Some(EntryAction::StartNewProject) => {
-            entry.screen = EntryScreen::NewProject;
-            entry.new_name.clear();
-            entry.name_touched = false;
-            entry.focus_name = true;
-        }
-        Some(EntryAction::CancelNewProject) => {
-            entry.screen = EntryScreen::Welcome;
-            state.pending_focus = entry.new_button;
-        }
-        Some(EntryAction::CreateProject(name)) => {
-            if welcome::name_error(&name).is_none() {
-                state.project_name = name;
-                state.classes.clear();
-                state.selected = None;
-                state.relations.clear();
-                state.diagrams = vec![Diagram::new(FIRST_DIAGRAM, &[])];
-                state.tabs = vec![OpenTab {
-                    diagram: 0,
-                    selected: None,
-                }];
-                state.active_tab = Some(0);
-                return;
-            }
-            entry.name_touched = true;
-        }
-        Some(EntryAction::OpenSample) => {
-            let sample = ShellState::default();
-            state.project_name = sample.project_name;
-            state.classes = sample.classes;
-            state.selected = None;
-            state.relations = sample.relations;
-            state.diagrams = sample.diagrams;
-            state.tabs = sample.tabs;
-            state.active_tab = sample.active_tab;
-            return;
-        }
-        Some(EntryAction::RemoveRecent(index)) => {
-            if index < entry.recent.len() {
-                entry.recent.remove(index);
-            }
-        }
-        Some(EntryAction::DismissRecovery) => entry.recovery_visible = false,
-        None => {}
-    }
-    state.entry = Some(entry);
 }
 
 /// "Customer places Order".

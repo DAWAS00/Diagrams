@@ -2,6 +2,7 @@
 
 pub mod commands;
 pub mod components;
+pub(crate) mod entry;
 pub mod inspector;
 pub mod intents;
 pub mod navigator;
