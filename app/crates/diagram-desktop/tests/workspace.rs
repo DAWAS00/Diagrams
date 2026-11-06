@@ -1,7 +1,9 @@
 //! UI-03: responsive workspace composition — rows, docked panels, drawers,
 //! focus return and retained panel preferences.
 
-use diagram_desktop::shell::{self, ShellState};
+mod common;
+use common::harness_at;
+use diagram_desktop::shell::ShellState;
 use diagram_desktop::ui::workspace::{
     self, Drawer, INSPECTOR, LayoutMode, MIN_CANVAS_WIDTH, NAVIGATOR,
 };
@@ -9,14 +11,6 @@ use eframe::egui::accesskit::{Rect, Toggled};
 use eframe::egui::{Key, Vec2};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
-
-fn harness_at(width: f32, height: f32) -> Harness<'static, ShellState> {
-    let mut harness = Harness::builder()
-        .with_size(Vec2::new(width, height))
-        .build_ui_state(shell::show, ShellState::default());
-    harness.run();
-    harness
-}
 
 fn bounds(harness: &Harness<'_, ShellState>, label: &str) -> Rect {
     harness

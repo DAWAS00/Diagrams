@@ -1,12 +1,14 @@
 //! UI-02: text roles come from one theme module, and longer labels stay
 //! inside the window at the supported sizes.
 
-use diagram_desktop::shell::{self, ShellState};
+mod common;
+use common::harness_with;
+use diagram_desktop::shell::ShellState;
 use diagram_desktop::ui::components;
 use diagram_desktop::ui::theme::{self, TextRole};
 use diagram_desktop::ui::workspace::{Drawer, LayoutMode};
 use eframe::egui::accesskit::Rect;
-use eframe::egui::{Color32, FontFamily, LayerId, Painter, TextStyle, Theme, Vec2};
+use eframe::egui::{Color32, FontFamily, LayerId, Painter, TextStyle, Theme};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
 
@@ -33,14 +35,6 @@ const CHROME: [&str; 15] = [
 /// Bottom of the tool row: header 48 + tab row 38 + tool row 40.
 const ROWS_BOTTOM: f64 = 126.0;
 const SUPPORTED_SIZES: [(f32, f32); 3] = [(800.0, 500.0), (1280.0, 800.0), (1440.0, 900.0)];
-
-fn harness_at(width: f32, height: f32, state: ShellState) -> Harness<'static, ShellState> {
-    let mut harness = Harness::builder()
-        .with_size(Vec2::new(width, height))
-        .build_ui_state(shell::show, state);
-    harness.run();
-    harness
-}
 
 /// Opens a panel's drawer when the window is too narrow to dock it.
 fn show_panel(harness: &mut Harness<'_, ShellState>, toggle: &str) {
@@ -104,7 +98,7 @@ fn both_theme_styles_should_carry_every_role() {
 
 #[test]
 fn shell_should_render_with_the_role_sizes() {
-    let harness = harness_at(1280.0, 800.0, ShellState::default());
+    let harness = harness_with((1280.0, 800.0), ShellState::default());
     let style = harness.ctx.global_style();
 
     assert_eq!(style.text_styles[&TextStyle::Body].size, 15.0);
@@ -116,7 +110,7 @@ fn shell_should_render_with_the_role_sizes() {
 #[test]
 fn chrome_should_fit_without_overlap_at_every_supported_size() {
     for (width, height) in SUPPORTED_SIZES {
-        let harness = harness_at(width, height, ShellState::default());
+        let harness = harness_with((width, height), ShellState::default());
         let labels: Vec<&str> = CHROME
             .iter()
             .copied()
@@ -144,7 +138,7 @@ fn long_class_name_should_not_push_controls_out_of_the_window() {
         let mut state = ShellState::default();
         state.classes[0].name = String::from(LONG_NAME);
         state.select(0);
-        let mut harness = harness_at(width, height, state);
+        let mut harness = harness_with((width, height), state);
         show_panel(&mut harness, "Inspector");
 
         for label in ["Light", "Dark", "System", "Name", "Undo", "Export"] {
@@ -168,7 +162,7 @@ fn long_class_name_should_stay_complete_in_the_accessibility_tree() {
     let mut state = ShellState::default();
     state.classes[0].name = String::from(LONG_NAME);
     state.select(0);
-    let mut harness = harness_at(800.0, 500.0, state);
+    let mut harness = harness_with((800.0, 500.0), state);
     show_panel(&mut harness, "Inspector");
 
     harness.get_by_label(&format!("Class {LONG_NAME}"));
@@ -183,7 +177,7 @@ fn truncated_status_should_keep_the_full_name_for_screen_readers() {
     let mut state = ShellState::default();
     state.classes[0].name = String::from(LONG_NAME);
     state.select(0);
-    let harness = harness_at(800.0, 500.0, state);
+    let harness = harness_with((800.0, 500.0), state);
 
     let status = harness.get_by_label_contains("Selected: ");
     let expected = format!("Selected: {LONG_NAME}");
@@ -197,7 +191,7 @@ fn truncated_status_should_keep_the_full_name_for_screen_readers() {
 fn list_rows_should_stay_on_one_line_in_the_narrowest_sidebar() {
     let mut state = ShellState::default();
     state.classes[0].name = String::from(LONG_NAME);
-    let mut harness = harness_at(800.0, 500.0, state);
+    let mut harness = harness_with((800.0, 500.0), state);
     show_panel(&mut harness, "Project panel");
 
     let canvas = bounds(&harness, "Diagram canvas");
@@ -218,7 +212,7 @@ fn list_rows_should_stay_on_one_line_in_the_narrowest_sidebar() {
 
 #[test]
 fn painted_class_text_should_fit_its_box_width() {
-    let harness = harness_at(800.0, 500.0, ShellState::default());
+    let harness = harness_with((800.0, 500.0), ShellState::default());
     let painter = Painter::new(
         harness.ctx,
         LayerId::background(),

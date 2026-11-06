@@ -1,17 +1,11 @@
 //! UI-01: the component showcase shows every reusable control and state.
 
-use diagram_desktop::shell::{self, ShellState};
-use eframe::egui::{Key, Modifiers, Vec2};
+mod common;
+use common::harness;
+use diagram_desktop::shell::ShellState;
+use eframe::egui::{Key, Modifiers};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
-
-fn harness() -> Harness<'static, ShellState> {
-    let mut harness = Harness::builder()
-        .with_size(Vec2::new(1280.0, 800.0))
-        .build_ui_state(shell::show, ShellState::default());
-    harness.run();
-    harness
-}
 
 fn open_from_search(harness: &mut Harness<'_, ShellState>) {
     harness.key_press_modifiers(Modifiers::COMMAND, Key::K);

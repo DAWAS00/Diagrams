@@ -5,9 +5,11 @@
 //! height, does not partly overlap another control, and enabled controls are
 //! reachable with the Tab key. New screens must be added here.
 
+mod common;
 use std::collections::HashSet;
 
-use diagram_desktop::shell::{self, ShellState};
+use common::harness_with;
+use diagram_desktop::shell::ShellState;
 use eframe::egui::accesskit::{Action, Rect, Role};
 use eframe::egui::{
     Button, Key, Modifiers, Pos2, Rect as EguiRect, Role as WidgetRole, Sense, Vec2, WidgetInfo,
@@ -200,14 +202,6 @@ fn audit_tab_order<S>(
         .collect()
 }
 
-fn harness_at(size: (f32, f32), state: ShellState) -> Harness<'static, ShellState> {
-    let mut harness = Harness::builder()
-        .with_size(Vec2::new(size.0, size.1))
-        .build_ui_state(shell::show, state);
-    harness.run();
-    harness
-}
-
 fn report(findings: Vec<String>) {
     assert!(
         findings.is_empty(),
@@ -226,7 +220,7 @@ const POINTER_ONLY: [&str; 1] = ["Class "];
 #[test]
 fn welcome_screen_should_pass_the_audit() {
     for size in [LARGE, SMALL] {
-        let mut harness = harness_at(size, ShellState::welcome());
+        let mut harness = harness_with(size, ShellState::welcome());
         let mut findings = audit_layout("welcome", &harness, size, false);
         findings.extend(audit_tab_order("welcome", &mut harness, size, &[]));
         report(findings);
@@ -236,7 +230,7 @@ fn welcome_screen_should_pass_the_audit() {
 #[test]
 fn new_project_form_should_pass_the_audit() {
     for size in [LARGE, SMALL] {
-        let mut harness = harness_at(size, ShellState::welcome());
+        let mut harness = harness_with(size, ShellState::welcome());
         harness.get_by_label("New project").click();
         harness.run();
         harness.get_by_label("Project name").type_text(" ");
@@ -251,7 +245,7 @@ fn new_project_form_should_pass_the_audit() {
 fn docked_workspace_should_pass_the_audit() {
     let mut state = ShellState::default();
     state.select(0);
-    let mut harness = harness_at(LARGE, state);
+    let mut harness = harness_with(LARGE, state);
     let mut findings = audit_layout("docked workspace", &harness, LARGE, false);
     findings.extend(audit_tab_order(
         "docked workspace",
@@ -266,7 +260,7 @@ fn docked_workspace_should_pass_the_audit() {
 fn narrow_workspace_and_drawers_should_pass_the_audit() {
     let mut state = ShellState::default();
     state.select(1);
-    let mut harness = harness_at(SMALL, state);
+    let mut harness = harness_with(SMALL, state);
     let mut findings = audit_layout("narrow workspace", &harness, SMALL, false);
     for toggle in ["Inspector", "Project panel"] {
         harness.get_by_label(toggle).click();
@@ -286,7 +280,7 @@ fn narrow_workspace_and_drawers_should_pass_the_audit() {
 
 #[test]
 fn project_panel_states_should_pass_the_audit() {
-    let mut harness = harness_at(LARGE, ShellState::default());
+    let mut harness = harness_with(LARGE, ShellState::default());
     harness.get_by_label("Search project").focus();
     harness.run();
     harness.get_by_label("Search project").type_text("zzz");
@@ -316,7 +310,7 @@ fn overflowing_tabs_should_pass_the_audit() {
         .collect();
     state.active_tab = Some(6);
     for size in [SMALL, LARGE] {
-        let mut harness = harness_at(size, state.clone());
+        let mut harness = harness_with(size, state.clone());
         let mut findings = audit_layout("overflowing tabs", &harness, size, false);
         findings.extend(audit_tab_order(
             "overflowing tabs",
@@ -336,7 +330,7 @@ fn inspector_states_should_pass_the_audit() {
         // Relationship selected.
         let mut state = ShellState::default();
         state.select_relation(0);
-        let mut harness = harness_at(size, state);
+        let mut harness = harness_with(size, state);
         if harness.query_by_label("Relationship name").is_none() {
             harness.get_by_label("Inspector").click();
             harness.run();
@@ -358,7 +352,7 @@ fn inspector_states_should_pass_the_audit() {
         let mut state = ShellState::default();
         state.select(0);
         state.toggle_in_selection(1);
-        let mut harness = harness_at(size, state);
+        let mut harness = harness_with(size, state);
         if harness
             .query_by_label("Appearance (this view only)")
             .is_none()
@@ -372,7 +366,7 @@ fn inspector_states_should_pass_the_audit() {
         let mut state = ShellState::default();
         state.select(0);
         state.inspector_sections = (true, true);
-        let mut harness = harness_at(size, state);
+        let mut harness = harness_with(size, state);
         if harness.query_by_label("Name").is_none() {
             harness.get_by_label("Inspector").click();
             harness.run();
@@ -394,7 +388,7 @@ fn inspector_states_should_pass_the_audit() {
 
 #[test]
 fn command_search_should_pass_the_audit() {
-    let mut harness = harness_at(LARGE, ShellState::default());
+    let mut harness = harness_with(LARGE, ShellState::default());
     harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
     harness.run();
     report(audit_layout("command search", &harness, LARGE, true));
@@ -402,7 +396,7 @@ fn command_search_should_pass_the_audit() {
 
 #[test]
 fn component_showcase_should_pass_the_audit() {
-    let mut harness = harness_at(LARGE, ShellState::default());
+    let mut harness = harness_with(LARGE, ShellState::default());
     harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
     harness.run();
     harness
@@ -469,8 +463,8 @@ fn audit_should_see_every_screen_s_controls() {
             .filter(|c| visible(c.rect, LARGE))
             .count()
     };
-    let welcome = harness_at(LARGE, ShellState::welcome());
-    let workspace = harness_at(LARGE, ShellState::default());
+    let welcome = harness_with(LARGE, ShellState::welcome());
+    let workspace = harness_with(LARGE, ShellState::default());
 
     // Welcome: New, Open, Continue, Review, Dismiss, search, 2 recent, Remove, 3 theme.
     assert!(count(&welcome) >= 12, "{}", count(&welcome));

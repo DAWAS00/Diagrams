@@ -18,12 +18,12 @@ use crate::ui::theme::{Palette, TextRole};
 pub(crate) const CLASS_WIDTH: f32 = 180.0;
 pub(crate) const HEADER_HEIGHT: f32 = 32.0;
 pub(crate) const ATTRIBUTE_HEIGHT: f32 = 20.0;
-pub(crate) const TEXT_INSET: f32 = 10.0;
+const TEXT_INSET: f32 = 10.0;
 
 /// Document colors for diagram objects. They do not follow the editor theme,
 /// so switching themes never changes how a diagram looks when exported.
-pub(crate) const DOCUMENT_FILL: Color32 = Color32::from_rgb(0xFA, 0xFC, 0xFF);
-pub(crate) const DOCUMENT_INK: Color32 = Color32::from_rgb(0x22, 0x31, 0x47);
+const DOCUMENT_FILL: Color32 = Color32::from_rgb(0xFA, 0xFC, 0xFF);
+const DOCUMENT_INK: Color32 = Color32::from_rgb(0x22, 0x31, 0x47);
 
 pub(crate) fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) -> Rect {
     let (background, painter) = ui.allocate_painter(ui.available_size(), Sense::click());

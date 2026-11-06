@@ -1,26 +1,16 @@
 //! UI-04: welcome and project entry screens. Sample entries are labeled, and
 //! nothing pretends to open or save real files.
 
-use diagram_desktop::shell::{self, SAMPLE_PROJECT, ShellState};
+mod common;
+use common::harness_with;
+use diagram_desktop::shell::{SAMPLE_PROJECT, ShellState};
 use diagram_desktop::ui::welcome::{self, EntryScreen, RecentStatus};
+use eframe::egui::Key;
 use eframe::egui::accesskit::Rect;
-use eframe::egui::{Key, Vec2};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
 
 const BLANK_NAME_ERROR: &str = "A project name must contain a non-whitespace character.";
-
-fn harness_at(width: f32, height: f32) -> Harness<'static, ShellState> {
-    let mut harness = Harness::builder()
-        .with_size(Vec2::new(width, height))
-        .build_ui_state(shell::show, ShellState::welcome());
-    harness.run();
-    harness
-}
-
-fn harness() -> Harness<'static, ShellState> {
-    harness_at(1280.0, 800.0)
-}
 
 fn screen(harness: &Harness<'_, ShellState>) -> Option<EntryScreen> {
     harness.state().entry.as_ref().map(|entry| entry.screen)
@@ -59,7 +49,7 @@ fn recent_search_should_match_name_or_path() {
 
 #[test]
 fn app_should_start_on_the_welcome_screen() {
-    let harness = harness();
+    let harness = harness_with(common::LARGE, ShellState::welcome());
 
     assert_eq!(screen(&harness), Some(EntryScreen::Welcome));
     // The name appears in the header and as the page title.
@@ -75,7 +65,7 @@ fn app_should_start_on_the_welcome_screen() {
 
 #[test]
 fn sample_entries_should_be_labeled_as_a_fixture() {
-    let harness = harness();
+    let harness = harness_with(common::LARGE, ShellState::welcome());
 
     harness.get_by_label_contains("Sample entries (design fixture)");
     harness.get_by_label_contains("Sample notice (design fixture)");
@@ -83,7 +73,7 @@ fn sample_entries_should_be_labeled_as_a_fixture() {
 
 #[test]
 fn nothing_should_pretend_to_open_real_files() {
-    let harness = harness();
+    let harness = harness_with(common::LARGE, ShellState::welcome());
 
     assert!(disabled(&harness, "Open project…"));
     assert!(disabled(
@@ -101,7 +91,7 @@ fn nothing_should_pretend_to_open_real_files() {
 
 #[test]
 fn missing_file_should_explain_and_offer_removal() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
 
     harness.get_by_label_contains("Error: File not found at this path");
     harness
@@ -127,7 +117,7 @@ fn missing_file_should_explain_and_offer_removal() {
 
 #[test]
 fn recent_search_should_filter_and_explain_no_matches() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
     harness.get_by_label("Search recent projects").focus();
     harness.run();
 
@@ -151,7 +141,7 @@ fn recent_search_should_filter_and_explain_no_matches() {
 
 #[test]
 fn recovery_notice_should_be_dismissible() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
     harness.get_by_label_contains("Unsaved changes to Customer model were recovered");
 
     harness.get_by_label("Dismiss recovery").click();
@@ -162,7 +152,7 @@ fn recovery_notice_should_be_dismissible() {
 
 #[test]
 fn new_project_form_should_focus_the_name_and_offer_only_class_diagrams() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
 
     open_form(&mut harness);
 
@@ -183,7 +173,7 @@ fn new_project_form_should_focus_the_name_and_offer_only_class_diagrams() {
 
 #[test]
 fn blank_name_should_show_the_error_beside_the_field() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
     open_form(&mut harness);
 
     harness.get_by_label("Project name").type_text("   ");
@@ -195,7 +185,7 @@ fn blank_name_should_show_the_error_beside_the_field() {
 
 #[test]
 fn create_should_open_an_empty_diagram_with_the_exact_name() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
     open_form(&mut harness);
 
     harness
@@ -215,7 +205,7 @@ fn create_should_open_an_empty_diagram_with_the_exact_name() {
 
 #[test]
 fn enter_in_the_name_field_should_create_the_project() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
     open_form(&mut harness);
 
     harness.get_by_label("Project name").type_text("Orders");
@@ -229,7 +219,7 @@ fn enter_in_the_name_field_should_create_the_project() {
 
 #[test]
 fn cancel_should_return_to_welcome_and_focus_new_project() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
     open_form(&mut harness);
 
     harness.get_by_label("Cancel").click();
@@ -241,7 +231,7 @@ fn cancel_should_return_to_welcome_and_focus_new_project() {
 
 #[test]
 fn escape_should_leave_the_field_then_cancel_the_form() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
     open_form(&mut harness);
     harness.get_by_label("Project name").type_text("Draft");
     harness.run();
@@ -257,7 +247,7 @@ fn escape_should_leave_the_field_then_cancel_the_form() {
 
 #[test]
 fn continue_should_open_the_sample_project() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
 
     harness
         .get_by_label("Continue with the sample project")
@@ -273,7 +263,7 @@ fn continue_should_open_the_sample_project() {
 #[test]
 fn entry_screens_should_fit_the_smallest_window() {
     let (width, height) = (800.0, 500.0);
-    let mut harness = harness_at(width, height);
+    let mut harness = harness_with((width, height), ShellState::welcome());
     let inside = |rect: Rect| {
         rect.x0 >= 0.0
             && rect.y0 >= 0.0
@@ -303,7 +293,7 @@ fn entry_screens_should_fit_the_smallest_window() {
 
 #[test]
 fn typing_should_continue_after_the_error_appears() {
-    let mut harness = harness();
+    let mut harness = harness_with(common::LARGE, ShellState::welcome());
     open_form(&mut harness);
 
     harness.get_by_label("Project name").type_text(" ");

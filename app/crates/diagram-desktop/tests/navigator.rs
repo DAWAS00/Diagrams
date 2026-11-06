@@ -1,23 +1,13 @@
 //! UI-05: project panel (navigator) and diagram tabs.
 
-use diagram_desktop::shell::{self, ShellState};
+mod common;
+use common::{harness, harness_with};
+use diagram_desktop::shell::ShellState;
 use diagram_desktop::ui::navigator::{self, Diagram, OpenTab};
+use eframe::egui::Key;
 use eframe::egui::accesskit::{Role, Toggled};
-use eframe::egui::{Key, Vec2};
 use egui_kittest::Harness;
 use egui_kittest::kittest::{NodeT, Queryable};
-
-fn harness_with(size: (f32, f32), state: ShellState) -> Harness<'static, ShellState> {
-    let mut harness = Harness::builder()
-        .with_size(Vec2::new(size.0, size.1))
-        .build_ui_state(shell::show, state);
-    harness.run();
-    harness
-}
-
-fn harness() -> Harness<'static, ShellState> {
-    harness_with((1280.0, 800.0), ShellState::default())
-}
 
 /// The project-panel row for `label` (below the header, tab and tool rows).
 fn panel_row<'a>(harness: &'a Harness<'_, ShellState>, label: &'a str) -> egui_kittest::Node<'a> {
