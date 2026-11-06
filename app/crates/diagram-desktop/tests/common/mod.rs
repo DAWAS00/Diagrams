@@ -31,7 +31,7 @@ pub fn harness_at(width: f32, height: f32) -> Harness<'static, ShellState> {
     harness_with((width, height), ShellState::default())
 }
 
-/// The default sample project at 1280×800, built but with no frame run yet.
+/// The default sample project at 1280×800, built without an additional explicit `run()` (the builder still renders its start-up frames).
 pub fn harness_unrun() -> Harness<'static, ShellState> {
     Harness::builder()
         .with_size(Vec2::new(LARGE.0, LARGE.1))

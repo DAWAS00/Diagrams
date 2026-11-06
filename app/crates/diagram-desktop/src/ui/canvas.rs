@@ -25,6 +25,7 @@ const TEXT_INSET: f32 = 10.0;
 const DOCUMENT_FILL: Color32 = Color32::from_rgb(0xFA, 0xFC, 0xFF);
 const DOCUMENT_INK: Color32 = Color32::from_rgb(0x22, 0x31, 0x47);
 
+/// Paints the active diagram and queues selection intents for clicks.
 pub(crate) fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palette) -> Rect {
     let (background, painter) = ui.allocate_painter(ui.available_size(), Sense::click());
     background.widget_info(|| WidgetInfo::labeled(Role::Canvas, true, "Diagram canvas"));

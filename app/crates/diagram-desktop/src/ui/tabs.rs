@@ -12,7 +12,6 @@ use crate::ui::intents::UiIntent;
 use crate::ui::navigator;
 use crate::ui::theme::{self, TextRole};
 
-/// Diagram tabs. The tab strip itself (overflow, close, per-tab state) is UI-05.
 /// What the user did in the tab row.
 enum TabAction {
     Activate(usize),
