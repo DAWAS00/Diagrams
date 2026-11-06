@@ -216,6 +216,42 @@ impl Member {
             Self::Operation(operation) => operation.id,
         }
     }
+
+    /// Attribute or operation.
+    pub const fn kind(&self) -> MemberKind {
+        match self {
+            Self::Attribute(_) => MemberKind::Attribute,
+            Self::Operation(_) => MemberKind::Operation,
+        }
+    }
+}
+
+/// The two kinds of member. Editing never turns one into the other.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum MemberKind {
+    /// An attribute.
+    Attribute,
+    /// An operation.
+    Operation,
+}
+
+impl fmt::Display for MemberKind {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(match self {
+            Self::Attribute => "attribute",
+            Self::Operation => "operation",
+        })
+    }
+}
+
+impl MemberKind {
+    /// The kind with its article: "an attribute", "an operation".
+    pub const fn with_article(self) -> &'static str {
+        match self {
+            Self::Attribute => "an attribute",
+            Self::Operation => "an operation",
+        }
+    }
 }
 
 /// A model element.
@@ -318,7 +354,10 @@ pub struct Document {
     pub diagrams: BTreeMap<DiagramId, Diagram>,
     /// Diagram order in the project.
     pub diagram_order: Vec<DiagramId>,
-    /// Next raw ID to allocate; IDs are never reused.
+    /// The last raw ID handed out. While a record exists its ID is never
+    /// handed out again, but undoing a creation also restores this counter,
+    /// so the undone record's ID can be handed out again later. Code that
+    /// keeps an ID across an Undo must fence it by document revision.
     pub next_id: u64,
 }
 

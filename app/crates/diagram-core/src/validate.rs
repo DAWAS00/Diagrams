@@ -77,6 +77,17 @@ pub enum DomainError {
     /// The command would change nothing.
     #[error("this change would not change anything")]
     NoChange,
+    /// A member typed as text could not be read.
+    #[error(transparent)]
+    MemberText(#[from] crate::member_text::MemberTextError),
+    /// Editing a member cannot change its kind.
+    #[error("{} cannot become {} by editing; add {} instead", .from.with_article(), .to.with_article(), .to.with_article())]
+    MemberKindChange {
+        /// The member's kind.
+        from: crate::model::MemberKind,
+        /// The kind the text describes.
+        to: crate::model::MemberKind,
+    },
     /// The document changed after the edit was prepared.
     #[error("the document changed while this edit was prepared; try again")]
     Stale,

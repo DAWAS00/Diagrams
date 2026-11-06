@@ -492,3 +492,47 @@ fn an_id_counter_above_the_signed_range_should_be_damaged() {
         outcome.map(|(name, _)| name)
     );
 }
+
+#[test]
+fn members_added_and_edited_as_text_should_round_trip() -> Result<(), Box<dyn Error>> {
+    use diagram_core::model::Member;
+    let (_dir, path) = folder()?;
+    let mut document = project();
+    let Some(order) = element(&document, "Order") else {
+        return Err("the fixture has Order".into());
+    };
+    run(
+        &mut document,
+        Command::AddMember {
+            element: order,
+            text: String::from("# place(customer: CustomerId, lines: List<Line>): Order"),
+        },
+    );
+    let added = document.elements[&order]
+        .members
+        .last()
+        .map(Member::id)
+        .ok_or("a member was added")?;
+    run(
+        &mut document,
+        Command::UpdateMember {
+            element: order,
+            member: added,
+            text: String::from("~ place(customer: CustomerId, at: Map<Day, Slot>): Receipt"),
+        },
+    );
+
+    save(&path, "Shop", &document)?;
+    let loaded = load(&path)?.document;
+
+    assert_eq!(loaded, document);
+    let line = loaded.elements[&order]
+        .members
+        .last()
+        .and_then(diagram_core::member_text::edit_text);
+    assert_eq!(
+        line.as_deref(),
+        Some("~ place(customer: CustomerId, at: Map<Day, Slot>): Receipt")
+    );
+    Ok(())
+}

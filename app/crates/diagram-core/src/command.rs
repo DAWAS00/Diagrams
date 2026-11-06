@@ -8,6 +8,7 @@
 
 use crate::geometry::{Point, Rect};
 use crate::ids::{DiagramId, ElementId, MemberId, RelationId, ViewId};
+use crate::member_text;
 use crate::model::{
     AssociationEnd, Attribute, Diagram, Document, EdgeView, Element, Member, Multiplicity, Name,
     NodeView, Operation, Relation, Visibility,
@@ -66,6 +67,24 @@ pub enum Command {
         visibility: Visibility,
         /// Return type; blank means none.
         return_type: String,
+    },
+    /// Append a member typed as one line (see [`crate::member_text`]); an
+    /// operation may have parameters.
+    AddMember {
+        /// Owning class.
+        element: ElementId,
+        /// The line, such as `place(id: OrderId): Order`.
+        text: String,
+    },
+    /// Replace a member's content with a typed line, keeping its ID, its
+    /// position and its kind.
+    UpdateMember {
+        /// Owning class.
+        element: ElementId,
+        /// Member.
+        member: MemberId,
+        /// The line.
+        text: String,
     },
     /// Remove a member from its class.
     RemoveMember {
@@ -158,6 +177,8 @@ impl Command {
             Self::RenameElement { .. } => "Rename class",
             Self::AddAttribute { .. } => "Add attribute",
             Self::AddOperation { .. } => "Add operation",
+            Self::AddMember { .. } => "Add member",
+            Self::UpdateMember { .. } => "Edit member",
             Self::RemoveMember { .. } => "Remove member",
             Self::MoveMember { .. } => "Move member",
             Self::Connect {
@@ -653,6 +674,42 @@ pub fn prepare(document: &Document, command: &Command) -> Result<ChangeSet, Doma
             };
             let mut changed = current.clone();
             changed.members.push(Member::Operation(operation));
+            builder.replace_element(current, changed);
+        }
+        Command::AddMember { element, text } => {
+            let current = builder.element(*element)?;
+            let draft = member_text::parse(text)?;
+            let mut changed = current.clone();
+            changed
+                .members
+                .push(draft.into_member(MemberId::from_raw(builder.id())));
+            builder.replace_element(current, changed);
+        }
+        Command::UpdateMember {
+            element,
+            member,
+            text,
+        } => {
+            let current = builder.element(*element)?;
+            let position = current
+                .members
+                .iter()
+                .position(|candidate| candidate.id() == *member)
+                .ok_or(DomainError::MissingMember(*member))?;
+            let draft = member_text::parse(text)?;
+            let old = &current.members[position];
+            if draft.kind() != old.kind() {
+                return Err(DomainError::MemberKindChange {
+                    from: old.kind(),
+                    to: draft.kind(),
+                });
+            }
+            let edited = draft.into_member(*member);
+            if &edited == old {
+                return Err(DomainError::NoChange);
+            }
+            let mut changed = current.clone();
+            changed.members[position] = edited;
             builder.replace_element(current, changed);
         }
         Command::RemoveMember { element, member } => {
