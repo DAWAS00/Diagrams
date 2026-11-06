@@ -141,5 +141,7 @@ Legend: **Built** = in source and described as tested; **Core only** = domain co
 ## Evidence and files
 
 - Test run on Windows 11 with VP CE 18.1; screenshots were viewed during the session but are not stored in the repo.
-- Exported example images (outside the repo): `vp-er-export.jpg` and `vp-shop-class.jpg` in the session scratchpad. Copy them into `research/visual-paradigm/ce-evidence/ui/` if you want to keep them.
-- Prior evidence: [VALIDATION-GAPS.md](VALIDATION-GAPS.md), [FEATURE-DIFFERENCES.md](FEATURE-DIFFERENCES.md), [README.md](README.md), and `research/visual-paradigm/`.
+- Images exported by VP during the test (both carry VP's Community Edition mark):
+  - [Class diagram built in the test](images/vp-shop-class.jpg)
+  - [ER diagram built in the test](images/vp-er-export.jpg)
+- Prior evidence: [VALIDATION-GAPS.md](../../../plan-rust-diagram-editor/comparison/VALIDATION-GAPS.md), [FEATURE-DIFFERENCES.md](../../../plan-rust-diagram-editor/comparison/FEATURE-DIFFERENCES.md), [comparison README](../../../plan-rust-diagram-editor/comparison/README.md), and [research/visual-paradigm](../../../research/visual-paradigm/README.md).
