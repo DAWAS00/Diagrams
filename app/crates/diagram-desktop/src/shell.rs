@@ -12,29 +12,32 @@ use diagram_core::command::Command;
 use diagram_core::ids::{DiagramId, ElementId, RelationId};
 use diagram_core::model::Document;
 use eframe::egui::{
-    self, Align, Area, Button, Frame, Id, Key, Layout, Modal, Modifiers, Order, Pos2, Rect, Role,
-    ScrollArea, Stroke, ThemePreference, Vec2,
+    self, Area, Frame, Id, Key, Modifiers, Order, Pos2, Rect, Role, ScrollArea, Stroke,
+    ThemePreference, Vec2,
 };
 
 use crate::session::ProjectSession;
 pub use crate::session::{FIRST_DIAGRAM, SAMPLE_PROJECT};
 use crate::ui::canvas::canvas;
-use crate::ui::commands::{self, Availability, CommandContext, CommandId, CommandSpec, Placement};
+use crate::ui::commands::{self, CommandContext, CommandId};
 use crate::ui::components;
 use crate::ui::dialogs::{self, DialogAnswer, DialogKind, DialogState};
 use crate::ui::entry::entry_screens;
+use crate::ui::header::header;
 use crate::ui::inspector::{self as rules, DraftKey};
 use crate::ui::inspector_view::inspector;
 use crate::ui::intents::UiIntent;
 use crate::ui::navigator::OpenTab;
-use crate::ui::notation::{self, NotationId};
-use crate::ui::palette::{self, PaletteEntry, PaletteState};
+use crate::ui::notation::NotationId;
+use crate::ui::palette::PaletteState;
 use crate::ui::project_panel::sidebar;
 use crate::ui::read_model;
+use crate::ui::search::command_palette;
 use crate::ui::showcase::{self, ShowcaseState};
 use crate::ui::status::status_bar;
 use crate::ui::tabs::tab_row;
 use crate::ui::theme::{self, Palette};
+use crate::ui::tool_row::tool_row;
 use crate::ui::welcome::{self, EntryState};
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
 
@@ -815,15 +818,6 @@ fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
     }
 }
 
-/// Whether a panel's toggle shows as pressed.
-fn panel_shown(state: &ShellState, which: Drawer) -> bool {
-    match (state.layout, which) {
-        (LayoutMode::Docked, Drawer::Navigator) => state.panels.navigator_visible,
-        (LayoutMode::Docked, Drawer::Inspector) => state.panels.inspector_visible,
-        (LayoutMode::Narrow, _) => state.drawer == Some(which),
-    }
-}
-
 /// Draws the complete shell into `ui` and applies the user's interactions to `state`.
 pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     if state.applied_theme != Some(state.theme) {
@@ -945,146 +939,6 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     state.text_had_focus = ui.ctx().text_edit_focused();
 }
 
-/// A command button with its shortcut as a hover hint; disabled commands
-/// explain why.
-pub(crate) fn command_button(
-    ui: &mut egui::Ui,
-    spec: &CommandSpec,
-    context: CommandContext,
-    clicked: &mut Option<CommandId>,
-) {
-    let hint = spec
-        .shortcut
-        .map(|shortcut| format!("Shortcut: {}", ui.ctx().format_shortcut(&shortcut)));
-    let availability = commands::availability(spec.id, context);
-    if components::action_button(ui, spec.label, availability.reason(), hint.as_deref()).clicked() {
-        *clicked = Some(spec.id);
-    }
-}
-
-/// The application menu: every catalog command, grouped, with shortcuts.
-fn command_menu(ui: &mut egui::Ui, context: CommandContext, clicked: &mut Option<CommandId>) -> Id {
-    let menu = ui.menu_button("Menu", |ui| {
-        for (group, specs) in commands::menu_groups() {
-            ui.menu_button(group.label(), |ui| {
-                for spec in specs {
-                    let availability = commands::availability(spec.id, context);
-                    let mut item = Button::new(spec.label);
-                    if let Some(shortcut) = spec.shortcut {
-                        item = item.shortcut_text(ui.ctx().format_shortcut(&shortcut));
-                    }
-                    let response = ui.add_enabled(availability.is_enabled(), item);
-                    let response = match availability.reason() {
-                        Some(reason) => response.on_disabled_hover_text(reason),
-                        None => response,
-                    };
-                    if response.clicked() {
-                        *clicked = Some(spec.id);
-                        ui.close();
-                    }
-                }
-            });
-        }
-    });
-    menu.response.id
-}
-
-/// Header: menu, project name, then Undo, Redo, Search, Save and Export.
-fn header(ui: &mut egui::Ui, state: &mut ShellState) {
-    let context = state.command_context();
-    let mut clicked = None;
-    let mut from_menu = None;
-    let mut menu_button = None;
-    ui.horizontal_centered(|ui| {
-        menu_button = Some(command_menu(ui, context, &mut from_menu));
-        ui.separator();
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            // Right-to-left: add in reverse visual order, with a separator
-            // between command groups.
-            let mut previous_group = None;
-            for spec in commands::placed(Placement::Header)
-                .collect::<Vec<_>>()
-                .into_iter()
-                .rev()
-            {
-                if previous_group.is_some_and(|group| group != spec.group) {
-                    ui.separator();
-                }
-                previous_group = Some(spec.group);
-                command_button(ui, spec, context, &mut clicked);
-            }
-            ui.separator();
-            ui.allocate_ui_with_layout(
-                ui.available_size(),
-                Layout::left_to_right(Align::Center),
-                |ui| {
-                    let title = format!("{} · not saved", state.project_name());
-                    components::truncated_text(ui, &title)
-                },
-            );
-        });
-    });
-    if let Some(command) = from_menu {
-        // A dialog the command opens returns focus to the Menu button.
-        state.queue(UiIntent::Run {
-            command,
-            origin: menu_button,
-        });
-    }
-    if let Some(id) = clicked {
-        state.queue(UiIntent::run(id));
-    }
-}
-
-/// Tool row: project panel button, tools, inspector button.
-fn tool_row(ui: &mut egui::Ui, state: &mut ShellState) {
-    let context = state.command_context();
-    let mut clicked = None;
-    let mut toggle = None;
-    ui.horizontal_centered(|ui| {
-        let navigator = components::choice(
-            ui,
-            panel_shown(state, Drawer::Navigator),
-            CommandId::ToggleNavigator.spec().label,
-        );
-        if navigator.clicked() {
-            toggle = Some((CommandId::ToggleNavigator, navigator.id));
-        }
-        ui.separator();
-        // Tools come from the active diagram's notation contract.
-        for spec in notation::tool_commands(state.active_notation()).map(CommandId::spec) {
-            if spec.id == CommandId::SelectTool {
-                // The active tool shows as pressed.
-                if components::choice(ui, true, spec.label).clicked() {
-                    clicked = Some(spec.id);
-                }
-            } else {
-                command_button(ui, spec, context, &mut clicked);
-            }
-        }
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            let inspector = components::choice(
-                ui,
-                panel_shown(state, Drawer::Inspector),
-                CommandId::ToggleInspector.spec().label,
-            );
-            if inspector.clicked() {
-                toggle = Some((CommandId::ToggleInspector, inspector.id));
-            }
-        });
-    });
-    if let Some(id) = clicked {
-        state.queue(UiIntent::run(id));
-    }
-    if let Some((id, button)) = toggle {
-        // A drawer opened from its button returns focus to that button.
-        state.queue(UiIntent::Run {
-            command: id,
-            origin: Some(button),
-        });
-    }
-}
-
 /// Wraps panel contents in a vertical scroll area that assistive technology
 /// (and the usability audit) sees as a named, clipping scroll region.
 fn scrolling(ui: &mut egui::Ui, id: &str, label: &str, add_contents: impl FnOnce(&mut egui::Ui)) {
@@ -1169,105 +1023,6 @@ fn dialog_window(ctx: &egui::Context, state: &mut ShellState) {
             state.queue(UiIntent::AnswerDialog(answer));
         }
         None => state.dialog = Some(dialog),
-    }
-}
-
-/// Command and object search. Enter runs the highlighted result, arrows move
-/// the highlight, Escape or a click outside closes it, and focus returns to
-/// where it was.
-fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
-    let Some(mut search) = state.palette.take() else {
-        return;
-    };
-    let rows = read_model::element_rows(state.document());
-    let names: Vec<(ElementId, &str)> =
-        rows.iter().map(|row| (row.id, row.name.as_str())).collect();
-    let context = state.command_context();
-    let results = palette::entries(&search.query, &names);
-    let (down, up, enter) = ctx.input(|input| {
-        (
-            input.key_pressed(Key::ArrowDown),
-            input.key_pressed(Key::ArrowUp),
-            input.key_pressed(Key::Enter),
-        )
-    });
-    let entry_availability = |entry: PaletteEntry| match entry {
-        PaletteEntry::Command(id) => commands::availability(id, context),
-        PaletteEntry::Object(_) => Availability::Enabled,
-    };
-    if search.highlight_pending {
-        search.highlighted =
-            palette::first_available(&results, |entry| entry_availability(entry).is_enabled());
-        search.highlight_pending = false;
-    }
-    search.highlighted = palette::move_highlight(search.highlighted, results.len(), down, up);
-    let mut chosen = if enter {
-        results.get(search.highlighted).copied()
-    } else {
-        None
-    };
-
-    let modal = Modal::new(Id::unique("command-palette")).show(ctx, |ui| {
-        ui.set_width(480.0);
-        components::panel_title(ui, "Search commands and objects");
-        let field = components::text_field(ui, "Find a command or object", &mut search.query);
-        if !search.focused_once {
-            field.request_focus();
-            search.focused_once = true;
-        }
-        if field.changed() {
-            search.highlight_pending = true;
-        }
-        ui.add_space(theme::GAP);
-        if results.is_empty() {
-            ui.label("No commands or objects match.");
-        }
-        ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
-            for (index, entry) in results.iter().copied().enumerate() {
-                let availability = entry_availability(entry);
-                let mut row = Button::selectable(
-                    index == search.highlighted,
-                    palette::entry_label(entry, &names),
-                )
-                .truncate()
-                .min_size(Vec2::new(ui.available_width(), theme::ROW_HEIGHT));
-                if let PaletteEntry::Command(id) = entry
-                    && let Some(shortcut) = id.spec().shortcut
-                {
-                    row = row.shortcut_text(ctx.format_shortcut(&shortcut));
-                }
-                let response = ui.add_enabled(availability.is_enabled(), row);
-                if index == search.highlighted && (down || up) {
-                    response.scroll_to_me(None);
-                }
-                if let Some(reason) = availability.reason() {
-                    components::field_label(ui, reason);
-                }
-                if response.clicked() {
-                    chosen = Some(entry);
-                }
-            }
-        });
-    });
-
-    let close_requested = modal.should_close();
-    let ran = match chosen {
-        Some(entry) if !entry_availability(entry).is_enabled() => false,
-        Some(PaletteEntry::Command(id)) => {
-            state.queue(UiIntent::run(id));
-            true
-        }
-        Some(PaletteEntry::Object(id)) => {
-            state.queue(UiIntent::RevealClass(id));
-            true
-        }
-        None => false,
-    };
-    if ran || close_requested {
-        state.pending_focus = search.restore_focus;
-        ctx.request_repaint();
-    } else {
-        state.palette = Some(search);
     }
 }
 

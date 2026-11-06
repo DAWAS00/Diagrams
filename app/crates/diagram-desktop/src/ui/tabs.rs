@@ -4,9 +4,10 @@
 use diagram_core::ids::DiagramId;
 use eframe::egui::{self, Button, Color32, Role, Vec2, WidgetInfo};
 
-use crate::shell::{ShellState, command_button};
+use crate::shell::ShellState;
 use crate::ui::commands::{self, Placement};
 use crate::ui::components;
+use crate::ui::header::command_button;
 use crate::ui::intents::UiIntent;
 use crate::ui::navigator;
 use crate::ui::theme::{self, TextRole};
