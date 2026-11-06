@@ -2,7 +2,7 @@
 //! focus return and retained panel preferences.
 
 mod common;
-use common::harness_at;
+use common::{harness_at, select_class, selected_name};
 use diagram_desktop::shell::ShellState;
 use diagram_desktop::ui::workspace::{
     self, Drawer, INSPECTOR, LayoutMode, MIN_CANVAS_WIDTH, NAVIGATOR,
@@ -149,7 +149,7 @@ fn close_button_and_toggle_should_close_the_drawer() {
 #[test]
 fn escape_should_close_the_drawer_and_return_focus_to_its_button() {
     let mut harness = harness_at(800.0, 500.0);
-    harness.state_mut().select(0);
+    select_class(&mut harness, "Customer");
     harness.run();
     harness.get_by_label("Inspector").focus();
     harness.run();
@@ -163,8 +163,8 @@ fn escape_should_close_the_drawer_and_return_focus_to_its_button() {
 
     assert_eq!(harness.state().drawer, None);
     assert_eq!(
-        harness.state().selected,
-        Some(0),
+        selected_name(&harness).as_deref(),
+        Some("Customer"),
         "Escape closed the drawer only"
     );
     assert!(harness.get_by_label("Inspector").is_focused());
@@ -173,7 +173,7 @@ fn escape_should_close_the_drawer_and_return_focus_to_its_button() {
 #[test]
 fn escape_while_typing_in_a_drawer_should_first_leave_the_field() {
     let mut harness = harness_at(800.0, 500.0);
-    harness.state_mut().select(0);
+    select_class(&mut harness, "Customer");
     harness.run();
     harness.get_by_label("Inspector").click();
     harness.run();
@@ -187,13 +187,13 @@ fn escape_while_typing_in_a_drawer_should_first_leave_the_field() {
     harness.key_press(Key::Escape);
     harness.run();
     assert_eq!(harness.state().drawer, None);
-    assert_eq!(harness.state().selected, Some(0));
+    assert_eq!(selected_name(&harness).as_deref(), Some("Customer"));
 }
 
 #[test]
 fn renaming_in_the_drawer_should_update_the_canvas() {
     let mut harness = harness_at(800.0, 500.0);
-    harness.state_mut().select(1);
+    select_class(&mut harness, "Order");
     harness.run();
     harness.get_by_label("Inspector").click();
     harness.run();
@@ -244,7 +244,7 @@ fn growing_the_window_should_close_an_open_drawer() {
 #[test]
 fn menu_should_list_every_group_and_run_commands() {
     let mut harness = harness_at(1280.0, 800.0);
-    harness.state_mut().select(0);
+    select_class(&mut harness, "Customer");
     harness.run();
 
     harness.get_by_label("Menu").click();
@@ -258,13 +258,13 @@ fn menu_should_list_every_group_and_run_commands() {
     harness.get_by_label_contains("Clear selection").click();
     harness.run();
 
-    assert_eq!(harness.state().selected, None);
+    assert_eq!(selected_name(&harness), None);
 }
 
 #[test]
 fn escape_on_a_focused_button_should_still_clear_the_selection() {
     let mut harness = harness_at(1280.0, 800.0);
-    harness.state_mut().select(1);
+    select_class(&mut harness, "Order");
     harness.run();
     harness.get_by_label("Select").focus();
     harness.run();
@@ -272,5 +272,5 @@ fn escape_on_a_focused_button_should_still_clear_the_selection() {
     harness.key_press(Key::Escape);
     harness.run();
 
-    assert_eq!(harness.state().selected, None);
+    assert_eq!(selected_name(&harness), None);
 }

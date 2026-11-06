@@ -196,8 +196,8 @@ fn create_should_open_an_empty_diagram_with_the_exact_name() {
     harness.run();
 
     assert!(harness.state().entry.is_none());
-    assert_eq!(harness.state().project_name, "  Customer model ");
-    assert!(harness.state().classes.is_empty());
+    assert_eq!(harness.state().project_name(), "  Customer model ");
+    assert!(harness.state().document().elements.is_empty());
     harness.get_by_label("Diagram canvas");
     // The exact spelling, including spaces, is kept in the header.
     harness.get_by_label_contains("  Customer model  · not saved");
@@ -214,7 +214,7 @@ fn enter_in_the_name_field_should_create_the_project() {
     harness.run();
 
     assert!(harness.state().entry.is_none());
-    assert_eq!(harness.state().project_name, "Orders");
+    assert_eq!(harness.state().project_name(), "Orders");
 }
 
 #[test]
@@ -255,8 +255,8 @@ fn continue_should_open_the_sample_project() {
     harness.run();
 
     assert!(harness.state().entry.is_none());
-    assert_eq!(harness.state().project_name, SAMPLE_PROJECT);
-    assert_eq!(harness.state().classes.len(), 2);
+    assert_eq!(harness.state().project_name(), SAMPLE_PROJECT);
+    assert_eq!(harness.state().document().elements.len(), 2);
     harness.get_by_label("Class Customer");
 }
 

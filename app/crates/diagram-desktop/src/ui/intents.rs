@@ -3,11 +3,14 @@
 //! Widgets never change editor or project state directly. They queue a
 //! [`UiIntent`]; after the frame is drawn, the shell's coordinator applies the
 //! queue in order. Text fields are the exception: they edit a draft in place,
-//! and committing drafts as model commands arrives with M1/M2 (UI-14).
+//! committed drafts become `diagram-core` commands in the coordinator.
+//! Targets are typed IDs, never list positions.
 
+use diagram_core::ids::{DiagramId, ElementId, RelationId};
 use eframe::egui::{Id, ThemePreference};
 
 use super::commands::CommandId;
+use super::dialogs::DialogAnswer;
 use super::inspector::RelationField;
 
 /// Something the user asked for.
@@ -22,29 +25,35 @@ pub enum UiIntent {
         origin: Option<Id>,
     },
     /// Select a class on the current diagram.
-    SelectClass(usize),
+    SelectClass(ElementId),
     /// Add a class to the selection, or remove it if already selected.
-    ToggleClassInSelection(usize),
+    ToggleClassInSelection(ElementId),
     /// Select a relationship.
-    SelectRelation(usize),
+    SelectRelation(RelationId),
     /// Commit a class name draft (validated by the coordinator).
-    RenameClass(usize, String),
+    RenameClass(ElementId, String),
     /// Commit a relationship field draft (validated by the coordinator).
-    SetRelationField(usize, RelationField, String),
+    SetRelationField(RelationId, RelationField, String),
     /// Select a class from the project panel, opening a diagram that shows it.
-    RevealClass(usize),
+    RevealClass(ElementId),
     /// Show a diagram in its tab, opening a tab if needed.
-    OpenDiagram(usize),
+    OpenDiagram(DiagramId),
     /// Make an open tab active.
-    ActivateTab(usize),
+    ActivateTab(DiagramId),
     /// Close an open tab (model elements are untouched).
-    CloseTab(usize),
+    CloseTab(DiagramId),
     /// Change the theme preference.
     SetTheme(ThemePreference),
     /// Close the open drawer.
     CloseDrawer,
     /// Close the component showcase.
     CloseShowcase,
+    /// Create a project with this name and open its empty diagram.
+    CreateProject(String),
+    /// Open the built-in sample project.
+    OpenSample,
+    /// Answer the open dialog.
+    AnswerDialog(DialogAnswer),
 }
 
 impl UiIntent {

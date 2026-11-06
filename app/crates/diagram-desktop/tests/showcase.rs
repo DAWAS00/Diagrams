@@ -1,7 +1,7 @@
 //! UI-01: the component showcase shows every reusable control and state.
 
 mod common;
-use common::harness;
+use common::{harness, select_class, selected_name};
 use diagram_desktop::shell::ShellState;
 use eframe::egui::{Key, Modifiers};
 use egui_kittest::Harness;
@@ -101,7 +101,7 @@ fn showcase_choices_and_rows_should_respond() {
 #[test]
 fn close_button_and_escape_should_close_the_showcase_only() {
     let mut harness = harness();
-    harness.state_mut().select(0);
+    select_class(&mut harness, "Customer");
     harness.run();
     open_from_search(&mut harness);
 
@@ -114,8 +114,8 @@ fn close_button_and_escape_should_close_the_showcase_only() {
     harness.run();
     assert!(harness.state().showcase.is_none());
     assert_eq!(
-        harness.state().selected,
-        Some(0),
+        selected_name(&harness).as_deref(),
+        Some("Customer"),
         "Escape closed the showcase only"
     );
 }

@@ -43,11 +43,13 @@ pub enum CommandId {
     ClearSelection,
     /// Show every reusable control in each state (design fixture).
     ShowComponentShowcase,
+    /// Close the project and return to the welcome screen.
+    CloseProject,
 }
 
 impl CommandId {
     /// Every command, in catalog order.
-    pub const ALL: [Self; 16] = [
+    pub const ALL: [Self; 17] = [
         Self::Undo,
         Self::Redo,
         Self::SearchCommands,
@@ -64,6 +66,7 @@ impl CommandId {
         Self::ToggleInspector,
         Self::ClearSelection,
         Self::ShowComponentShowcase,
+        Self::CloseProject,
     ];
 
     /// This command's catalog entry.
@@ -189,7 +192,7 @@ const fn keys(modifiers: Modifiers, key: Key) -> Option<KeyboardShortcut> {
 }
 
 /// The catalog, in [`CommandId`] order.
-pub const CATALOG: [CommandSpec; 16] = [
+pub const CATALOG: [CommandSpec; 17] = [
     spec(
         CommandId::Undo,
         "Undo",
@@ -318,6 +321,14 @@ pub const CATALOG: [CommandSpec; 16] = [
         false,
         Placement::MenuOnly,
     ),
+    spec(
+        CommandId::CloseProject,
+        "Close project",
+        CommandGroup::File,
+        None,
+        false,
+        Placement::MenuOnly,
+    ),
 ];
 
 /// The state that command availability depends on.
@@ -325,14 +336,24 @@ pub const CATALOG: [CommandSpec; 16] = [
 pub struct CommandContext {
     /// Something is selected on the canvas.
     pub has_selection: bool,
+    /// A project is open.
+    pub has_project: bool,
+    /// The history has an action to undo.
+    pub can_undo: bool,
+    /// The history has an action to redo.
+    pub can_redo: bool,
 }
 
 /// Whether `id` can run in `context`, with the reason when it cannot.
 pub fn availability(id: CommandId, context: CommandContext) -> Availability {
     use Availability::{Disabled, Enabled};
     match id {
-        CommandId::Undo => Disabled("Not available yet: undo needs the project history."),
-        CommandId::Redo => Disabled("Not available yet: redo needs the project history."),
+        CommandId::Undo if context.can_undo => Enabled,
+        CommandId::Undo => Disabled("Nothing to undo yet."),
+        CommandId::Redo if context.can_redo => Enabled,
+        CommandId::Redo => Disabled("Nothing to redo."),
+        CommandId::CloseProject if context.has_project => Enabled,
+        CommandId::CloseProject => Disabled("No project is open."),
         CommandId::Save => Disabled("Not available yet: this prototype cannot save."),
         CommandId::Export => Disabled("Not available yet: SVG export is planned for v0.1."),
         CommandId::PanTool => {
@@ -470,18 +491,18 @@ pub fn contract(id: CommandId) -> ActionContract {
     };
     match id {
         CommandId::Undo => c(
-            "A change to undo in the project history (M1)",
+            "A change to undo in the project history",
             "Restores the previous project state",
             ProjectModel,
             MovesHistory,
-            "unavailable_shortcuts_should_change_nothing",
+            "undo_and_redo_should_follow_the_project_history",
         ),
         CommandId::Redo => c(
-            "An undone change to redo (M1)",
+            "An undone change to redo",
             "Re-applies the undone change",
             ProjectModel,
             MovesHistory,
-            "unavailable_shortcuts_should_change_nothing",
+            "undo_and_redo_should_follow_the_project_history",
         ),
         CommandId::SearchCommands => c(
             "None",
@@ -580,6 +601,13 @@ pub fn contract(id: CommandId) -> ActionContract {
             Editor,
             NotRecorded,
             "search_should_open_the_showcase",
+        ),
+        CommandId::CloseProject => c(
+            "A project is open",
+            "Closes the project and returns to the welcome screen; asks first when work would be lost",
+            Editor,
+            NoProjectChange,
+            "close_project_should_ask_first_when_there_are_unsaved_changes",
         ),
     }
 }

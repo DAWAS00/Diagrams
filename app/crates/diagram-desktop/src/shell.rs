@@ -1,89 +1,72 @@
-//! Native shell prototype: toolbar, sidebar, canvas, inspector and status bar.
+//! Native shell: toolbar, project panel, canvas, inspector and status bar.
 //!
-//! The preview classes are prototype data owned by the desktop crate. They
-//! exercise layout, selection and real text editing before M1 introduces the
-//! core model, commands and history.
+//! The window reads the open project's real [`Document`] through
+//! [`crate::ui::read_model`] and changes it only by executing `diagram-core`
+//! commands in the coordinator ([`apply_intents`]). Selection and open tabs
+//! name records by typed ID, never by list position, so an ID that no longer
+//! exists is ignored with a message instead of selecting the wrong record.
 
+use std::sync::LazyLock;
+
+use diagram_core::command::Command;
+use diagram_core::ids::{DiagramId, ElementId, RelationId};
+use diagram_core::model::Document;
 use eframe::egui::{
-    self, Align, Area, Button, Frame, Id, Key, Layout, Modal, Modifiers, Order, Pos2, Rect, Role,
-    ScrollArea, Stroke, ThemePreference, Vec2,
+    self, Area, Frame, Id, Key, Modifiers, Order, Pos2, Rect, Role, ScrollArea, Stroke,
+    ThemePreference, Vec2,
 };
 
-use crate::ui::canvas::{ATTRIBUTE_HEIGHT, CLASS_WIDTH, HEADER_HEIGHT, canvas};
-use crate::ui::commands::{self, Availability, CommandContext, CommandId, CommandSpec, Placement};
+use crate::session::ProjectSession;
+pub use crate::session::{FIRST_DIAGRAM, SAMPLE_PROJECT};
+use crate::ui::canvas::canvas;
+use crate::ui::commands::{self, CommandContext, CommandId};
 use crate::ui::components;
+use crate::ui::dialogs::{self, DialogAnswer, DialogKind, DialogState};
 use crate::ui::entry::entry_screens;
-use crate::ui::inspector::{self as rules, DraftKey, DraftOutcome, PreviewRelation, RelationField};
+use crate::ui::header::header;
+use crate::ui::inspector::{self as rules, DraftKey};
+use crate::ui::inspector_view::inspector;
 use crate::ui::intents::UiIntent;
-use crate::ui::navigator::{self, Diagram, OpenTab};
-use crate::ui::notation::{self, InspectorSection, NotationId};
-use crate::ui::palette::{self, PaletteEntry, PaletteState};
+use crate::ui::navigator::OpenTab;
+use crate::ui::notation::NotationId;
+use crate::ui::palette::PaletteState;
+use crate::ui::project_panel::sidebar;
+use crate::ui::read_model;
+use crate::ui::search::command_palette;
 use crate::ui::showcase::{self, ShowcaseState};
 use crate::ui::status::status_bar;
 use crate::ui::tabs::tab_row;
 use crate::ui::theme::{self, Palette};
-use crate::ui::welcome::EntryState;
+use crate::ui::tool_row::tool_row;
+use crate::ui::welcome::{self, EntryState};
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
-
-/// Name of the diagram every new project starts with.
-pub const FIRST_DIAGRAM: &str = "Class diagram 1";
-
-/// Name of the built-in sample project.
-pub const SAMPLE_PROJECT: &str = "Sample project";
 
 /// Message shown when a class name has no visible characters.
 pub const BLANK_NAME_WARNING: &str = "A class name must contain a non-whitespace character.";
 
-/// A class box drawn on the prototype canvas.
-#[derive(Debug, Clone, PartialEq)]
-pub struct PreviewClass {
-    /// Editable class name, bound directly to the inspector text field.
-    pub name: String,
-    /// Attribute lines displayed below the name.
-    pub attributes: Vec<String>,
-    /// Top-left corner, relative to the canvas origin.
-    pub position: Vec2,
-}
+/// Shown while no project is open, so drawing code never needs a project.
+static EMPTY_DOCUMENT: LazyLock<Document> = LazyLock::new(Document::default);
 
-impl PreviewClass {
-    /// Name used in the canvas and accessibility tree; blank names get a placeholder.
-    pub fn display_name(&self) -> &str {
-        if self.name.trim().is_empty() {
-            "Unnamed class"
-        } else {
-            &self.name
-        }
-    }
-
-    pub(crate) fn size(&self) -> Vec2 {
-        let rows = self.attributes.len().max(1) as f32;
-        Vec2::new(CLASS_WIDTH, HEADER_HEIGHT + rows * ATTRIBUTE_HEIGHT + 8.0)
-    }
-}
-
-/// Editor state for the prototype shell.
+/// Editor state: the open project, the selection, the open tabs and the
+/// window's own state (panels, theme, dialogs).
 #[derive(Debug, Clone, PartialEq)]
 pub struct ShellState {
-    /// Classes shown on the canvas, in drawing order.
-    pub classes: Vec<PreviewClass>,
-    /// Index into [`Self::classes`] of the selected class, if any (in the active tab).
-    pub selected: Option<usize>,
+    /// The open project; `None` on the welcome screen.
+    project: Option<ProjectSession>,
+    /// The selected class, if any (in the active tab).
+    selected: Option<ElementId>,
     /// Further classes selected with Ctrl+click (multi-selection).
-    pub also_selected: Vec<usize>,
-    /// Relationships between classes.
-    pub relations: Vec<PreviewRelation>,
-    /// Index into [`Self::relations`] of the selected relationship, if any.
-    pub selected_relation: Option<usize>,
+    also_selected: Vec<ElementId>,
+    /// The selected relationship, if any.
+    selected_relation: Option<RelationId>,
     /// Uncommitted inspector drafts; widgets edit these, never the records.
     pub drafts: std::collections::BTreeMap<DraftKey, String>,
     /// Whether the inspector's Appearance and Advanced sections are open.
     pub inspector_sections: (bool, bool),
-    /// Diagrams in the project; each shows some of [`Self::classes`].
-    pub diagrams: Vec<Diagram>,
     /// Open diagram tabs, in order.
-    pub tabs: Vec<OpenTab>,
-    /// Index into [`Self::tabs`] of the active tab, if any tab is open.
-    pub active_tab: Option<usize>,
+    tabs: Vec<OpenTab>,
+    /// Index into `tabs` of the active tab, if any tab is open.
+    active_tab: Option<usize>,
     /// Text in the project panel's search field.
     pub navigator_search: String,
     /// Light, dark or follow the operating system. Light is the default.
@@ -100,12 +83,19 @@ pub struct ShellState {
     drawer_return: Option<Id>,
     /// The welcome or new-project screen, while one is shown instead of the workspace.
     pub entry: Option<EntryState>,
-    /// Name of the open project, shown in the header.
-    pub project_name: String,
     /// The component showcase window, while it is open.
     pub showcase: Option<ShowcaseState>,
     /// Widget to focus when the showcase closes.
     showcase_return: Option<Id>,
+    /// The open dialog, if any.
+    dialog: Option<DialogState>,
+    /// Widget to focus when the dialog closes.
+    dialog_return: Option<Id>,
+    /// A sentence about the last thing that was refused or undone, in words.
+    notice: Option<String>,
+    /// Counts projects opened or closed, so requests queued for an earlier
+    /// project are dropped instead of hitting the next one.
+    epoch: u64,
     /// Intents queued by widgets this frame, applied after drawing.
     intents: Vec<UiIntent>,
     /// Widget to focus at the start of the next frame, after a dialog closes.
@@ -118,48 +108,11 @@ pub struct ShellState {
 }
 
 impl Default for ShellState {
+    /// The workspace showing the labelled sample project.
     fn default() -> Self {
-        let class = |name: &str, attributes: &[&str], x, y| PreviewClass {
-            name: name.to_owned(),
-            attributes: attributes.iter().map(|a| (*a).to_owned()).collect(),
-            position: Vec2::new(x, y),
-        };
-        Self {
-            classes: vec![
-                class("Customer", &["id: CustomerId", "name: String"], 48.0, 48.0),
-                class("Order", &["id: OrderId", "total: Money"], 300.0, 96.0),
-            ],
-            selected: None,
-            also_selected: Vec::new(),
-            relations: vec![rules::sample_relation()],
-            selected_relation: None,
-            drafts: std::collections::BTreeMap::new(),
-            inspector_sections: (false, false),
-            diagrams: vec![
-                Diagram::new(FIRST_DIAGRAM, &[0, 1]),
-                Diagram::new("Order details", &[1]),
-            ],
-            tabs: vec![OpenTab {
-                diagram: 0,
-                selected: None,
-            }],
-            active_tab: Some(0),
-            navigator_search: String::new(),
-            theme: ThemePreference::Light,
-            palette: None,
-            panels: PanelPreferences::default(),
-            drawer: None,
-            layout: LayoutMode::Docked,
-            drawer_return: None,
-            entry: None,
-            project_name: String::from(SAMPLE_PROJECT),
-            showcase: None,
-            showcase_return: None,
-            intents: Vec::new(),
-            pending_focus: None,
-            applied_theme: None,
-            text_had_focus: false,
-        }
+        let mut state = Self::welcome();
+        state.open_project(ProjectSession::sample());
+        state
     }
 }
 
@@ -167,20 +120,142 @@ impl ShellState {
     /// State at application start: the welcome screen.
     pub fn welcome() -> Self {
         Self {
+            project: None,
+            selected: None,
+            also_selected: Vec::new(),
+            selected_relation: None,
+            drafts: std::collections::BTreeMap::new(),
+            inspector_sections: (false, false),
+            tabs: Vec::new(),
+            active_tab: None,
+            navigator_search: String::new(),
+            theme: ThemePreference::Light,
+            palette: None,
+            panels: PanelPreferences::default(),
+            drawer: None,
+            layout: LayoutMode::Docked,
+            drawer_return: None,
             entry: Some(EntryState::default()),
-            ..Self::default()
+            showcase: None,
+            showcase_return: None,
+            dialog: None,
+            dialog_return: None,
+            notice: None,
+            epoch: 0,
+            intents: Vec::new(),
+            pending_focus: None,
+            applied_theme: None,
+            text_had_focus: false,
         }
     }
 
-    /// The currently selected class, if the selection index is valid.
-    pub fn selected_class(&self) -> Option<&PreviewClass> {
-        self.selected.and_then(|index| self.classes.get(index))
+    /// Makes `project` the open project, with its first diagram in a tab, and
+    /// leaves the entry screens.
+    pub fn open_project(&mut self, project: ProjectSession) {
+        self.epoch += 1;
+        self.clear_selection();
+        self.drafts.clear();
+        self.tabs.clear();
+        self.active_tab = None;
+        self.navigator_search.clear();
+        self.notice = None;
+        self.dialog = None;
+        self.entry = None;
+        let first = project.document().diagram_order.first().copied();
+        self.project = Some(project);
+        if let Some(diagram) = first {
+            self.open_diagram(diagram);
+        }
     }
 
-    /// Selects only the class at `index`; out-of-range indices clear the selection.
-    pub fn select(&mut self, index: usize) {
+    /// Closes the project and returns to the welcome screen.
+    pub fn close_project(&mut self) {
+        self.epoch += 1;
+        self.project = None;
         self.clear_selection();
-        self.selected = (index < self.classes.len()).then_some(index);
+        self.drafts.clear();
+        self.tabs.clear();
+        self.active_tab = None;
+        self.notice = None;
+        self.dialog = None;
+        self.palette = None;
+        self.showcase = None;
+        self.drawer = None;
+        self.entry = Some(EntryState::default());
+    }
+
+    /// The open project, if any.
+    pub const fn project(&self) -> Option<&ProjectSession> {
+        self.project.as_ref()
+    }
+
+    /// The open document; empty while no project is open.
+    pub fn document(&self) -> &Document {
+        self.project
+            .as_ref()
+            .map_or(&*EMPTY_DOCUMENT, ProjectSession::document)
+    }
+
+    /// Name of the open project, empty on the welcome screen.
+    pub fn project_name(&self) -> &str {
+        self.project.as_ref().map_or("", ProjectSession::name)
+    }
+
+    /// The ID of the first class with this name, if there is one.
+    pub fn element_id(&self, name: &str) -> Option<ElementId> {
+        read_model::element_rows(self.document())
+            .into_iter()
+            .find(|row| row.name == name)
+            .map(|row| row.id)
+    }
+
+    /// The ID of the first diagram with this name, if there is one.
+    pub fn diagram_id(&self, name: &str) -> Option<DiagramId> {
+        read_model::diagram_rows(self.document())
+            .into_iter()
+            .find(|row| row.name == name)
+            .map(|row| row.id)
+    }
+
+    /// The selected class, if it still exists.
+    pub fn selected_element(&self) -> Option<ElementId> {
+        self.selected
+            .filter(|id| self.document().elements.contains_key(id))
+    }
+
+    /// The selected relationship, if it still exists.
+    pub fn selected_relation(&self) -> Option<RelationId> {
+        self.selected_relation
+            .filter(|id| self.document().relations.contains_key(id))
+    }
+
+    /// Every selected class, the primary one first.
+    pub fn selected_elements(&self) -> Vec<ElementId> {
+        self.selected
+            .into_iter()
+            .chain(self.also_selected.iter().copied())
+            .filter(|id| self.document().elements.contains_key(id))
+            .collect()
+    }
+
+    /// Open tabs, in order.
+    pub fn tabs(&self) -> &[OpenTab] {
+        &self.tabs
+    }
+
+    /// Index into [`Self::tabs`] of the active tab, if any tab is open.
+    pub const fn active_tab(&self) -> Option<usize> {
+        self.active_tab
+    }
+
+    /// The sentence about the last refused or undone action, if any.
+    pub fn notice(&self) -> Option<&str> {
+        self.notice.as_deref()
+    }
+
+    /// Whether a dialog is open.
+    pub const fn has_dialog(&self) -> bool {
+        self.dialog.is_some()
     }
 
     /// Clears the whole selection: classes and relationship.
@@ -190,39 +265,48 @@ impl ShellState {
         self.selected_relation = None;
     }
 
-    /// Every selected class, the primary one first.
-    pub fn selected_classes(&self) -> Vec<usize> {
-        self.selected
-            .into_iter()
-            .chain(self.also_selected.iter().copied())
-            .collect()
+    /// Selects only `element`. A class that no longer exists is ignored and
+    /// the selection stays as it was; the result says whether it was selected.
+    pub fn select(&mut self, element: ElementId) -> bool {
+        if !self.document().elements.contains_key(&element) {
+            return false;
+        }
+        self.clear_selection();
+        self.selected = Some(element);
+        true
     }
 
-    /// Adds the class to the selection, or removes it if already selected.
-    pub fn toggle_in_selection(&mut self, index: usize) {
-        if index >= self.classes.len() {
-            return;
+    /// Adds `element` to the selection, or removes it if already selected.
+    /// Returns false for a class that no longer exists.
+    pub fn toggle_in_selection(&mut self, element: ElementId) -> bool {
+        if !self.document().elements.contains_key(&element) {
+            return false;
         }
         self.selected_relation = None;
-        if self.selected == Some(index) {
+        if self.selected == Some(element) {
             self.selected = (!self.also_selected.is_empty()).then(|| self.also_selected.remove(0));
-        } else if let Some(position) = self.also_selected.iter().position(|&i| i == index) {
+        } else if let Some(position) = self.also_selected.iter().position(|&id| id == element) {
             self.also_selected.remove(position);
         } else if self.selected.is_none() {
-            self.selected = Some(index);
+            self.selected = Some(element);
         } else {
-            self.also_selected.push(index);
+            self.also_selected.push(element);
         }
+        true
     }
 
-    /// Selects only the relationship at `index`.
-    pub fn select_relation(&mut self, index: usize) {
+    /// Selects only `relation`. Returns false for one that no longer exists.
+    pub fn select_relation(&mut self, relation: RelationId) -> bool {
+        if !self.document().relations.contains_key(&relation) {
+            return false;
+        }
         self.clear_selection();
-        self.selected_relation = (index < self.relations.len()).then_some(index);
+        self.selected_relation = Some(relation);
+        true
     }
 
     /// The diagram in the active tab, if a tab is open.
-    pub fn active_diagram(&self) -> Option<usize> {
+    pub fn active_diagram(&self) -> Option<DiagramId> {
         self.active_tab
             .and_then(|tab| self.tabs.get(tab))
             .map(|tab| tab.diagram)
@@ -231,23 +315,28 @@ impl ShellState {
     /// Notation of the active diagram; Class when no diagram is open.
     pub fn active_notation(&self) -> NotationId {
         self.active_diagram()
-            .and_then(|diagram| self.diagrams.get(diagram))
-            .map_or(NotationId::Class, |diagram| diagram.notation)
+            .and_then(|id| self.document().diagrams.get(&id))
+            .map_or(NotationId::Class, |diagram| {
+                NotationId::from_core(diagram.notation)
+            })
     }
 
     /// Classes shown on the canvas: those in the active diagram.
-    pub fn visible_classes(&self) -> Vec<usize> {
+    pub fn visible_elements(&self) -> Vec<ElementId> {
         self.active_diagram()
-            .and_then(|diagram| self.diagrams.get(diagram))
-            .map(|diagram| diagram.classes.clone())
+            .map(|diagram| read_model::elements_in(self.document(), diagram))
             .unwrap_or_default()
     }
 
-    /// Makes tab `index` active. The leaving tab keeps its selection and the
-    /// arriving tab restores its own.
-    pub fn activate_tab(&mut self, index: usize) {
-        if index >= self.tabs.len() || self.active_tab == Some(index) {
-            return;
+    /// Makes the tab showing `diagram` active. The leaving tab keeps its
+    /// selection and the arriving tab restores its own. Returns false when
+    /// no open tab shows that diagram.
+    pub fn activate_tab(&mut self, diagram: DiagramId) -> bool {
+        let Some(index) = self.tabs.iter().position(|tab| tab.diagram == diagram) else {
+            return false;
+        };
+        if self.active_tab == Some(index) {
+            return true;
         }
         if let Some(current) = self.active_tab.and_then(|tab| self.tabs.get_mut(tab)) {
             current.selected = self.selected;
@@ -255,32 +344,32 @@ impl ShellState {
         self.active_tab = Some(index);
         let restored = self.tabs[index].selected;
         self.clear_selection();
-        self.selected = restored;
+        self.selected = restored.filter(|id| self.document().elements.contains_key(id));
+        true
     }
 
-    /// Shows `diagram` in its tab, opening a tab if it has none.
-    pub fn open_diagram(&mut self, diagram: usize) {
-        if diagram >= self.diagrams.len() {
-            return;
+    /// Shows `diagram` in its tab, opening a tab if it has none. Returns
+    /// false for a diagram that no longer exists.
+    pub fn open_diagram(&mut self, diagram: DiagramId) -> bool {
+        if !self.document().diagrams.contains_key(&diagram) {
+            return false;
         }
-        match self.tabs.iter().position(|tab| tab.diagram == diagram) {
-            Some(index) => self.activate_tab(index),
-            None => {
-                self.tabs.push(OpenTab {
-                    diagram,
-                    selected: None,
-                });
-                self.activate_tab(self.tabs.len() - 1);
-            }
+        if !self.tabs.iter().any(|tab| tab.diagram == diagram) {
+            self.tabs.push(OpenTab {
+                diagram,
+                selected: None,
+            });
         }
+        self.activate_tab(diagram)
     }
 
-    /// Closes tab `index`. Model elements are untouched; a neighbouring tab
-    /// becomes active when the active one closes.
-    pub fn close_tab(&mut self, index: usize) {
-        if index >= self.tabs.len() {
-            return;
-        }
+    /// Closes the tab showing `diagram`. Model elements are untouched; a
+    /// neighbouring tab becomes active when the active one closes. Returns
+    /// false when that diagram has no open tab.
+    pub fn close_tab(&mut self, diagram: DiagramId) -> bool {
+        let Some(index) = self.tabs.iter().position(|tab| tab.diagram == diagram) else {
+            return false;
+        };
         if let Some(current) = self.active_tab.and_then(|tab| self.tabs.get_mut(tab)) {
             current.selected = self.selected;
         }
@@ -292,24 +381,31 @@ impl ShellState {
             Some(active) if was_active => Some(active.min(self.tabs.len() - 1)),
             other => other,
         };
-        self.selected = self
-            .active_tab
-            .and_then(|tab| self.tabs.get(tab))
-            .and_then(|tab| tab.selected);
+        // Closing a background tab leaves the active tab's selection alone.
+        if was_active {
+            let restored = self
+                .active_tab
+                .and_then(|tab| self.tabs.get(tab))
+                .and_then(|tab| tab.selected);
+            self.clear_selection();
+            self.selected = restored.filter(|id| self.document().elements.contains_key(id));
+        }
+        true
     }
 
     /// Selects a class from the project panel. If the active diagram does not
-    /// show it, a diagram that does is opened first ("reveal").
-    pub fn reveal_class(&mut self, class: usize) {
-        if class >= self.classes.len() {
-            return;
+    /// show it, a diagram that does is opened first ("reveal"). Returns false
+    /// for a class that no longer exists.
+    pub fn reveal_class(&mut self, element: ElementId) -> bool {
+        if !self.document().elements.contains_key(&element) {
+            return false;
         }
-        if !self.visible_classes().contains(&class)
-            && let Some(&diagram) = navigator::diagrams_showing(&self.diagrams, class).first()
+        if !self.visible_elements().contains(&element)
+            && let Some(&diagram) = read_model::diagrams_showing(self.document(), element).first()
         {
             self.open_diagram(diagram);
         }
-        self.select(class);
+        self.select(element)
     }
 
     /// Queues `intent`; it is applied after the current frame is drawn.
@@ -330,18 +426,171 @@ impl ShellState {
     /// The state that decides which commands are available.
     pub fn command_context(&self) -> CommandContext {
         CommandContext {
-            has_selection: self.selected_class().is_some() || self.selected_relation.is_some(),
+            has_selection: self.selected_element().is_some() || self.selected_relation().is_some(),
+            has_project: self.project.is_some(),
+            can_undo: self
+                .project
+                .as_ref()
+                .is_some_and(|project| project.undo_label().is_some()),
+            can_redo: self
+                .project
+                .as_ref()
+                .is_some_and(|project| project.redo_label().is_some()),
         }
+    }
+
+    /// "Selected: Customer", "2 classes selected" or "No selection", for the status bar.
+    pub(crate) fn selection_summary(&self) -> String {
+        if let Some(relation) = self
+            .selected_relation()
+            .and_then(|id| self.document().relations.get(&id))
+        {
+            return format!(
+                "Selected: {}",
+                read_model::relation_label(self.document(), relation)
+            );
+        }
+        match self.selected_elements().as_slice() {
+            [] => String::from("No selection"),
+            [only] => format!(
+                "Selected: {}",
+                read_model::element_name(self.document(), *only).unwrap_or("?")
+            ),
+            several => format!("{} classes selected", several.len()),
+        }
+    }
+
+    /// Executes `command` on the open project. A refusal becomes a notice in
+    /// words and leaves the document unchanged. Returns whether it applied.
+    fn execute(&mut self, command: &Command) -> bool {
+        let Some(project) = self.project.as_mut() else {
+            return false;
+        };
+        match project.execute(command) {
+            Ok(_) => {
+                self.after_document_change(false);
+                true
+            }
+            Err(error) => {
+                self.notice = Some(format!("Error: {error}. Nothing was changed."));
+                false
+            }
+        }
+    }
+
+    /// Reverses the last action and says what it was.
+    fn undo(&mut self) {
+        if let Some(outcome) = self.project.as_mut().and_then(ProjectSession::undo) {
+            self.notice = Some(format!("Undid: {}.", outcome.label));
+            self.after_document_change(true);
+        }
+    }
+
+    /// Repeats the last undone action and says what it was.
+    fn redo(&mut self) {
+        if let Some(outcome) = self.project.as_mut().and_then(ProjectSession::redo) {
+            self.notice = Some(format!("Redid: {}.", outcome.label));
+            self.after_document_change(true);
+        }
+    }
+
+    /// Drops selection, tabs and drafts that name records the document no
+    /// longer has (after an edit, an undo or a redo). After a history move
+    /// (`history_moved`) every draft goes, because the text it started from
+    /// may have changed.
+    fn after_document_change(&mut self, history_moved: bool) {
+        let elements = self.selected_elements();
+        let relation = self.selected_relation();
+        let stale_tabs: Vec<DiagramId> = self
+            .tabs
+            .iter()
+            .map(|tab| tab.diagram)
+            .filter(|id| !self.document().diagrams.contains_key(id))
+            .collect();
+        self.selected = elements.first().copied();
+        self.also_selected = elements.into_iter().skip(1).collect();
+        self.selected_relation = relation;
+        for diagram in stale_tabs {
+            self.close_tab(diagram);
+        }
+        // A background tab remembers its own selection; forget classes that
+        // are gone, so a later Redo cannot bring a dropped selection back.
+        if let Some(project) = self.project.as_ref() {
+            let document = project.document();
+            for tab in &mut self.tabs {
+                tab.selected = tab.selected.filter(|id| document.elements.contains_key(id));
+            }
+        }
+        if history_moved {
+            self.drafts.clear();
+        } else {
+            let document = self.project.as_ref().map(ProjectSession::document);
+            self.drafts.retain(|key, _| {
+                document.is_some_and(|document| match key {
+                    DraftKey::ClassName(id) => document.elements.contains_key(id),
+                    DraftKey::Relation(id, _) => document.relations.contains_key(id),
+                })
+            });
+        }
+    }
+
+    /// Tells the user that an ID in a request no longer names anything.
+    fn stale(&mut self, what: &str) {
+        self.notice = Some(format!(
+            "That {what} no longer exists, so nothing was changed."
+        ));
     }
 }
 
-/// The coordinator: applies queued intents in order, after drawing.
+/// The coordinator: applies queued intents in order, after drawing. This is
+/// the only place the editor state and the document change.
 fn apply_intents(state: &mut ShellState, ctx: &egui::Context) {
-    for intent in std::mem::take(&mut state.intents) {
+    let intents = std::mem::take(&mut state.intents);
+    if !intents.is_empty() {
+        if !intents
+            .iter()
+            .all(|intent| matches!(intent, UiIntent::SetTheme(_)))
+        {
+            state.notice = None;
+        }
+        // The state changed after this frame was drawn: draw the next one.
+        ctx.request_repaint();
+    }
+    let epoch = state.epoch;
+    // A draft committed in the same frame as Undo or Redo was typed against
+    // the text before the history moved, whichever way round they were
+    // queued; it must not undo the undo or clear the redo.
+    let history_in_batch = intents.iter().any(|intent| {
+        matches!(
+            intent,
+            UiIntent::Run {
+                command: CommandId::Undo | CommandId::Redo,
+                ..
+            }
+        )
+    });
+    for intent in intents {
+        if state.epoch != epoch {
+            // A project was opened or closed: what is left was queued for the
+            // old one and must not touch the new one.
+            state.notice = Some(String::from(
+                "The project changed, so the remaining requests were dropped.",
+            ));
+            break;
+        }
+        if history_in_batch
+            && matches!(
+                intent,
+                UiIntent::RenameClass(..) | UiIntent::SetRelationField(..)
+            )
+        {
+            continue;
+        }
         match intent {
             UiIntent::Run { command, origin } => {
                 let drawer_before = state.drawer;
                 let showcase_before = state.showcase.is_some();
+                let dialog_before = state.dialog.is_some();
                 run(state, ctx, command);
                 // Whatever this control opened returns focus to it.
                 if let Some(origin) = origin {
@@ -351,33 +600,117 @@ fn apply_intents(state: &mut ShellState, ctx: &egui::Context) {
                     if state.showcase.is_some() && !showcase_before {
                         state.showcase_return = Some(origin);
                     }
+                    if state.dialog.is_some() && !dialog_before {
+                        state.dialog_return = Some(origin);
+                    }
                 }
             }
-            UiIntent::SelectClass(index) => state.select(index),
-            UiIntent::ToggleClassInSelection(index) => state.toggle_in_selection(index),
-            UiIntent::SelectRelation(index) => state.select_relation(index),
-            UiIntent::RenameClass(index, name) => {
-                if rules::class_name_error(&name).is_none()
-                    && let Some(class) = state.classes.get_mut(index)
-                {
-                    class.name = name;
+            UiIntent::SelectClass(id) => {
+                if !state.select(id) {
+                    state.stale("class");
                 }
             }
-            UiIntent::SetRelationField(index, field, value) => {
-                if field.error(&value).is_none()
-                    && let Some(relation) = state.relations.get_mut(index)
-                {
-                    *field.value_mut(relation) = value.trim().to_owned();
+            UiIntent::ToggleClassInSelection(id) => {
+                if !state.toggle_in_selection(id) {
+                    state.stale("class");
                 }
             }
-            UiIntent::RevealClass(index) => state.reveal_class(index),
-            UiIntent::OpenDiagram(index) => state.open_diagram(index),
-            UiIntent::ActivateTab(index) => state.activate_tab(index),
-            UiIntent::CloseTab(index) => state.close_tab(index),
+            UiIntent::SelectRelation(id) => {
+                if !state.select_relation(id) {
+                    state.stale("relationship");
+                }
+            }
+            UiIntent::RenameClass(id, name) => rename_class(state, id, &name),
+            UiIntent::SetRelationField(id, field, value) => {
+                set_relation_field(state, id, field, &value);
+            }
+            UiIntent::RevealClass(id) => {
+                if !state.reveal_class(id) {
+                    state.stale("class");
+                }
+            }
+            UiIntent::OpenDiagram(id) => {
+                if !state.open_diagram(id) {
+                    state.stale("diagram");
+                }
+            }
+            UiIntent::ActivateTab(id) => {
+                if !state.activate_tab(id) {
+                    state.stale("tab");
+                }
+            }
+            UiIntent::CloseTab(id) => {
+                if !state.close_tab(id) {
+                    state.stale("tab");
+                }
+            }
             UiIntent::SetTheme(preference) => state.theme = preference,
             UiIntent::CloseDrawer => close_drawer(state),
             UiIntent::CloseShowcase => close_showcase(state),
+            UiIntent::CreateProject(name) => {
+                if state.project.is_none() && welcome::name_error(&name).is_none() {
+                    state.open_project(ProjectSession::blank(&name));
+                }
+            }
+            UiIntent::OpenSample => {
+                if state.project.is_none() {
+                    state.open_project(ProjectSession::sample());
+                }
+            }
+            UiIntent::AnswerDialog(answer) => answer_dialog(state, answer),
         }
+    }
+}
+
+/// Renames a class as one undoable command, after checking the name again.
+fn rename_class(state: &mut ShellState, id: ElementId, name: &str) {
+    if let Some(message) = rules::class_name_error(name) {
+        state.notice = Some(message);
+    } else if !state.document().elements.contains_key(&id) {
+        state.stale("class");
+    } else if read_model::element_name(state.document(), id) != Some(name.trim()) {
+        state.execute(&Command::RenameElement {
+            element: id,
+            name: name.trim().to_owned(),
+        });
+    }
+}
+
+/// Sets one field of an association's ends as one undoable command.
+fn set_relation_field(
+    state: &mut ShellState,
+    id: RelationId,
+    field: rules::RelationField,
+    value: &str,
+) {
+    if let Some(message) = field.error(value) {
+        state.notice = Some(message);
+        return;
+    }
+    let Some(relation) = state.document().relations.get(&id).cloned() else {
+        state.stale("relationship");
+        return;
+    };
+    if field.unchanged(&relation, value) {
+        return;
+    }
+    let (source, target) = field.ends_with(&relation, value);
+    state.execute(&Command::SetEnds {
+        relation: id,
+        source,
+        target,
+    });
+}
+
+/// Applies the user's answer to the open dialog.
+fn answer_dialog(state: &mut ShellState, answer: DialogAnswer) {
+    let Some(dialog) = state.dialog.take() else {
+        return;
+    };
+    state.pending_focus = state.dialog_return.take();
+    match (dialog.kind, answer) {
+        (DialogKind::CloseProject { .. }, DialogAnswer::Confirm) => state.close_project(),
+        (DialogKind::CloseProject { .. }, DialogAnswer::Cancel) => {}
     }
 }
 
@@ -388,6 +721,9 @@ fn run(state: &mut ShellState, ctx: &egui::Context, id: CommandId) {
     }
     match id {
         CommandId::ClearSelection => state.clear_selection(),
+        CommandId::Undo => state.undo(),
+        CommandId::Redo => state.redo(),
+        CommandId::CloseProject => close_project_command(state, ctx),
         CommandId::SearchCommands => {
             if state.palette.is_none() {
                 let focused = ctx.memory(|memory| memory.focused());
@@ -404,10 +740,8 @@ fn run(state: &mut ShellState, ctx: &egui::Context, id: CommandId) {
         }
         // Select is the only tool so far, so it is always the active one.
         CommandId::SelectTool => {}
-        // Always unavailable until the project model exists (M1/M2).
-        CommandId::Undo
-        | CommandId::Redo
-        | CommandId::Save
+        // Always unavailable until later slices build them.
+        CommandId::Save
         | CommandId::Export
         | CommandId::PanTool
         | CommandId::AddClass
@@ -415,6 +749,28 @@ fn run(state: &mut ShellState, ctx: &egui::Context, id: CommandId) {
         | CommandId::AddNote
         | CommandId::Arrange
         | CommandId::NewDiagram => {}
+    }
+}
+
+/// Closes the project now, or asks first when that would lose work.
+fn close_project_command(state: &mut ShellState, ctx: &egui::Context) {
+    let Some(project) = state.project.as_ref() else {
+        return;
+    };
+    if state.dialog.is_some() {
+        return;
+    }
+    if project.has_unsaved_changes() {
+        let name = project.name().to_owned();
+        // Focus goes back to what had it before: a search that just closed
+        // names it in `pending_focus`; otherwise the focused widget.
+        state.dialog_return = state
+            .pending_focus
+            .take()
+            .or_else(|| ctx.memory(|memory| memory.focused()));
+        state.dialog = Some(DialogState::new(DialogKind::CloseProject { project: name }));
+    } else {
+        state.close_project();
     }
 }
 
@@ -470,32 +826,6 @@ fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
     }
 }
 
-/// "Customer places Order".
-pub(crate) fn relation_label(state: &ShellState, relation: &PreviewRelation) -> String {
-    let name = |class: usize| {
-        state
-            .classes
-            .get(class)
-            .map(PreviewClass::display_name)
-            .unwrap_or("?")
-    };
-    format!(
-        "{} {} {}",
-        name(relation.source),
-        relation.name,
-        name(relation.target)
-    )
-}
-
-/// Whether a panel's toggle shows as pressed.
-fn panel_shown(state: &ShellState, which: Drawer) -> bool {
-    match (state.layout, which) {
-        (LayoutMode::Docked, Drawer::Navigator) => state.panels.navigator_visible,
-        (LayoutMode::Docked, Drawer::Inspector) => state.panels.inspector_visible,
-        (LayoutMode::Narrow, _) => state.drawer == Some(which),
-    }
-}
-
 /// Draws the complete shell into `ui` and applies the user's interactions to `state`.
 pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     if state.applied_theme != Some(state.theme) {
@@ -536,19 +866,24 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     // the frame Escape is pressed, and Escape must first leave the field.
     // An open drawer takes Escape before the canvas selection does.
     let text_had_focus = state.text_had_focus;
-    if state.showcase.is_some()
+    if state.dialog.is_none()
+        && state.showcase.is_some()
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
     {
         state.queue(UiIntent::CloseShowcase);
     }
-    if state.drawer.is_some()
+    if state.dialog.is_none()
+        && state.drawer.is_some()
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
     {
         state.queue(UiIntent::CloseDrawer);
     }
-    if let Some(id) = ui.input_mut(|input| commands::take_shortcut(input, text_had_focus)) {
+    // A dialog owns the keyboard: shortcuts do nothing behind it.
+    if state.dialog.is_none()
+        && let Some(id) = ui.input_mut(|input| commands::take_shortcut(input, text_had_focus))
+    {
         state.queue(UiIntent::run(id));
     }
 
@@ -605,140 +940,11 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     drawer(ui.ctx(), state, canvas_rect, &palette);
     showcase_window(ui.ctx(), state);
     command_palette(ui.ctx(), state);
+    dialog_window(ui.ctx(), state);
     apply_intents(state, ui.ctx());
     // Only a focused text field keeps editing keys; a focused button must not
     // swallow Escape (egui_wants_keyboard_input is true for any focus).
     state.text_had_focus = ui.ctx().text_edit_focused();
-}
-
-/// A command button with its shortcut as a hover hint; disabled commands
-/// explain why.
-pub(crate) fn command_button(
-    ui: &mut egui::Ui,
-    spec: &CommandSpec,
-    context: CommandContext,
-    clicked: &mut Option<CommandId>,
-) {
-    let hint = spec
-        .shortcut
-        .map(|shortcut| format!("Shortcut: {}", ui.ctx().format_shortcut(&shortcut)));
-    let availability = commands::availability(spec.id, context);
-    if components::action_button(ui, spec.label, availability.reason(), hint.as_deref()).clicked() {
-        *clicked = Some(spec.id);
-    }
-}
-
-/// The application menu: every catalog command, grouped, with shortcuts.
-fn command_menu(ui: &mut egui::Ui, context: CommandContext, clicked: &mut Option<CommandId>) {
-    ui.menu_button("Menu", |ui| {
-        for (group, specs) in commands::menu_groups() {
-            ui.menu_button(group.label(), |ui| {
-                for spec in specs {
-                    let availability = commands::availability(spec.id, context);
-                    let mut item = Button::new(spec.label);
-                    if let Some(shortcut) = spec.shortcut {
-                        item = item.shortcut_text(ui.ctx().format_shortcut(&shortcut));
-                    }
-                    let response = ui.add_enabled(availability.is_enabled(), item);
-                    let response = match availability.reason() {
-                        Some(reason) => response.on_disabled_hover_text(reason),
-                        None => response,
-                    };
-                    if response.clicked() {
-                        *clicked = Some(spec.id);
-                        ui.close();
-                    }
-                }
-            });
-        }
-    });
-}
-
-/// Header: menu, project name, then Undo, Redo, Search, Save and Export.
-fn header(ui: &mut egui::Ui, state: &mut ShellState) {
-    let context = state.command_context();
-    let mut clicked = None;
-    ui.horizontal_centered(|ui| {
-        command_menu(ui, context, &mut clicked);
-        ui.separator();
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            // Right-to-left: add in reverse visual order, with a separator
-            // between command groups.
-            let mut previous_group = None;
-            for spec in commands::placed(Placement::Header)
-                .collect::<Vec<_>>()
-                .into_iter()
-                .rev()
-            {
-                if previous_group.is_some_and(|group| group != spec.group) {
-                    ui.separator();
-                }
-                previous_group = Some(spec.group);
-                command_button(ui, spec, context, &mut clicked);
-            }
-            ui.separator();
-            ui.allocate_ui_with_layout(
-                ui.available_size(),
-                Layout::left_to_right(Align::Center),
-                |ui| {
-                    let title = format!("{} · not saved", state.project_name);
-                    components::truncated_text(ui, &title)
-                },
-            );
-        });
-    });
-    if let Some(id) = clicked {
-        state.queue(UiIntent::run(id));
-    }
-}
-
-/// Tool row: project panel button, tools, inspector button.
-fn tool_row(ui: &mut egui::Ui, state: &mut ShellState) {
-    let context = state.command_context();
-    let mut clicked = None;
-    let mut toggle = None;
-    ui.horizontal_centered(|ui| {
-        let navigator = components::choice(
-            ui,
-            panel_shown(state, Drawer::Navigator),
-            CommandId::ToggleNavigator.spec().label,
-        );
-        if navigator.clicked() {
-            toggle = Some((CommandId::ToggleNavigator, navigator.id));
-        }
-        ui.separator();
-        // Tools come from the active diagram's notation contract.
-        for spec in notation::tool_commands(state.active_notation()).map(CommandId::spec) {
-            if spec.id == CommandId::SelectTool {
-                // The active tool shows as pressed.
-                if components::choice(ui, true, spec.label).clicked() {
-                    clicked = Some(spec.id);
-                }
-            } else {
-                command_button(ui, spec, context, &mut clicked);
-            }
-        }
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            let inspector = components::choice(
-                ui,
-                panel_shown(state, Drawer::Inspector),
-                CommandId::ToggleInspector.spec().label,
-            );
-            if inspector.clicked() {
-                toggle = Some((CommandId::ToggleInspector, inspector.id));
-            }
-        });
-    });
-    if let Some(id) = clicked {
-        state.queue(UiIntent::run(id));
-    }
-    if let Some((id, button)) = toggle {
-        // A drawer opened from its button returns focus to that button.
-        state.queue(UiIntent::Run {
-            command: id,
-            origin: Some(button),
-        });
-    }
 }
 
 /// Wraps panel contents in a vertical scroll area that assistive technology
@@ -814,425 +1020,18 @@ fn drawer(ctx: &egui::Context, state: &mut ShellState, canvas_rect: Rect, palett
     }
 }
 
-/// Command and object search. Enter runs the highlighted result, arrows move
-/// the highlight, Escape or a click outside closes it, and focus returns to
-/// where it was.
-fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
-    let Some(mut search) = state.palette.take() else {
+/// The open dialog, if any. Its answer is queued as an intent.
+fn dialog_window(ctx: &egui::Context, state: &mut ShellState) {
+    let Some(mut dialog) = state.dialog.take() else {
         return;
     };
-    let names: Vec<String> = state
-        .classes
-        .iter()
-        .map(|class| class.display_name().to_owned())
-        .collect();
-    let names: Vec<&str> = names.iter().map(String::as_str).collect();
-    let context = state.command_context();
-    let results = palette::entries(&search.query, &names);
-    let (down, up, enter) = ctx.input(|input| {
-        (
-            input.key_pressed(Key::ArrowDown),
-            input.key_pressed(Key::ArrowUp),
-            input.key_pressed(Key::Enter),
-        )
-    });
-    let entry_availability = |entry: PaletteEntry| match entry {
-        PaletteEntry::Command(id) => commands::availability(id, context),
-        PaletteEntry::Object(_) => Availability::Enabled,
-    };
-    if search.highlight_pending {
-        search.highlighted =
-            palette::first_available(&results, |entry| entry_availability(entry).is_enabled());
-        search.highlight_pending = false;
-    }
-    search.highlighted = palette::move_highlight(search.highlighted, results.len(), down, up);
-    let mut chosen = if enter {
-        results.get(search.highlighted).copied()
-    } else {
-        None
-    };
-
-    let modal = Modal::new(Id::unique("command-palette")).show(ctx, |ui| {
-        ui.set_width(480.0);
-        components::panel_title(ui, "Search commands and objects");
-        let field = components::text_field(ui, "Find a command or object", &mut search.query);
-        if !search.focused_once {
-            field.request_focus();
-            search.focused_once = true;
+    match dialogs::show(ctx, &mut dialog) {
+        Some(answer) => {
+            state.dialog = Some(dialog);
+            state.queue(UiIntent::AnswerDialog(answer));
         }
-        if field.changed() {
-            search.highlight_pending = true;
-        }
-        ui.add_space(theme::GAP);
-        if results.is_empty() {
-            ui.label("No commands or objects match.");
-        }
-        ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
-            for (index, entry) in results.iter().copied().enumerate() {
-                let availability = entry_availability(entry);
-                let mut row = Button::selectable(
-                    index == search.highlighted,
-                    palette::entry_label(entry, &names),
-                )
-                .truncate()
-                .min_size(Vec2::new(ui.available_width(), theme::ROW_HEIGHT));
-                if let PaletteEntry::Command(id) = entry
-                    && let Some(shortcut) = id.spec().shortcut
-                {
-                    row = row.shortcut_text(ctx.format_shortcut(&shortcut));
-                }
-                let response = ui.add_enabled(availability.is_enabled(), row);
-                if index == search.highlighted && (down || up) {
-                    response.scroll_to_me(None);
-                }
-                if let Some(reason) = availability.reason() {
-                    components::field_label(ui, reason);
-                }
-                if response.clicked() {
-                    chosen = Some(entry);
-                }
-            }
-        });
-    });
-
-    let close_requested = modal.should_close();
-    let ran = match chosen {
-        Some(entry) if !entry_availability(entry).is_enabled() => false,
-        Some(PaletteEntry::Command(id)) => {
-            state.queue(UiIntent::run(id));
-            true
-        }
-        Some(PaletteEntry::Object(index)) => {
-            state.queue(UiIntent::RevealClass(index));
-            true
-        }
-        None => false,
-    };
-    if ran || close_requested {
-        state.pending_focus = search.restore_focus;
-        ctx.request_repaint();
-    } else {
-        state.palette = Some(search);
+        None => state.dialog = Some(dialog),
     }
-}
-
-/// Project panel: search, the project's diagrams (views) and its model
-/// elements, with distinct "nothing yet" and "no match" states.
-fn sidebar(ui: &mut egui::Ui, state: &mut ShellState) {
-    components::panel_title(ui, "Project");
-    components::text_field(ui, "Search project", &mut state.navigator_search);
-    let query = state.navigator_search.clone();
-    let searching = !query.trim().is_empty();
-
-    ui.add_space(theme::SPACING);
-    components::field_label(ui, "Diagrams (views of the model)");
-    let diagram_hits: Vec<usize> = (0..state.diagrams.len())
-        .filter(|&index| navigator::matches(&query, &state.diagrams[index].name))
-        .collect();
-    if state.diagrams.is_empty() {
-        ui.label("No diagrams yet.");
-    } else if diagram_hits.is_empty() {
-        ui.label(format!("No diagrams match \"{}\".", query.trim()));
-    }
-    let active = state.active_diagram();
-    let mut open = None;
-    ui.indent("diagrams", |ui| {
-        for index in diagram_hits {
-            let name = &state.diagrams[index].name;
-            let row = components::list_row(ui, active == Some(index), name)
-                .on_hover_text("Open this diagram in a tab");
-            if row.clicked() {
-                open = Some(index);
-            }
-        }
-    });
-    if let Some(index) = open {
-        state.queue(UiIntent::OpenDiagram(index));
-    }
-
-    ui.add_space(theme::SPACING);
-    components::field_label(ui, "Model (shared by all diagrams)");
-    let class_hits: Vec<usize> = (0..state.classes.len())
-        .filter(|&index| navigator::matches(&query, state.classes[index].display_name()))
-        .collect();
-    if state.classes.is_empty() {
-        ui.label("No classes yet. Classes appear here when you add them to a diagram.");
-    } else if class_hits.is_empty() {
-        ui.label(format!("No classes match \"{}\".", query.trim()));
-    }
-    let mut reveal = None;
-    let mut toggle = None;
-    let chosen = state.selected_classes();
-    let adding = ui.input(|input| input.modifiers.command);
-    ui.indent("model", |ui| {
-        for index in class_hits {
-            let label = state.classes[index].display_name().to_owned();
-            let row =
-                components::list_row(ui, chosen.contains(&index), &label).on_hover_text(format!(
-                    "{}. Ctrl+click or Ctrl+Enter adds it to the selection.",
-                    navigator::shown_in(&state.diagrams, index)
-                ));
-            if row.clicked() {
-                if adding {
-                    toggle = Some(index);
-                } else {
-                    reveal = Some(index);
-                }
-            }
-        }
-    });
-    components::field_label(ui, "Relationships");
-    let relation_hits: Vec<(usize, String)> = state
-        .relations
-        .iter()
-        .enumerate()
-        .map(|(index, relation)| (index, relation_label(state, relation)))
-        .filter(|(_, label)| navigator::matches(&query, label))
-        .collect();
-    if state.relations.is_empty() {
-        ui.label("No relationships yet.");
-    } else if relation_hits.is_empty() {
-        ui.label(format!("No relationships match \"{}\".", query.trim()));
-    }
-    let mut relation = None;
-    ui.indent("relationships", |ui| {
-        for (index, label) in relation_hits {
-            if components::list_row(ui, state.selected_relation == Some(index), &label).clicked() {
-                relation = Some(index);
-            }
-        }
-    });
-    if let Some(index) = toggle {
-        state.queue(UiIntent::ToggleClassInSelection(index));
-    }
-    if let Some(index) = relation {
-        state.queue(UiIntent::SelectRelation(index));
-    }
-    if searching {
-        ui.add_space(theme::GAP);
-        if components::action_button(ui, "Clear search", None, None).clicked() {
-            state.navigator_search.clear();
-        }
-    }
-    if let Some(index) = reveal {
-        state.queue(UiIntent::RevealClass(index));
-    }
-}
-
-/// A text field bound to a draft. Enter or moving focus away commits a valid
-/// draft; Escape cancels it; an invalid draft stays with its error.
-fn draft_field(
-    ui: &mut egui::Ui,
-    drafts: &mut std::collections::BTreeMap<DraftKey, String>,
-    key: DraftKey,
-    label: &str,
-    committed: &str,
-    error_of: impl Fn(&str) -> Option<String>,
-) -> DraftOutcome {
-    let editing = drafts.contains_key(&key);
-    let mut text = drafts
-        .get(&key)
-        .cloned()
-        .unwrap_or_else(|| committed.to_owned());
-    let error = if editing { error_of(&text) } else { None };
-    let response = match &error {
-        Some(message) => components::text_field_with_error(ui, label, &mut text, message),
-        None => components::text_field(ui, label, &mut text),
-    };
-    if response.changed() {
-        drafts.insert(key, text);
-    }
-    if editing && response.has_focus() {
-        components::field_label(ui, "Enter applies the change. Escape cancels it.");
-    }
-    if !response.lost_focus() {
-        return DraftOutcome::Editing;
-    }
-    if ui.input(|input| input.key_pressed(Key::Escape)) {
-        drafts.remove(&key);
-        return DraftOutcome::Cancel;
-    }
-    match drafts.get(&key).cloned() {
-        Some(draft) if error_of(&draft).is_none() => {
-            drafts.remove(&key);
-            if draft == committed {
-                DraftOutcome::Editing
-            } else {
-                DraftOutcome::Commit(draft)
-            }
-        }
-        _ => DraftOutcome::Editing,
-    }
-}
-
-/// A disclosure button for a collapsed inspector section.
-fn section_toggle(ui: &mut egui::Ui, open: &mut bool, title: &str) {
-    if components::choice(ui, *open, title).clicked() {
-        *open = !*open;
-    }
-}
-
-/// The view-only sections shared by single and multiple selections.
-fn appearance_and_advanced(ui: &mut egui::Ui, state: &mut ShellState, mixed: bool) {
-    ui.add_space(theme::SPACING);
-    let (mut appearance, mut advanced) = state.inspector_sections;
-    section_toggle(ui, &mut appearance, "Appearance (this view only)");
-    if appearance {
-        let value = if mixed { "Mixed" } else { "Default" };
-        components::field_label(ui, &format!("Fill and border: {value}"));
-        let _ = components::action_button(
-            ui,
-            "Change appearance",
-            Some("Not available yet: view styles arrive with the project model."),
-            None,
-        );
-    }
-    section_toggle(ui, &mut advanced, "Advanced");
-    if advanced {
-        components::field_label(
-            ui,
-            "Stereotypes, visibility and documentation arrive with the project model.",
-        );
-    }
-    state.inspector_sections = (appearance, advanced);
-}
-
-/// Contextual inspector: nothing selected, one class, several classes, or a
-/// relationship. Edits are drafts committed through intents.
-fn inspector(ui: &mut egui::Ui, state: &mut ShellState) {
-    components::panel_title(ui, "Selection");
-    if let Some(relation) = state.selected_relation {
-        relation_inspector(ui, state, relation);
-        return;
-    }
-    let selected = state.selected_classes();
-    match selected.as_slice() {
-        [] => {
-            ui.label("Nothing selected. Select a class on the canvas or in the Model list.");
-            if let Some(diagram) = state.active_diagram().and_then(|d| state.diagrams.get(d)) {
-                ui.add_space(theme::SPACING);
-                components::field_label(ui, "Diagram");
-                ui.label(&diagram.name);
-                components::field_label(ui, &format!("{} classes shown", diagram.classes.len()));
-            }
-            components::field_label(ui, "Tip: Ctrl+click adds classes to the selection.");
-        }
-        [index] => class_inspector(ui, state, *index),
-        several => {
-            let names: Vec<&str> = several
-                .iter()
-                .filter_map(|&index| state.classes.get(index))
-                .map(PreviewClass::display_name)
-                .collect();
-            components::field_label(ui, &format!("{} classes selected", several.len()));
-            ui.label(format!("Names (mixed): {}", names.join(", ")));
-            ui.label(
-                "Select one class to rename it. Edits never apply to several classes silently.",
-            );
-            appearance_and_advanced(ui, state, true);
-        }
-    }
-}
-
-fn class_inspector(ui: &mut egui::Ui, state: &mut ShellState, index: usize) {
-    let Some(class) = state.classes.get(index).cloned() else {
-        return;
-    };
-    components::field_label(ui, "Model: changes apply in every diagram");
-    let outcome = draft_field(
-        ui,
-        &mut state.drafts,
-        DraftKey::ClassName(index),
-        "Name",
-        &class.name,
-        rules::class_name_error,
-    );
-    if let DraftOutcome::Commit(name) = outcome {
-        state.queue(UiIntent::RenameClass(index, name));
-    }
-    if class.name.trim().is_empty() {
-        components::warning_text(ui, BLANK_NAME_WARNING);
-    }
-    // Model versus view: renaming changes the class in every diagram.
-    components::field_label(ui, &navigator::shown_in(&state.diagrams, index));
-
-    // Sections come from the active diagram's notation contract.
-    let sections = notation::notation(state.active_notation()).element_sections;
-    if sections.contains(&InspectorSection::Members) {
-        members(ui, &class);
-    }
-    if sections.contains(&InspectorSection::Appearance)
-        || sections.contains(&InspectorSection::Advanced)
-    {
-        appearance_and_advanced(ui, state, false);
-    }
-}
-
-/// Attributes and operations of a class, with the unavailable Add buttons.
-fn members(ui: &mut egui::Ui, class: &PreviewClass) {
-    ui.add_space(theme::SPACING);
-    components::field_label(ui, "Attributes");
-    if class.attributes.is_empty() {
-        ui.label("No attributes.");
-    }
-    for attribute in &class.attributes {
-        components::code_text(ui, attribute);
-    }
-    components::field_label(ui, "Operations");
-    ui.label("No operations.");
-    ui.horizontal_wrapped(|ui| {
-        for label in ["Add attribute", "Add operation"] {
-            let _ = components::action_button(
-                ui,
-                label,
-                Some("Not available yet: members need the project model."),
-                None,
-            );
-        }
-    });
-}
-
-fn relation_inspector(ui: &mut egui::Ui, state: &mut ShellState, index: usize) {
-    let Some(relation) = state.relations.get(index).cloned() else {
-        return;
-    };
-    let name_of = |class: usize| {
-        state
-            .classes
-            .get(class)
-            .map(|class| class.display_name().to_owned())
-            .unwrap_or_default()
-    };
-    let (source, target) = (name_of(relation.source), name_of(relation.target));
-    components::field_label(ui, "Relationship (model)");
-    ui.label(format!("From {source} to {target}"));
-    let fields = [
-        (RelationField::Name, String::from("Relationship name")),
-        (RelationField::SourceRole, format!("Role at {source}")),
-        (
-            RelationField::SourceMultiplicity,
-            format!("Multiplicity at {source}"),
-        ),
-        (RelationField::TargetRole, format!("Role at {target}")),
-        (
-            RelationField::TargetMultiplicity,
-            format!("Multiplicity at {target}"),
-        ),
-    ];
-    for (field, label) in fields {
-        let outcome = draft_field(
-            ui,
-            &mut state.drafts,
-            DraftKey::Relation(index, field),
-            &label,
-            field.value(&relation),
-            |value| field.error(value),
-        );
-        if let DraftOutcome::Commit(value) = outcome {
-            state.queue(UiIntent::SetRelationField(index, field, value));
-        }
-    }
-    appearance_and_advanced(ui, state, false);
 }
 
 /// eframe application wrapper around [`ShellState`]; starts on the welcome screen.

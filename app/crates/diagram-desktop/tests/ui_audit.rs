@@ -8,7 +8,12 @@
 mod common;
 use std::collections::HashSet;
 
-use common::harness_with;
+use common::{class_id, harness_with};
+
+fn select_named(state: &mut ShellState, name: &str) {
+    let element = class_id(state, name);
+    state.select(element);
+}
 use diagram_desktop::shell::ShellState;
 use eframe::egui::accesskit::{Action, Rect, Role};
 use eframe::egui::{
@@ -244,7 +249,7 @@ fn new_project_form_should_pass_the_audit() {
 #[test]
 fn docked_workspace_should_pass_the_audit() {
     let mut state = ShellState::default();
-    state.select(0);
+    select_named(&mut state, "Customer");
     let mut harness = harness_with(LARGE, state);
     let mut findings = audit_layout("docked workspace", &harness, LARGE, false);
     findings.extend(audit_tab_order(
@@ -259,7 +264,7 @@ fn docked_workspace_should_pass_the_audit() {
 #[test]
 fn narrow_workspace_and_drawers_should_pass_the_audit() {
     let mut state = ShellState::default();
-    state.select(1);
+    select_named(&mut state, "Order");
     let mut harness = harness_with(SMALL, state);
     let mut findings = audit_layout("narrow workspace", &harness, SMALL, false);
     for toggle in ["Inspector", "Project panel"] {
@@ -297,18 +302,9 @@ fn project_panel_states_should_pass_the_audit() {
 
 #[test]
 fn overflowing_tabs_should_pass_the_audit() {
-    use diagram_desktop::ui::navigator::{Diagram, OpenTab};
-    let mut state = ShellState::default();
-    state.diagrams = (1..=8)
-        .map(|number| Diagram::new(&format!("Customer overview part {number}"), &[0, 1]))
-        .collect();
-    state.tabs = (0..8)
-        .map(|diagram| OpenTab {
-            diagram,
-            selected: None,
-        })
-        .collect();
-    state.active_tab = Some(6);
+    let mut state = common::state_with_many_diagrams(8);
+    let seventh = common::diagram_id(&state, "Customer overview part 7");
+    state.activate_tab(seventh);
     for size in [SMALL, LARGE] {
         let mut harness = harness_with(size, state.clone());
         let mut findings = audit_layout("overflowing tabs", &harness, size, false);
@@ -329,9 +325,11 @@ fn inspector_states_should_pass_the_audit() {
 
         // Relationship selected.
         let mut state = ShellState::default();
-        state.select_relation(0);
+        if let Some(relation) = state.document().relations.keys().next().copied() {
+            state.select_relation(relation);
+        }
         let mut harness = harness_with(size, state);
-        if harness.query_by_label("Relationship name").is_none() {
+        if harness.query_by_label("Role at Customer").is_none() {
             harness.get_by_label("Inspector").click();
             harness.run();
         }
@@ -350,8 +348,9 @@ fn inspector_states_should_pass_the_audit() {
 
         // Two classes selected.
         let mut state = ShellState::default();
-        state.select(0);
-        state.toggle_in_selection(1);
+        select_named(&mut state, "Customer");
+        let order = class_id(&state, "Order");
+        state.toggle_in_selection(order);
         let mut harness = harness_with(size, state);
         if harness
             .query_by_label("Appearance (this view only)")
@@ -364,7 +363,7 @@ fn inspector_states_should_pass_the_audit() {
 
         // Invalid draft with every section open.
         let mut state = ShellState::default();
-        state.select(0);
+        select_named(&mut state, "Customer");
         state.inspector_sections = (true, true);
         let mut harness = harness_with(size, state);
         if harness.query_by_label("Name").is_none() {
@@ -470,4 +469,62 @@ fn audit_should_see_every_screen_s_controls() {
     assert!(count(&welcome) >= 12, "{}", count(&welcome));
     // Workspace: menu, 5 header, 2 tab row, 8 tool row, rows, canvas, classes, theme.
     assert!(count(&workspace) >= 22, "{}", count(&workspace));
+}
+
+#[test]
+fn close_project_dialog_should_pass_the_audit() {
+    use diagram_desktop::ui::commands::CommandId;
+    use diagram_desktop::ui::intents::UiIntent;
+    for size in [LARGE, SMALL] {
+        let state = ShellState::default();
+        let customer = class_id(&state, "Customer");
+        let mut harness = harness_with(size, state);
+        harness
+            .state_mut()
+            .queue(UiIntent::RenameClass(customer, String::from("Client")));
+        harness.run();
+        harness
+            .state_mut()
+            .queue(UiIntent::run(CommandId::CloseProject));
+        harness.run();
+
+        assert!(harness.state().has_dialog());
+        // A modal covers part of the canvas by design; check it with the
+        // canvas boxes left out, as for the drawers.
+        let findings: Vec<String> = audit_layout("close-project dialog", &harness, size, false)
+            .into_iter()
+            .filter(|finding| !finding.contains("\"Class "))
+            .collect();
+        report(findings);
+    }
+}
+
+#[test]
+fn generalization_inspector_should_pass_the_audit() {
+    use diagram_core::notation::RelationKind;
+    for size in [LARGE, SMALL] {
+        let mut state = common::state_with_generalization();
+        let relation = state
+            .document()
+            .relations
+            .values()
+            .find(|relation| relation.kind == RelationKind::Generalization)
+            .map(|relation| relation.id);
+        assert!(relation.is_some(), "the fixture has a generalization");
+        if let Some(relation) = relation {
+            state.select_relation(relation);
+        }
+        let mut harness = harness_with(size, state);
+        if harness.query_by_label("Kind: generalization").is_none() {
+            harness.get_by_label("Inspector").click();
+            harness.run();
+        }
+        harness.get_by_label("Kind: generalization");
+        // A drawer covers part of the canvas by design: leave the boxes out.
+        let findings: Vec<String> = audit_layout("generalization inspector", &harness, size, false)
+            .into_iter()
+            .filter(|finding| !finding.contains("\"Class ") && !finding.contains("Diagram canvas"))
+            .collect();
+        report(findings);
+    }
 }

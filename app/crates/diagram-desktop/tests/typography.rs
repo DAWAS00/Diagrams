@@ -2,7 +2,7 @@
 //! inside the window at the supported sizes.
 
 mod common;
-use common::harness_with;
+use common::{class_id, harness_with, sample_with_renamed};
 use diagram_desktop::shell::ShellState;
 use diagram_desktop::ui::components;
 use diagram_desktop::ui::theme::{self, TextRole};
@@ -135,9 +135,9 @@ fn chrome_should_fit_without_overlap_at_every_supported_size() {
 #[test]
 fn long_class_name_should_not_push_controls_out_of_the_window() {
     for (width, height) in SUPPORTED_SIZES {
-        let mut state = ShellState::default();
-        state.classes[0].name = String::from(LONG_NAME);
-        state.select(0);
+        let mut state = sample_with_renamed("Customer", LONG_NAME);
+        let long = class_id(&state, LONG_NAME);
+        state.select(long);
         let mut harness = harness_with((width, height), state);
         show_panel(&mut harness, "Inspector");
 
@@ -159,9 +159,9 @@ fn long_class_name_should_not_push_controls_out_of_the_window() {
 
 #[test]
 fn long_class_name_should_stay_complete_in_the_accessibility_tree() {
-    let mut state = ShellState::default();
-    state.classes[0].name = String::from(LONG_NAME);
-    state.select(0);
+    let mut state = sample_with_renamed("Customer", LONG_NAME);
+    let long = class_id(&state, LONG_NAME);
+    state.select(long);
     let mut harness = harness_with((800.0, 500.0), state);
     show_panel(&mut harness, "Inspector");
 
@@ -174,9 +174,9 @@ fn long_class_name_should_stay_complete_in_the_accessibility_tree() {
 
 #[test]
 fn truncated_status_should_keep_the_full_name_for_screen_readers() {
-    let mut state = ShellState::default();
-    state.classes[0].name = String::from(LONG_NAME);
-    state.select(0);
+    let mut state = sample_with_renamed("Customer", LONG_NAME);
+    let long = class_id(&state, LONG_NAME);
+    state.select(long);
     let harness = harness_with((800.0, 500.0), state);
 
     let status = harness.get_by_label_contains("Selected: ");
@@ -189,8 +189,7 @@ fn truncated_status_should_keep_the_full_name_for_screen_readers() {
 
 #[test]
 fn list_rows_should_stay_on_one_line_in_the_narrowest_sidebar() {
-    let mut state = ShellState::default();
-    state.classes[0].name = String::from(LONG_NAME);
+    let state = sample_with_renamed("Customer", LONG_NAME);
     let mut harness = harness_with((800.0, 500.0), state);
     show_panel(&mut harness, "Project panel");
 

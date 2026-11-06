@@ -8,6 +8,7 @@
 use std::error::Error;
 use std::io::{self, Write};
 
+pub mod session;
 pub mod shell;
 pub mod ui;
 
