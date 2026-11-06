@@ -2,7 +2,7 @@
 //!
 //! The window reads the open project's real [`Document`] through
 //! [`crate::ui::read_model`] and changes it only by executing `diagram-core`
-//! commands in the coordinator ([`apply_intents`]). Selection and open tabs
+//! commands in the coordinator (`apply_intents`). Selection and open tabs
 //! name records by typed ID, never by list position, so an ID that no longer
 //! exists is ignored with a message instead of selecting the wrong record.
 

@@ -739,6 +739,7 @@ dependencies = [
  "diagram-core",
  "rusqlite",
  "tempfile",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
