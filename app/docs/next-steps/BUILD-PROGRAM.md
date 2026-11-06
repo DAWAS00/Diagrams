@@ -13,7 +13,7 @@ Each slice has its own branch off up-to-date `main` and its own pull request. S1
 | S10 | `feat/p5-storage-core` | In `diagram-storage`, no UI: schema v1, DTOs, save (temporary file, check, replace), load, recovery. Early on purpose, once S3 is merged. | R1-05, R1-06, R3-03 (storage half) |
 | S4 | `feat/p2-member-core` | In `diagram-core`: `member_text.rs` parser, an `UpdateMember` command and operation parameters. | R2-04 (core half) |
 | S5 | `feat/p2-class-tool` | The Class tool creates a class and starts naming it. The duplicate-name dialog in `ui/dialogs.rs` (D2). | R2-04, UI-14, UI-09 (duplicate-name dialog only) |
-| S6 | `feat/p2-inspector-members` | `ui/members.rs` (add, edit, delete, reorder) and `ui/context_menu.rs`. | R2-04, UI-14 |
+| S6 | `feat/p2-inspector-members` | `ui/members.rs` (add, edit, delete, reorder) and `ui/context_menu.rs`. Member drafts carry the document revision they were opened at and refuse to commit against a newer one (IDs come back after Undo, see S4's plan). Members that `member_text::edit_text` cannot represent are edited through separate fields. | R2-04, UI-14 |
 | S7 | `feat/p3-scene-gesture` | In `diagram-canvas`: `scene.rs`, picking and `gesture.rs`. Pure code with tests. | R2-01, R2-02 |
 | S8 | `feat/p3-drag-relations` | Drag to move with connectors following and one undo per drag. Association and generalization tools with Parent and Child labels (D1). Undo and Redo labels. | R2-05, R2-07, UI-15 |
 | S9 | `feat/p4-reuse-delete` | New diagram, Show in diagram, Duplicate model, Remove from diagram versus Delete from project with the impact count. | R2-06, UI-09 (remove versus delete dialog) |
@@ -32,8 +32,9 @@ This is slice progress (which pull requests are merged), not task status; task s
 | S2 `refactor/p0-split-shell` | Merged (PR #13) | [p0-split-shell](../ui/p0-split-shell/) |
 | S3 `feat/p1-session-binding` | Merged (PR #14) | [p1-session-binding](../ui/p1-session-binding/) |
 | S10 `feat/p5-storage-core` | Merged (PR #15); Codex approved in round 5 | `diagram-storage/tests/` |
-| B1 `fix/canvas-dark-ink` | Fixed on its branch, with all gates and the real-window check passing; pull request next | [B1-CANVAS-DARK-INK.md](../ui/B1-CANVAS-DARK-INK.md) |
-| S4, S5, S6, S7, S8, S9, S11, S12, S13 | Not started, in that order | — |
+| B1 `fix/canvas-dark-ink` | Merged (PR #16) | [B1-CANVAS-DARK-INK.md](../ui/B1-CANVAS-DARK-INK.md) |
+| S4 `feat/p2-member-core` | Built on its branch: `member_text` parser and edit line, `AddMember` and `UpdateMember`; in review | [SLICE-p2-member-core.md](SLICE-p2-member-core.md) |
+| S5, S6, S7, S8, S9, S11, S12, S13 | Not started, in that order | — |
 
 **What a user can do today** (on `main`): start a blank or sample project; select classes and relationships; rename a class; edit role names and multiplicities, with errors in words; Undo and Redo (Ctrl+Z, Ctrl+Shift+Z) with a status sentence; open several diagram tabs; search commands and objects (Ctrl+K); close a project, with a prompt when changes would be lost; and switch between light and dark.
 

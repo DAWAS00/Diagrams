@@ -6,6 +6,8 @@
 //! - [`validate`]: typed domain errors and whole-document checks,
 //!   including generalization cycles (R1-02).
 //! - [`command`]: atomic, reversible commands with labels (R1-03).
+//! - [`member_text`]: one member typed as one line, and the exact line to
+//!   edit an existing member (R2-04).
 //! - [`history`]: undo, redo, revisions and saved-state identity (R1-04).
 //! - [`notation`]: what each diagram notation offers (UI-11).
 //!
@@ -17,6 +19,7 @@ pub mod command;
 pub mod geometry;
 pub mod history;
 pub mod ids;
+pub mod member_text;
 pub mod model;
 pub mod notation;
 mod project_name;

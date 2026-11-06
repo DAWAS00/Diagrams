@@ -153,9 +153,13 @@ Fixed the three failures from the 2026-11-06 hand test:
 
 Each fix has a test proven to fail without it. Evidence and screenshots: [B1-CANVAS-DARK-INK.md](B1-CANVAS-DARK-INK.md).
 
+### Slice S4 — members typed as one line (core only)
+
+`diagram-core` now reads a member typed as one line, such as `- total: Money [0..1]` or `place(id: OrderId, lines: List<Line>): Order`. It refuses malformed lines with a reason in words. Two new commands, `AddMember` and `UpdateMember`, add and edit members this way, and operations can have parameters. `member_text::edit_text` gives the exact line to edit an existing member, or none when no line would read back exactly. The window does not change yet: the inspector uses this in S6. Plan: [SLICE-p2-member-core.md](../next-steps/SLICE-p2-member-core.md).
+
 ## What is next
 The order is set in [BUILD-PROGRAM.md](../next-steps/BUILD-PROGRAM.md):
-1. **S4 to S9:** member parser, Class tool, member editing, canvas gestures, drag and connect, reuse and delete.
+1. **S5 to S9:** Class tool, member editing, canvas gestures, drag and connect, reuse and delete.
 2. **S11, S12 and S13:** Save and Open in the window, pan, zoom and SVG export, then the keyboard journey and the final acceptance test.
 3. **In parallel (needs a Windows desktop):** the R0-04 text and accessibility matrix (Arabic and mixed text, IME, Narrator/NVDA, 100/150/200% scaling), then the R0-05 framework decision.
 
