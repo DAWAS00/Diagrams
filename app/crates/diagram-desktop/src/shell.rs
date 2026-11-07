@@ -821,7 +821,8 @@ fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
         });
     state.showcase = Some(fixture);
     if close {
-        close_showcase(state);
+        // Closing goes through the coordinator like every other change.
+        state.queue(UiIntent::CloseShowcase);
     }
 }
 
