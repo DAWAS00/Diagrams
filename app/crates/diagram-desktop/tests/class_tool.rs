@@ -941,20 +941,44 @@ fn a_long_name_should_stay_on_one_line_in_the_field() {
 #[test]
 fn escape_in_command_search_should_not_change_the_tool() {
     let mut harness = harness_with(common::LARGE, ShellState::default());
+    common::select_class(&mut harness, "Customer");
+    harness.run();
+    let customer = class_id(harness.state(), "Customer");
     choose_class_tool(&mut harness);
-    harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
+
+    // Escape in the search field: search closes, focus returns to its opener.
+    harness.get_by_label("Search").focus();
+    harness.run();
+    harness.key_press(Key::Enter);
     harness.run();
     assert!(harness.state().palette.is_some());
-    harness.key_press(Key::Tab);
-    harness.run();
-
     harness.key_press(Key::Escape);
     harness.run();
+    assert!(harness.state().palette.is_none(), "search closed");
+    assert!(
+        harness.get_by_label("Search").is_focused(),
+        "focus on the opener"
+    );
+    assert_eq!(harness.state().active_tool(), Tool::Class);
+    assert_eq!(harness.state().selected_element(), Some(customer));
 
+    // Escape on a focused result: the same, nothing behind search reacts.
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
+    harness.run();
+    harness.key_press(Key::Tab);
+    harness.run();
+    harness.key_press(Key::Escape);
+    harness.run();
+    assert!(harness.state().palette.is_none(), "search closed");
     assert_eq!(
         harness.state().active_tool(),
         Tool::Class,
         "search took Escape"
+    );
+    assert_eq!(
+        harness.state().selected_element(),
+        Some(customer),
+        "selection kept"
     );
 }
 
