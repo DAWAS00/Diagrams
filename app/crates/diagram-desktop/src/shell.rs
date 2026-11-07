@@ -170,7 +170,7 @@ impl ShellState {
         self.navigator_search.clear();
         self.notice = None;
         self.dialog = None;
-        self.class_tool = ClassTool::default();
+        self.class_tool.reset();
         self.entry = None;
         let first = project.document().diagram_order.first().copied();
         self.project = Some(project);
@@ -189,7 +189,7 @@ impl ShellState {
         self.active_tab = None;
         self.notice = None;
         self.dialog = None;
-        self.class_tool = ClassTool::default();
+        self.class_tool.reset();
         self.palette = None;
         self.showcase = None;
         self.drawer = None;

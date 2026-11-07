@@ -93,21 +93,38 @@ pub fn text(kind: &DialogKind) -> DialogText {
             alternative: None,
             alternative_disabled: None,
         },
-        DialogKind::DuplicateClassName { name, existing, .. } => DialogText {
-            title: "A class with this name exists",
-            body: format!(
-                "A class named \"{name}\" already exists in this project. Show that class \
+        DialogKind::DuplicateClassName { name, existing, .. } => {
+            let name = shortened(name);
+            DialogText {
+                title: "A class with this name exists",
+                body: format!(
+                    "A class named \"{name}\" already exists in this project. Show that class \
                  here, so both diagrams share it, or keep a new, separate class with the same \
                  name."
-            ),
-            confirm: "Keep a new class",
-            cancel: "Cancel",
-            alternative: Some("Show the existing class here"),
-            alternative_disabled: existing
-                .is_none()
-                .then(|| format!("Every class named \"{name}\" is already in this diagram.")),
-        },
+                ),
+                confirm: "Keep a new class",
+                cancel: "Cancel",
+                alternative: Some("Show the existing class here"),
+                alternative_disabled: existing
+                    .is_none()
+                    .then(|| format!("Every class named \"{name}\" is already in this diagram.")),
+            }
+        }
     }
+}
+
+/// Longest class name a dialog shows in full; longer ones end in "…" so the
+/// dialog's buttons stay in the window.
+pub const DIALOG_NAME_CHARS: usize = 40;
+
+/// `name` cut to [`DIALOG_NAME_CHARS`] characters, ending in "…" when cut.
+pub fn shortened(name: &str) -> String {
+    if name.chars().count() <= DIALOG_NAME_CHARS {
+        return name.to_owned();
+    }
+    let mut short: String = name.chars().take(DIALOG_NAME_CHARS - 1).collect();
+    short.push('…');
+    short
 }
 
 /// Draws `dialog` and returns the user's answer, if they gave one this frame.

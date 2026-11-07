@@ -42,6 +42,11 @@ pub fn new_class_field() -> Id {
     Id::unique(NEW_CLASS_FIELD)
 }
 
+/// The egui ID of the naming panel's click blocker.
+fn field_panel_id() -> Id {
+    Id::unique("new-class-panel")
+}
+
 /// The active canvas tool.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum Tool {
@@ -203,6 +208,14 @@ impl ClassTool {
         if let Some(placement) = self.placement.as_mut().filter(|p| p.id == id) {
             placement.phase = phase;
         }
+    }
+
+    /// Back to Select with no placement, as for a newly opened project. The
+    /// ID counter keeps counting, so a late request from the previous
+    /// project never matches a new placement.
+    pub(crate) fn reset(&mut self) {
+        self.tool = Tool::Select;
+        self.placement = None;
     }
 
     /// Ends the placement, returning it.
@@ -379,6 +392,9 @@ pub(crate) fn naming_panel(
         Stroke::new(1.5, palette.accent),
         StrokeKind::Inside,
     );
+    // The whole panel takes clicks, so its padding never reaches the canvas
+    // or a class box under it. Its widgets are added after, so they win.
+    let _blocker = ui.interact(panel, field_panel_id(), egui::Sense::click());
     let field = new_class_field();
     let response = ui
         .scope_builder(
@@ -406,7 +422,8 @@ pub(crate) fn naming_panel(
     }
     if ui.input(|input| input.key_pressed(Key::Escape)) {
         state.queue(UiIntent::CancelNewClass(placement.id));
-    } else if error.is_some() {
+    } else if rules::class_name_error(&text).is_some() {
+        // Checked on the text as edited this frame, not the frame's start.
         // The field keeps focus while its error shows.
         response.request_focus();
     } else {

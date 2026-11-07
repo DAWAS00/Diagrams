@@ -156,7 +156,7 @@ fn show_here_should_share_the_class_at_its_drawn_size() -> Result<(), String> {
 }
 
 #[test]
-fn show_here_near_the_bottom_should_move_a_tall_class_up_to_fit() {
+fn show_here_near_the_bottom_should_move_a_tall_class_up_to_fit() -> Result<(), String> {
     let harness = harness_with(common::LARGE, ShellState::default());
     let canvas = harness.get_by_label("Diagram canvas").rect();
     drop(harness);
@@ -168,12 +168,13 @@ fn show_here_near_the_bottom_should_move_a_tall_class_up_to_fit() {
     harness.run();
 
     let Some(bounds) = view(&harness, details, customer) else {
-        return;
+        return Err(String::from("missing: view(&harness, details, customer)"));
     };
     assert!(
         bounds.top() + bounds.size().height() <= f64::from(canvas.height()) + 0.5,
         "{bounds:?} fits in {canvas:?}"
     );
+    Ok(())
 }
 
 #[test]
@@ -294,4 +295,45 @@ fn names_should_match_trimmed_and_case_sensitively() {
     let harness = asking("customer");
     assert!(!harness.state().has_dialog());
     assert_eq!(named(&harness, "customer").len(), 1);
+}
+
+#[test]
+fn shortened_should_cut_long_names_with_an_ellipsis() {
+    assert_eq!(dialogs::shortened("Customer"), "Customer");
+    let long = "N".repeat(dialogs::DIALOG_NAME_CHARS + 10);
+    let short = dialogs::shortened(&long);
+    assert_eq!(short.chars().count(), dialogs::DIALOG_NAME_CHARS);
+    assert!(short.ends_with('…'));
+    let exact = "E".repeat(dialogs::DIALOG_NAME_CHARS);
+    assert_eq!(dialogs::shortened(&exact), exact);
+}
+
+#[test]
+fn a_long_duplicate_name_should_keep_the_buttons_in_a_small_window() {
+    let long = "Very long name".repeat(60).replace("nameVery", "name Very");
+    let state = common::sample_with_renamed("Customer", &long);
+    let mut harness = harness_with((800.0, 500.0), state);
+    choose_class_tool(&mut harness);
+    click_canvas_at(&mut harness, 100.0, 200.0);
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::A);
+    harness.get_by_label(NEW_CLASS_LABEL).type_text(&long);
+    harness.run();
+    harness.key_press(Key::Enter);
+    harness.run();
+
+    assert!(harness.state().has_dialog());
+    let body = harness
+        .get_by_label_contains("already exists in this project")
+        .rect();
+    assert!(
+        body.min.y >= 0.0 && body.max.x <= 800.0 && body.max.y <= 500.0,
+        "body: {body:?}"
+    );
+    for label in ["Cancel", SHOW_HERE, KEEP_NEW] {
+        let rect = harness.get_by_label(label).rect();
+        assert!(
+            rect.max.y <= 500.0 && rect.max.x <= 800.0,
+            "{label}: {rect:?}"
+        );
+    }
 }

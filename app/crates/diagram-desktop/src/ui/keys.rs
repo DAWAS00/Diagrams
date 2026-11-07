@@ -37,8 +37,11 @@ pub(crate) fn route_keys(ui: &mut egui::Ui, state: &mut ShellState) {
         .placement()
         .filter(|placement| placement.phase == Phase::Naming)
         .map(|placement| placement.id);
+    // Command search is a modal of its own: it takes Escape first.
+    let search_open = state.palette.is_some();
     if let Some(placement) = naming
         && !state.has_dialog()
+        && !search_open
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
     {
@@ -48,6 +51,7 @@ pub(crate) fn route_keys(ui: &mut egui::Ui, state: &mut ShellState) {
     if state.active_tool() == Tool::Class
         && state.placement().is_none()
         && !state.has_dialog()
+        && !search_open
         && !text_had_focus
         && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
     {

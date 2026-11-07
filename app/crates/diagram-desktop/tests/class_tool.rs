@@ -341,7 +341,7 @@ fn class_should_be_disabled_with_its_reason_when_no_diagram_is_open() {
 }
 
 #[test]
-fn clicking_the_canvas_should_place_and_name_a_class_in_one_step() {
+fn clicking_the_canvas_should_place_and_name_a_class_in_one_step() -> Result<(), String> {
     let mut harness = naming();
     let diagram = diagram_id(harness.state(), "Class diagram 1");
     let before = element_count(&harness);
@@ -361,7 +361,7 @@ fn clicking_the_canvas_should_place_and_name_a_class_in_one_step() {
     assert_eq!(invoice.len(), 1);
     assert_eq!(element_count(&harness), before + 1);
     let Some(&invoice) = invoice.first() else {
-        return;
+        return Err(String::from("missing: invoice.first()"));
     };
     assert_eq!(
         view_origin(&harness, diagram, invoice),
@@ -376,6 +376,7 @@ fn clicking_the_canvas_should_place_and_name_a_class_in_one_step() {
     undo(&mut harness);
     assert!(classes_named(&harness, "Invoice").is_empty());
     assert_eq!(element_count(&harness), before);
+    Ok(())
 }
 
 #[test]
@@ -574,7 +575,9 @@ fn the_keyboard_should_place_a_class_at_a_free_spot() -> Result<(), String> {
         return Err(String::from("a class was created"));
     };
     let Some((x, y)) = view_origin(&harness, diagram, created) else {
-        return Ok(());
+        return Err(String::from(
+            "missing: view_origin(&harness, diagram, created)",
+        ));
     };
     // Not over Customer (48, 48, 180×80) or Order (300, 96, 180×80).
     let new = CanvasRect {
@@ -619,7 +622,7 @@ fn repeated_and_stale_commits_should_create_one_class() -> Result<(), String> {
     choose_class_tool(&mut harness);
     click_canvas_at(&mut harness, 100.0, 420.0);
     let Some(second) = placement_id(&harness) else {
-        return Ok(());
+        return Err(String::from("missing: placement_id(&harness)"));
     };
     assert_ne!(second, id);
     // The first placement's ID does nothing to the live one.
@@ -659,12 +662,12 @@ fn begin_while_placing_should_change_nothing() {
 }
 
 #[test]
-fn undo_or_redo_in_a_batch_should_cancel_the_placement_and_skip_the_commit() {
+fn undo_or_redo_in_a_batch_should_cancel_the_placement_and_skip_the_commit() -> Result<(), String> {
     for history in [CommandId::Undo, CommandId::Redo] {
         for commit_first in [true, false] {
             let mut harness = naming();
             let Some(id) = placement_id(&harness) else {
-                return;
+                return Err(String::from("missing: placement_id(&harness)"));
             };
             let document = harness.state().document().clone();
             let commit = UiIntent::CommitNewClass {
@@ -693,6 +696,7 @@ fn undo_or_redo_in_a_batch_should_cancel_the_placement_and_skip_the_commit() {
             );
         }
     }
+    Ok(())
 }
 
 #[test]
@@ -813,7 +817,7 @@ fn clicking_another_class_while_naming_should_create_then_select_it() {
 }
 
 #[test]
-fn a_duplicate_commit_with_navigation_should_ask_and_stay() {
+fn a_duplicate_commit_with_navigation_should_ask_and_stay() -> Result<(), String> {
     for commit_first in [true, false] {
         let mut state = ShellState::default();
         let first = diagram_id(&state, "Class diagram 1");
@@ -825,7 +829,7 @@ fn a_duplicate_commit_with_navigation_should_ask_and_stay() {
         harness.get_by_label(NEW_CLASS_LABEL).type_text("Order");
         harness.run();
         let Some(id) = placement_id(&harness) else {
-            return;
+            return Err(String::from("missing: placement_id(&harness)"));
         };
         let commit = UiIntent::CommitNewClass {
             placement: id,
@@ -850,6 +854,7 @@ fn a_duplicate_commit_with_navigation_should_ask_and_stay() {
         );
         harness.get_by_label("A class with this name exists");
     }
+    Ok(())
 }
 
 #[test]
@@ -878,7 +883,7 @@ fn inside(outer: eframe::egui::Rect, inner: eframe::egui::Rect) -> bool {
 }
 
 #[test]
-fn a_click_near_the_edge_should_keep_the_box_and_panel_inside() {
+fn a_click_near_the_edge_should_keep_the_box_and_panel_inside() -> Result<(), String> {
     let mut harness = harness_with(common::LARGE, ShellState::default());
     let diagram = diagram_id(harness.state(), "Class diagram 1");
     choose_class_tool(&mut harness);
@@ -902,13 +907,18 @@ fn a_click_near_the_edge_should_keep_the_box_and_panel_inside() {
     harness.key_press(Key::Enter);
     harness.run();
     let Some(&invoice) = classes_named(&harness, "Invoice").first() else {
-        return;
+        return Err(String::from(
+            "missing: classes_named(&harness, 'Invoice').first()",
+        ));
     };
     let Some((x, y)) = view_origin(&harness, diagram, invoice) else {
-        return;
+        return Err(String::from(
+            "missing: view_origin(&harness, diagram, invoice)",
+        ));
     };
     assert!(x + f64::from(CLASS_SIZE.width) <= f64::from(canvas.width()) + 0.5);
     assert!(y + f64::from(CLASS_SIZE.height) <= f64::from(canvas.height()) + 0.5);
+    Ok(())
 }
 
 #[test]
@@ -924,4 +934,154 @@ fn a_long_name_should_stay_on_one_line_in_the_field() {
         harness.get_by_label(NEW_CLASS_LABEL).rect().height(),
         single
     );
+}
+
+// --- Review round 1 --------------------------------------------------------
+
+#[test]
+fn escape_in_command_search_should_not_change_the_tool() {
+    let mut harness = harness_with(common::LARGE, ShellState::default());
+    choose_class_tool(&mut harness);
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::K);
+    harness.run();
+    assert!(harness.state().palette.is_some());
+    harness.key_press(Key::Tab);
+    harness.run();
+
+    harness.key_press(Key::Escape);
+    harness.run();
+
+    assert_eq!(
+        harness.state().active_tool(),
+        Tool::Class,
+        "search took Escape"
+    );
+}
+
+#[test]
+fn text_and_enter_in_one_frame_should_create_the_class() {
+    let mut harness = naming();
+    harness.key_press_modifiers(Modifiers::COMMAND, Key::A);
+    harness.key_press(Key::Backspace);
+    harness.run();
+    assert!(harness.query_all_by_label_contains("Error:").count() > 0);
+
+    harness
+        .input_mut()
+        .events
+        .push(eframe::egui::Event::Text(String::from("Invoice")));
+    harness.input_mut().events.push(eframe::egui::Event::Key {
+        key: Key::Enter,
+        physical_key: None,
+        pressed: true,
+        repeat: false,
+        modifiers: Modifiers::NONE,
+    });
+    harness.step();
+    harness.run();
+
+    assert_eq!(classes_named(&harness, "Invoice").len(), 1);
+}
+
+#[test]
+fn a_click_on_the_panel_padding_should_not_reach_a_class_under_it() -> Result<(), String> {
+    let mut harness = harness_with(common::LARGE, ShellState::default());
+    choose_class_tool(&mut harness);
+    // Order's box is at (300, 96), 180 wide; place the panel over it.
+    click_canvas_at(&mut harness, 310.0, 100.0);
+    let placement = placement_id(&harness).ok_or("a placement exists")?;
+    let canvas = harness.get_by_label("Diagram canvas").rect();
+    let field = harness.get_by_label(NEW_CLASS_LABEL).rect();
+
+    // Left padding of the panel, beside the field, over Order.
+    let x = field.min.x - canvas.min.x - 4.0;
+    click_canvas_at(&mut harness, x, 140.0);
+
+    // A click outside the field is a blur, which commits the name; the click
+    // itself must not reach Order under the panel.
+    let _ = placement;
+    let order = class_id(harness.state(), "Order");
+    let created = classes_named(&harness, "Class 1");
+    assert_eq!(created.len(), 1, "the blur committed");
+    assert_ne!(harness.state().selected_element(), Some(order));
+    assert_eq!(harness.state().selected_element(), created.first().copied());
+    Ok(())
+}
+
+#[test]
+fn a_late_request_from_a_closed_project_should_not_touch_a_new_placement() -> Result<(), String> {
+    let mut harness = naming();
+    let old = placement_id(&harness).ok_or("a placement exists")?;
+    harness.state_mut().close_project();
+    harness.state_mut().open_project(ProjectSession::sample());
+    harness.run();
+    choose_class_tool(&mut harness);
+    click_canvas_at(&mut harness, EMPTY.0, EMPTY.1);
+    let new = placement_id(&harness).ok_or("a new placement exists")?;
+    assert_ne!(old, new);
+
+    harness.state_mut().queue(UiIntent::CommitNewClass {
+        placement: old,
+        name: String::from("Late"),
+    });
+    harness.state_mut().queue(UiIntent::CancelNewClass(old));
+    harness.run();
+
+    assert!(classes_named(&harness, "Late").is_empty());
+    assert_eq!(placement_id(&harness), Some(new));
+    Ok(())
+}
+
+/// The sample with "Class 1" created through the tool, then `undo_first`
+/// times undone, then a new placement naming.
+fn naming_with_history(undo_first: bool) -> Harness<'static, ShellState> {
+    let mut harness = naming();
+    harness.key_press(Key::Enter);
+    harness.run();
+    if undo_first {
+        undo(&mut harness);
+    }
+    choose_class_tool(&mut harness);
+    click_canvas_at(&mut harness, 100.0, 420.0);
+    harness
+}
+
+#[test]
+fn undo_and_redo_in_a_batch_should_still_run_once() -> Result<(), String> {
+    for (history, undo_first, class_1_after) in [
+        (CommandId::Undo, false, 0_usize),
+        (CommandId::Redo, true, 1),
+    ] {
+        for commit_first in [true, false] {
+            let mut harness = naming_with_history(undo_first);
+            let id = placement_id(&harness).ok_or("a placement exists")?;
+            let commit = UiIntent::CommitNewClass {
+                placement: id,
+                name: String::from("Invoice"),
+            };
+            let run = UiIntent::Run {
+                command: history,
+                origin: None,
+            };
+            let batch = if commit_first {
+                [commit, run]
+            } else {
+                [run, commit]
+            };
+            for intent in batch {
+                harness.state_mut().queue(intent);
+            }
+            harness.run();
+
+            let what = format!("{history:?}, commit first {commit_first}");
+            assert!(harness.state().placement().is_none(), "{what}");
+            assert!(classes_named(&harness, "Invoice").is_empty(), "{what}");
+            assert_eq!(
+                classes_named(&harness, "Class 1").len(),
+                class_1_after,
+                "{what}"
+            );
+        }
+    }
+    Ok(())
 }
