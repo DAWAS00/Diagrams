@@ -28,7 +28,7 @@ Branch `feat/p2-class-tool`. Plan: [SLICE-p2-class-tool.md](../next-steps/SLICE-
 
 ## Tests
 
-- `tests/class_tool.rs` (32 tests) covers:
+- `tests/class_tool.rs` (37 tests) covers:
   - the pure rules;
   - availability;
   - one-step placing and naming;
@@ -43,7 +43,7 @@ Branch `feat/p2-class-tool`. Plan: [SLICE-p2-class-tool.md](../next-steps/SLICE-
   - blank names blocking each of them;
   - a duplicate commit with navigation, in both orders;
   - geometry at the edges.
-- `tests/dialogs.rs` (10 tests) covers:
+- `tests/dialogs.rs` (12 tests) covers:
   - the words;
   - focus on Cancel;
   - Show here, including a tall class near the bottom;
@@ -72,6 +72,14 @@ Each fix below was removed in turn, and its test failed. The script is in the se
 | 9 | Show here uses `ShowInDiagram` | `show_here_should_share_the_class_at_its_drawn_size` |
 | 10 | naming owns the text keys in its first frame | `ctrl_z_and_escape_before_the_panel_renders_should_not_touch_the_history` |
 | 11 | a commit that asks stops the batch | `a_duplicate_commit_with_navigation_should_ask_and_stay` |
+
+| 12 | command search takes every key while open | `escape_in_command_search_should_not_change_the_tool` |
+| 13 | Enter checks the text as edited this frame | `text_and_enter_in_one_frame_should_create_the_class` |
+| 14 | the naming panel blocks clicks through its padding | `a_click_on_the_panel_padding_should_not_reach_a_class_under_it` |
+| 15 | placement IDs survive project changes | `a_late_request_from_a_closed_project_should_not_touch_a_new_placement` |
+| 16 | long names are shortened in the dialog | `a_long_duplicate_name_should_keep_the_buttons_in_a_small_window` |
+
+Fixes 12–16 came from the Codex code review (xhigh, read-only). Round 1 found seven warnings and round 2 one more. Round 3 approved.
 
 The tests also found one bug, fixed here: `next_free_spot` counted one grid cell on a canvas narrower than a cell, because integer division rounds toward zero. It now uses Euclidean division. The test is `next_free_spot_should_take_the_first_free_grid_cell`.
 
