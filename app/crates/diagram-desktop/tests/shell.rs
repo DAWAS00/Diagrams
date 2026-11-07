@@ -52,7 +52,6 @@ fn unimplemented_toolbar_actions_should_be_disabled() {
         "Save",
         "Export",
         "Pan",
-        "Class",
         "Association",
         "Note",
         "Arrange",

@@ -6,6 +6,8 @@
 use eframe::egui::{self, Align, Layout};
 
 use crate::shell::ShellState;
+use crate::ui::class_tool::Tool;
+use crate::ui::commands;
 use crate::ui::commands::CommandId;
 use crate::ui::components;
 use crate::ui::header::command_button;
@@ -39,9 +41,16 @@ pub(crate) fn tool_row(ui: &mut egui::Ui, state: &mut ShellState) {
         ui.separator();
         // Tools come from the active diagram's notation contract.
         for spec in notation::tool_commands(state.active_notation()).map(CommandId::spec) {
-            if spec.id == CommandId::SelectTool {
-                // The active tool shows as pressed.
-                if components::choice(ui, true, spec.label).clicked() {
+            // The active tool shows as pressed.
+            let tool = match spec.id {
+                CommandId::SelectTool => Some(Tool::Select),
+                CommandId::AddClass => Some(Tool::Class),
+                _ => None,
+            };
+            if let Some(tool) = tool {
+                let reason = commands::availability(spec.id, context).reason();
+                let pressed = state.active_tool() == tool;
+                if components::tool_choice(ui, pressed, spec.label, reason).clicked() {
                     clicked = Some(spec.id);
                 }
             } else {

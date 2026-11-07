@@ -550,3 +550,92 @@ fn one_class_diagram_in_dark_should_pass_the_audit() {
         report(findings);
     }
 }
+
+const WIDE: (f32, f32) = (1440.0, 900.0);
+
+/// The sample in `diagram` with the Class tool chosen and, when `at` is
+/// given, the canvas clicked there (relative to the canvas's bottom-right
+/// corner when negative).
+fn class_tool_scene(
+    size: (f32, f32),
+    diagram: &str,
+    at: Option<(f32, f32)>,
+) -> Harness<'static, ShellState> {
+    let mut state = ShellState::default();
+    let target = common::diagram_id(&state, diagram);
+    state.open_diagram(target);
+    let mut harness = harness_with(size, state);
+    common::choose_class_tool(&mut harness);
+    if let Some((x, y)) = at {
+        let canvas = harness.get_by_label("Diagram canvas").rect();
+        let x = if x < 0.0 { canvas.width() + x } else { x };
+        let y = if y < 0.0 { canvas.height() + y } else { y };
+        common::click_canvas_at(&mut harness, x, y);
+    }
+    harness
+}
+
+/// Leaves out the canvas boxes and the canvas itself, which a panel or a
+/// modal covers by design.
+fn without_canvas(findings: Vec<String>) -> Vec<String> {
+    findings
+        .into_iter()
+        .filter(|finding| !finding.contains("\"Class ") && !finding.contains("Diagram canvas"))
+        .collect()
+}
+
+#[test]
+fn class_tool_states_should_pass_the_audit() {
+    use diagram_desktop::ui::class_tool::NEW_CLASS_LABEL;
+    for size in [SMALL, LARGE, WIDE] {
+        let harness = class_tool_scene(size, "Class diagram 1", None);
+        report(audit_layout("class tool active", &harness, size, false));
+
+        let harness = class_tool_scene(size, "Class diagram 1", Some((-4.0, -4.0)));
+        harness.get_by_label(NEW_CLASS_LABEL);
+        report(without_canvas(audit_layout(
+            "naming at the edge",
+            &harness,
+            size,
+            false,
+        )));
+
+        let mut harness = class_tool_scene(size, "Class diagram 1", Some((-4.0, -4.0)));
+        harness.key_press_modifiers(Modifiers::COMMAND, Key::A);
+        harness.key_press(Key::Backspace);
+        harness.run();
+        harness.key_press(Key::Enter);
+        harness.run();
+        assert!(harness.query_all_by_label_contains("Error:").count() > 0);
+        report(without_canvas(audit_layout(
+            "naming with an error at the edge",
+            &harness,
+            size,
+            false,
+        )));
+    }
+}
+
+#[test]
+fn duplicate_name_dialog_should_pass_the_audit() {
+    use diagram_desktop::ui::class_tool::NEW_CLASS_LABEL;
+    for size in [SMALL, LARGE, WIDE] {
+        for diagram in ["Order details", "Class diagram 1"] {
+            let mut harness = class_tool_scene(size, diagram, Some((100.0, 200.0)));
+            harness.key_press_modifiers(Modifiers::COMMAND, Key::A);
+            harness.get_by_label(NEW_CLASS_LABEL).type_text("Customer");
+            harness.run();
+            harness.key_press(Key::Enter);
+            harness.run();
+            assert!(harness.state().has_dialog(), "{diagram}");
+            let scene = format!("duplicate dialog in {diagram}");
+            // The modal's backdrop covers the name field behind it, which
+            // takes no input until the dialog closes.
+            let findings = without_canvas(audit_layout(&scene, &harness, size, false))
+                .into_iter()
+                .filter(|finding| !finding.contains(&format!("\"{NEW_CLASS_LABEL}\" overlaps")))
+                .collect();
+            report(findings);
+        }
+    }
+}

@@ -11,32 +11,34 @@ use std::sync::LazyLock;
 use diagram_core::command::Command;
 use diagram_core::ids::{DiagramId, ElementId, RelationId};
 use diagram_core::model::Document;
-use eframe::egui::{
-    self, Area, Frame, Id, Key, Modifiers, Order, Pos2, Rect, Role, ScrollArea, Stroke,
-    ThemePreference, Vec2,
-};
+use eframe::egui::{self, Frame, Id, ThemePreference};
 
 use crate::session::ProjectSession;
 pub use crate::session::{FIRST_DIAGRAM, SAMPLE_PROJECT};
-use crate::ui::canvas::canvas;
+use crate::ui::canvas::{self as canvas_view, canvas};
+use crate::ui::class_tool::{
+    self, ClassTool, Decision, Finish, Phase, Placement, PlacementId, Tool,
+};
 use crate::ui::commands::{self, CommandContext, CommandId};
 use crate::ui::components;
 use crate::ui::dialogs::{self, DialogAnswer, DialogKind, DialogState};
+use crate::ui::drawer::drawer;
 use crate::ui::entry::entry_screens;
 use crate::ui::header::header;
 use crate::ui::inspector::{self as rules, DraftKey};
 use crate::ui::inspector_view::inspector;
 use crate::ui::intents::UiIntent;
+use crate::ui::keys::route_keys;
 use crate::ui::navigator::OpenTab;
 use crate::ui::notation::NotationId;
 use crate::ui::palette::PaletteState;
 use crate::ui::project_panel::sidebar;
 use crate::ui::read_model;
 use crate::ui::search::command_palette;
-use crate::ui::showcase::{self, ShowcaseState};
+use crate::ui::showcase::{ShowcaseState, showcase_window};
 use crate::ui::status::status_bar;
 use crate::ui::tabs::tab_row;
-use crate::ui::theme::{self, Palette};
+use crate::ui::theme;
 use crate::ui::tool_row::tool_row;
 use crate::ui::welcome::{self, EntryState};
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
@@ -87,6 +89,8 @@ pub struct ShellState {
     pub showcase: Option<ShowcaseState>,
     /// Widget to focus when the showcase closes.
     showcase_return: Option<Id>,
+    /// The active tool and the class being placed, if any.
+    class_tool: ClassTool,
     /// The open dialog, if any.
     dialog: Option<DialogState>,
     /// Widget to focus when the dialog closes.
@@ -106,6 +110,11 @@ pub struct ShellState {
     /// end of the last frame.
     text_had_focus: bool,
 }
+
+mod actions;
+mod placing;
+
+use actions::{answer_dialog, close_drawer, close_showcase, rename_class, run, set_relation_field};
 
 impl Default for ShellState {
     /// The workspace showing the labelled sample project.
@@ -138,6 +147,7 @@ impl ShellState {
             entry: Some(EntryState::default()),
             showcase: None,
             showcase_return: None,
+            class_tool: ClassTool::default(),
             dialog: None,
             dialog_return: None,
             notice: None,
@@ -160,6 +170,7 @@ impl ShellState {
         self.navigator_search.clear();
         self.notice = None;
         self.dialog = None;
+        self.class_tool.reset();
         self.entry = None;
         let first = project.document().diagram_order.first().copied();
         self.project = Some(project);
@@ -178,6 +189,7 @@ impl ShellState {
         self.active_tab = None;
         self.notice = None;
         self.dialog = None;
+        self.class_tool.reset();
         self.palette = None;
         self.showcase = None;
         self.drawer = None;
@@ -423,6 +435,16 @@ impl ShellState {
         self.pending_focus = target;
     }
 
+    /// The active canvas tool.
+    pub const fn active_tool(&self) -> Tool {
+        self.class_tool.tool()
+    }
+
+    /// The class being placed with the Class tool, if any.
+    pub const fn placement(&self) -> Option<&Placement> {
+        self.class_tool.placement()
+    }
+
     /// The state that decides which commands are available.
     pub fn command_context(&self) -> CommandContext {
         CommandContext {
@@ -436,6 +458,7 @@ impl ShellState {
                 .project
                 .as_ref()
                 .is_some_and(|project| project.redo_label().is_some()),
+            has_diagram: self.active_diagram().is_some(),
         }
     }
 
@@ -525,10 +548,12 @@ impl ShellState {
             self.drafts.clear();
         } else {
             let document = self.project.as_ref().map(ProjectSession::document);
+            let placing = self.class_tool.placement().is_some();
             self.drafts.retain(|key, _| {
                 document.is_some_and(|document| match key {
                     DraftKey::ClassName(id) => document.elements.contains_key(id),
                     DraftKey::Relation(id, _) => document.relations.contains_key(id),
+                    DraftKey::NewClassName => placing,
                 })
             });
         }
@@ -569,6 +594,11 @@ fn apply_intents(state: &mut ShellState, ctx: &egui::Context) {
             }
         )
     });
+    // Undo or Redo ends a class being placed first: its name was typed
+    // against the document before the history moved.
+    if history_in_batch {
+        state.cancel_placement();
+    }
     for intent in intents {
         if state.epoch != epoch {
             // A project was opened or closed: what is left was queued for the
@@ -581,10 +611,23 @@ fn apply_intents(state: &mut ShellState, ctx: &egui::Context) {
         if history_in_batch
             && matches!(
                 intent,
-                UiIntent::RenameClass(..) | UiIntent::SetRelationField(..)
+                UiIntent::RenameClass(..)
+                    | UiIntent::SetRelationField(..)
+                    | UiIntent::CommitNewClass { .. }
             )
         {
             continue;
+        }
+        // Any other request first finishes naming a new class; an invalid
+        // name or a duplicate-name question stops the rest of the batch.
+        let placement_intent = matches!(
+            intent,
+            UiIntent::BeginNewClass { .. }
+                | UiIntent::CommitNewClass { .. }
+                | UiIntent::CancelNewClass(_)
+        );
+        if !placement_intent && state.preflight() != Finish::Completed {
+            break;
         }
         match intent {
             UiIntent::Run { command, origin } => {
@@ -658,171 +701,30 @@ fn apply_intents(state: &mut ShellState, ctx: &egui::Context) {
                 }
             }
             UiIntent::AnswerDialog(answer) => answer_dialog(state, answer),
-        }
-    }
-}
-
-/// Renames a class as one undoable command, after checking the name again.
-fn rename_class(state: &mut ShellState, id: ElementId, name: &str) {
-    if let Some(message) = rules::class_name_error(name) {
-        state.notice = Some(message);
-    } else if !state.document().elements.contains_key(&id) {
-        state.stale("class");
-    } else if read_model::element_name(state.document(), id) != Some(name.trim()) {
-        state.execute(&Command::RenameElement {
-            element: id,
-            name: name.trim().to_owned(),
-        });
-    }
-}
-
-/// Sets one field of an association's ends as one undoable command.
-fn set_relation_field(
-    state: &mut ShellState,
-    id: RelationId,
-    field: rules::RelationField,
-    value: &str,
-) {
-    if let Some(message) = field.error(value) {
-        state.notice = Some(message);
-        return;
-    }
-    let Some(relation) = state.document().relations.get(&id).cloned() else {
-        state.stale("relationship");
-        return;
-    };
-    if field.unchanged(&relation, value) {
-        return;
-    }
-    let (source, target) = field.ends_with(&relation, value);
-    state.execute(&Command::SetEnds {
-        relation: id,
-        source,
-        target,
-    });
-}
-
-/// Applies the user's answer to the open dialog.
-fn answer_dialog(state: &mut ShellState, answer: DialogAnswer) {
-    let Some(dialog) = state.dialog.take() else {
-        return;
-    };
-    state.pending_focus = state.dialog_return.take();
-    match (dialog.kind, answer) {
-        (DialogKind::CloseProject { .. }, DialogAnswer::Confirm) => state.close_project(),
-        (DialogKind::CloseProject { .. }, DialogAnswer::Cancel) => {}
-    }
-}
-
-/// Runs `id` if it is available now; unavailable commands do nothing.
-fn run(state: &mut ShellState, ctx: &egui::Context, id: CommandId) {
-    if !commands::availability(id, state.command_context()).is_enabled() {
-        return;
-    }
-    match id {
-        CommandId::ClearSelection => state.clear_selection(),
-        CommandId::Undo => state.undo(),
-        CommandId::Redo => state.redo(),
-        CommandId::CloseProject => close_project_command(state, ctx),
-        CommandId::SearchCommands => {
-            if state.palette.is_none() {
-                let focused = ctx.memory(|memory| memory.focused());
-                state.palette = Some(PaletteState::new(focused));
+            UiIntent::BeginNewClass {
+                diagram,
+                at,
+                visible,
+            } => state.begin_new_class(ctx, diagram, at, visible),
+            UiIntent::CommitNewClass { placement, name } => {
+                let live = state
+                    .class_tool
+                    .naming()
+                    .is_some_and(|naming| naming.id == placement);
+                if live && state.finish_naming(&name) != Finish::Completed {
+                    break;
+                }
+            }
+            UiIntent::CancelNewClass(placement) => {
+                if state
+                    .class_tool
+                    .naming()
+                    .is_some_and(|naming| naming.id == placement)
+                {
+                    state.cancel_placement();
+                }
             }
         }
-        CommandId::ToggleNavigator => toggle_panel(state, ctx, Drawer::Navigator),
-        CommandId::ToggleInspector => toggle_panel(state, ctx, Drawer::Inspector),
-        CommandId::ShowComponentShowcase => {
-            if state.showcase.is_none() {
-                state.showcase_return = ctx.memory(|memory| memory.focused());
-                state.showcase = Some(ShowcaseState::default());
-            }
-        }
-        // Select is the only tool so far, so it is always the active one.
-        CommandId::SelectTool => {}
-        // Always unavailable until later slices build them.
-        CommandId::Save
-        | CommandId::Export
-        | CommandId::PanTool
-        | CommandId::AddClass
-        | CommandId::Connect
-        | CommandId::AddNote
-        | CommandId::Arrange
-        | CommandId::NewDiagram => {}
-    }
-}
-
-/// Closes the project now, or asks first when that would lose work.
-fn close_project_command(state: &mut ShellState, ctx: &egui::Context) {
-    let Some(project) = state.project.as_ref() else {
-        return;
-    };
-    if state.dialog.is_some() {
-        return;
-    }
-    if project.has_unsaved_changes() {
-        let name = project.name().to_owned();
-        // Focus goes back to what had it before: a search that just closed
-        // names it in `pending_focus`; otherwise the focused widget.
-        state.dialog_return = state
-            .pending_focus
-            .take()
-            .or_else(|| ctx.memory(|memory| memory.focused()));
-        state.dialog = Some(DialogState::new(DialogKind::CloseProject { project: name }));
-    } else {
-        state.close_project();
-    }
-}
-
-/// Shows or hides a docked panel, or opens and closes its drawer on narrow windows.
-fn toggle_panel(state: &mut ShellState, ctx: &egui::Context, which: Drawer) {
-    match state.layout {
-        LayoutMode::Docked => match which {
-            Drawer::Navigator => state.panels.navigator_visible ^= true,
-            Drawer::Inspector => state.panels.inspector_visible ^= true,
-        },
-        LayoutMode::Narrow if state.drawer == Some(which) => close_drawer(state),
-        LayoutMode::Narrow => {
-            state.drawer_return = ctx.memory(|memory| memory.focused());
-            state.drawer = Some(which);
-        }
-    }
-}
-
-/// Closes the open drawer and returns focus to where it came from.
-fn close_drawer(state: &mut ShellState) {
-    state.drawer = None;
-    state.pending_focus = state.drawer_return.take();
-}
-
-/// Closes the component showcase and returns focus to where it came from.
-fn close_showcase(state: &mut ShellState) {
-    state.showcase = None;
-    state.pending_focus = state.showcase_return.take();
-}
-
-/// The component showcase as a movable window with an explicit Close button.
-fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
-    let Some(mut fixture) = state.showcase.take() else {
-        return;
-    };
-    let mut close = false;
-    egui::Window::new("Component showcase")
-        .id(Id::unique("component-showcase"))
-        .collapsible(false)
-        .default_size([460.0, 640.0])
-        .default_pos([260.0, 60.0])
-        .max_height((ctx.content_rect().height() - 80.0).max(200.0))
-        .show(ctx, |ui| {
-            if components::action_button(ui, "Close showcase", None, Some("Escape")).clicked() {
-                close = true;
-            }
-            ui.separator();
-            ScrollArea::vertical().show(ui, |ui| showcase::show(ui, &mut fixture));
-        });
-    state.showcase = Some(fixture);
-    if close {
-        close_showcase(state);
     }
 }
 
@@ -862,30 +764,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         state.drawer_return = None;
     }
 
-    // Shortcuts use the text focus of the previous frame: egui drops focus in
-    // the frame Escape is pressed, and Escape must first leave the field.
-    // An open drawer takes Escape before the canvas selection does.
-    let text_had_focus = state.text_had_focus;
-    if state.dialog.is_none()
-        && state.showcase.is_some()
-        && !text_had_focus
-        && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
-    {
-        state.queue(UiIntent::CloseShowcase);
-    }
-    if state.dialog.is_none()
-        && state.drawer.is_some()
-        && !text_had_focus
-        && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
-    {
-        state.queue(UiIntent::CloseDrawer);
-    }
-    // A dialog owns the keyboard: shortcuts do nothing behind it.
-    if state.dialog.is_none()
-        && let Some(id) = ui.input_mut(|input| commands::take_shortcut(input, text_had_focus))
-    {
-        state.queue(UiIntent::run(id));
-    }
+    route_keys(ui, state);
 
     let bar = Frame::side_top_panel(ui.style()).fill(palette.workspace);
     egui::Panel::top("header")
@@ -902,7 +781,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
                 .default_size(NAVIGATOR.default)
                 .size_range(NAVIGATOR.min..=NAVIGATOR.max)
                 .show(ui, |ui| {
-                    scrolling(ui, "navigator", "Project panel contents", |ui| {
+                    components::scrolling(ui, "navigator", "Project panel contents", |ui| {
                         sidebar(ui, state)
                     })
                 });
@@ -913,7 +792,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
                 .default_size(INSPECTOR.default)
                 .size_range(INSPECTOR.min..=INSPECTOR.max)
                 .show(ui, |ui| {
-                    scrolling(ui, "inspector", "Inspector contents", |ui| {
+                    components::scrolling(ui, "inspector", "Inspector contents", |ui| {
                         inspector(ui, state)
                     })
                 });
@@ -945,79 +824,6 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     // Only a focused text field keeps editing keys; a focused button must not
     // swallow Escape (egui_wants_keyboard_input is true for any focus).
     state.text_had_focus = ui.ctx().text_edit_focused();
-}
-
-/// Wraps panel contents in a vertical scroll area that assistive technology
-/// (and the usability audit) sees as a named, clipping scroll region.
-fn scrolling(ui: &mut egui::Ui, id: &str, label: &str, add_contents: impl FnOnce(&mut egui::Ui)) {
-    ui.scope(|ui| {
-        let region = ui.unique_id();
-        let output = ScrollArea::vertical()
-            .id_salt(id)
-            .auto_shrink([false, false])
-            .show(ui, add_contents);
-        // Same point coordinates egui uses for widget bounds.
-        let visible = output.inner_rect;
-        ui.ctx().accesskit_node_builder(region, |node| {
-            node.set_role(Role::ScrollView);
-            node.set_label(label);
-            node.set_clips_children();
-            node.set_bounds(egui::accesskit::Rect {
-                x0: visible.min.x.into(),
-                y0: visible.min.y.into(),
-                x1: visible.max.x.into(),
-                y1: visible.max.y.into(),
-            });
-        });
-    });
-}
-
-/// The open drawer, over the canvas only, never over the header, rows or
-/// status bar.
-fn drawer(ctx: &egui::Context, state: &mut ShellState, canvas_rect: Rect, palette: &Palette) {
-    let Some(which) = state.drawer else {
-        return;
-    };
-    let width = which.width(canvas_rect.width());
-    let rect = match which {
-        Drawer::Navigator => {
-            Rect::from_min_size(canvas_rect.min, Vec2::new(width, canvas_rect.height()))
-        }
-        Drawer::Inspector => Rect::from_min_max(
-            Pos2::new(canvas_rect.max.x - width, canvas_rect.min.y),
-            canvas_rect.max,
-        ),
-    };
-    let close_label = match which {
-        Drawer::Navigator => "Close project panel",
-        Drawer::Inspector => "Close inspector",
-    };
-    let frame = Frame::new()
-        .fill(palette.panel)
-        .stroke(Stroke::new(1.0, palette.separator))
-        .inner_margin(theme::SPACING);
-    let inner_size = rect.size() - Vec2::splat(2.0 * (theme::SPACING + 1.0));
-    let mut close = false;
-    Area::new(Id::unique("drawer"))
-        .order(Order::Foreground)
-        .fixed_pos(rect.min)
-        .show(ctx, |ui| {
-            frame.show(ui, |ui| {
-                ui.set_min_size(inner_size);
-                ui.set_max_size(inner_size);
-                if components::action_button(ui, close_label, None, Some("Escape")).clicked() {
-                    close = true;
-                }
-                ui.separator();
-                scrolling(ui, "drawer", "Drawer contents", |ui| match which {
-                    Drawer::Navigator => sidebar(ui, state),
-                    Drawer::Inspector => inspector(ui, state),
-                });
-            });
-        });
-    if close {
-        state.queue(UiIntent::CloseDrawer);
-    }
 }
 
 /// The open dialog, if any. Its answer is queued as an intent.

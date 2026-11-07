@@ -7,7 +7,8 @@ use std::sync::Arc;
 
 use eframe::egui::text::{LayoutJob, TextWrapping};
 use eframe::egui::{
-    self, Button, Color32, FontId, Galley, Label, Response, RichText, TextEdit, Vec2,
+    self, Button, Color32, FontId, Galley, Label, Response, RichText, Role, ScrollArea, TextEdit,
+    Vec2,
 };
 
 use super::theme::{CONTROL_HEIGHT, ROW_HEIGHT, TextRole};
@@ -46,13 +47,38 @@ pub fn code_text(ui: &mut egui::Ui, text: &str) -> Response {
 
 /// Labeled single-line text field; the label becomes its accessible name.
 pub fn text_field(ui: &mut egui::Ui, label: &str, value: &mut String) -> Response {
+    labelled_field(ui, label, value, None)
+}
+
+/// Labeled single-line text field with a fixed `id`, so its text selection
+/// can be prepared and focus can return to it, and with `error` beside it.
+pub fn text_field_at(
+    ui: &mut egui::Ui,
+    label: &str,
+    value: &mut String,
+    id: egui::Id,
+    error: Option<&str>,
+) -> Response {
+    match error {
+        Some(error) => with_error(ui, error, |ui| labelled_field(ui, label, value, Some(id))),
+        None => labelled_field(ui, label, value, Some(id)),
+    }
+}
+
+fn labelled_field(
+    ui: &mut egui::Ui,
+    label: &str,
+    value: &mut String,
+    id: Option<egui::Id>,
+) -> Response {
     let label = field_label(ui, label);
-    ui.add(
-        TextEdit::singleline(value)
-            .desired_width(f32::INFINITY)
-            .min_size(Vec2::new(0.0, CONTROL_HEIGHT)),
-    )
-    .labelled_by(label.id)
+    let mut field = TextEdit::singleline(value)
+        .desired_width(f32::INFINITY)
+        .min_size(Vec2::new(0.0, CONTROL_HEIGHT));
+    if let Some(id) = id {
+        field = field.id(id);
+    }
+    ui.add(field).labelled_by(label.id)
 }
 
 /// Selectable list row with at least the minimum hit height. Long text is
@@ -99,6 +125,15 @@ pub fn text_field_with_error(
     value: &mut String,
     error: &str,
 ) -> Response {
+    with_error(ui, error, |ui| text_field(ui, label, value))
+}
+
+/// Draws `field` with a red border and `error` as words under it.
+fn with_error(
+    ui: &mut egui::Ui,
+    error: &str,
+    field: impl FnOnce(&mut egui::Ui) -> Response,
+) -> Response {
     let danger = ui.visuals().error_fg_color;
     let saved = ui.visuals().widgets.clone();
     {
@@ -107,7 +142,7 @@ pub fn text_field_with_error(
             state.bg_stroke = egui::Stroke::new(1.5, danger);
         }
     }
-    let response = text_field(ui, label, value);
+    let response = field(ui);
     ui.visuals_mut().widgets = saved;
     error_text(ui, error);
     response
@@ -130,6 +165,24 @@ pub fn choice(ui: &mut egui::Ui, selected: bool, text: &str) -> Response {
     ui.add(Button::selectable(selected, text).frame_when_inactive(true))
 }
 
+/// A tool button: pressed while its tool is active, disabled with hover text
+/// when it has a `disabled_reason`.
+pub fn tool_choice(
+    ui: &mut egui::Ui,
+    selected: bool,
+    text: &str,
+    disabled_reason: Option<&str>,
+) -> Response {
+    let button = Button::selectable(selected, text)
+        .frame_when_inactive(true)
+        .min_size(Vec2::new(0.0, CONTROL_HEIGHT));
+    let response = ui.add_enabled(disabled_reason.is_none(), button);
+    match disabled_reason {
+        Some(reason) => response.on_disabled_hover_text(reason),
+        None => response,
+    }
+}
+
 /// Text that shortens with an ellipsis instead of pushing other controls away.
 pub fn truncated_text(ui: &mut egui::Ui, text: &str) -> Response {
     ui.add(Label::new(RichText::new(text).text_style(TextRole::Label.text_style())).truncate())
@@ -148,4 +201,46 @@ pub fn one_line_galley(
     let mut job = LayoutJob::simple_singleline(text.to_owned(), font, color);
     job.wrap = TextWrapping::truncate_at_width(max_width);
     painter.layout_job(job)
+}
+
+/// Wraps panel contents in a vertical scroll area that assistive technology
+/// (and the usability audit) sees as a named, clipping scroll region.
+pub(crate) fn scrolling(
+    ui: &mut egui::Ui,
+    id: &str,
+    label: &str,
+    add_contents: impl FnOnce(&mut egui::Ui),
+) {
+    let area = ScrollArea::vertical()
+        .id_salt(id)
+        .auto_shrink([false, false]);
+    clipping_scroll(ui, area, label, add_contents);
+}
+
+/// Shows `area` as a named scroll region that assistive technology (and the
+/// usability audit) knows clips its contents, so a row scrolled out of view
+/// is not reported where it would be drawn.
+pub(crate) fn clipping_scroll(
+    ui: &mut egui::Ui,
+    area: ScrollArea,
+    label: &str,
+    add_contents: impl FnOnce(&mut egui::Ui),
+) {
+    ui.scope(|ui| {
+        let region = ui.unique_id();
+        let output = area.show(ui, add_contents);
+        // Same point coordinates egui uses for widget bounds.
+        let visible = output.inner_rect;
+        ui.ctx().accesskit_node_builder(region, |node| {
+            node.set_role(Role::ScrollView);
+            node.set_label(label);
+            node.set_clips_children();
+            node.set_bounds(egui::accesskit::Rect {
+                x0: visible.min.x.into(),
+                y0: visible.min.y.into(),
+                x1: visible.max.x.into(),
+                y1: visible.max.y.into(),
+            });
+        });
+    });
 }

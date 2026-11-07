@@ -10,6 +10,7 @@ use eframe::egui::{
 use diagram_core::ids::ElementId;
 
 use crate::shell::ShellState;
+use crate::ui::class_tool::{self, CLASS_SIZE, CanvasPoint, CanvasRect, CanvasSize, Tool};
 use crate::ui::commands::CommandId;
 use crate::ui::components;
 use crate::ui::intents::UiIntent;
@@ -20,6 +21,14 @@ const CLASS_WIDTH: f32 = 180.0;
 const HEADER_HEIGHT: f32 = 32.0;
 const ATTRIBUTE_HEIGHT: f32 = 20.0;
 const TEXT_INSET: f32 = 10.0;
+/// Space under the last member line.
+const CARD_PADDING: f32 = 8.0;
+
+/// The size of a class box with no members.
+pub(crate) const EMPTY_CARD_SIZE: CanvasSize = CanvasSize::new(
+    CLASS_WIDTH as i32,
+    (HEADER_HEIGHT + ATTRIBUTE_HEIGHT + CARD_PADDING) as i32,
+);
 
 /// Document colors for diagram objects. They do not follow the editor theme,
 /// so switching themes never changes how a diagram looks when exported.
@@ -37,9 +46,9 @@ pub(crate) fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palett
         .unwrap_or_default();
     let empty_message = match state.active_diagram() {
         None => Some("No diagram is open. Open one from the project panel."),
-        Some(_) if model.classes.is_empty() => {
-            Some("This diagram is empty. Adding classes arrives with the Class tool.")
-        }
+        Some(_) if model.classes.is_empty() => Some(
+            "This diagram is empty. Choose Class in the tool row, then click here to place a class.",
+        ),
         Some(_) => None,
     };
     if let Some(message) = empty_message {
@@ -54,6 +63,7 @@ pub(crate) fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palett
     let origin = background.rect.min;
 
     let mut clicked_class = None;
+    let mut clicked_at = None;
     let chosen = state.selected_elements();
     let rect_of = |card: &ClassCard| {
         Rect::from_min_size(
@@ -96,10 +106,39 @@ pub(crate) fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palett
         });
         if response.clicked() {
             clicked_class = Some(card.element);
+            clicked_at = response.interact_pointer_pos();
         }
         paint_class(&painter, rect, card, selected, response.hovered(), palette);
     }
 
+    let placing = state.placement().copied();
+    if placing.is_some_and(|placement| Some(placement.diagram) == state.active_diagram()) {
+        class_tool::naming_panel(ui, state, background.rect, palette);
+    }
+    if state.active_tool() == Tool::Class
+        && placing.is_none()
+        && (clicked_class.is_some() || background.clicked())
+        && let Some(diagram) = state.active_diagram()
+    {
+        // A pointer click places the class there; a keyboard or
+        // accessibility activation (no pointer position) at a free spot.
+        let pointer = clicked_at.or_else(|| background.interact_pointer_pos());
+        let visible = CanvasSize::of(background.rect.size());
+        let at = match pointer {
+            Some(pos) => class_tool::fit_inside(
+                CanvasPoint::new((pos.x - origin.x) as i32, (pos.y - origin.y) as i32),
+                CLASS_SIZE,
+                visible,
+            ),
+            None => class_tool::next_free_spot(&occupied(&model.classes), CLASS_SIZE, visible),
+        };
+        state.queue(UiIntent::BeginNewClass {
+            diagram,
+            at,
+            visible,
+        });
+        return background.rect;
+    }
     let adding = ui.input(|input| input.modifiers.command);
     match clicked_class {
         Some(element) if adding => state.queue(UiIntent::ToggleClassInSelection(element)),
@@ -112,8 +151,28 @@ pub(crate) fn canvas(ui: &mut egui::Ui, state: &mut ShellState, palette: &Palett
 
 /// Size of a class box: fixed width, height from its lines.
 pub(crate) fn card_size(card: &ClassCard) -> Vec2 {
-    let rows = card.lines.len().max(1) as f32;
-    Vec2::new(CLASS_WIDTH, HEADER_HEIGHT + rows * ATTRIBUTE_HEIGHT + 8.0)
+    let size = footprint(card.lines.len());
+    Vec2::new(size.width as f32, size.height as f32)
+}
+
+/// The drawn size of a class box with `lines` member lines (at least one row).
+pub(crate) fn footprint(lines: usize) -> CanvasSize {
+    let rows = lines.max(1) as f32;
+    CanvasSize::new(
+        CLASS_WIDTH as i32,
+        (HEADER_HEIGHT + rows * ATTRIBUTE_HEIGHT + CARD_PADDING) as i32,
+    )
+}
+
+/// The rectangles the diagram's class boxes take, as drawn.
+fn occupied(classes: &[ClassCard]) -> Vec<CanvasRect> {
+    classes
+        .iter()
+        .map(|card| CanvasRect {
+            at: CanvasPoint::new(card.position.0 as i32, card.position.1 as i32),
+            size: footprint(card.lines.len()),
+        })
+        .collect()
 }
 
 /// A relationship as a line between box edges, with multiplicities near each end. Selected relationships are thicker and

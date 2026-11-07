@@ -9,6 +9,7 @@
 use diagram_core::ids::{DiagramId, ElementId, RelationId};
 use eframe::egui::{Id, ThemePreference};
 
+use super::class_tool::{CanvasPoint, CanvasSize, PlacementId};
 use super::commands::CommandId;
 use super::dialogs::DialogAnswer;
 use super::inspector::RelationField;
@@ -54,6 +55,25 @@ pub enum UiIntent {
     OpenSample,
     /// Answer the open dialog.
     AnswerDialog(DialogAnswer),
+    /// Start placing a new class at `at` on `diagram` (Class tool). `visible`
+    /// is the canvas size, kept to fit the class later.
+    BeginNewClass {
+        /// The diagram shown on the canvas.
+        diagram: DiagramId,
+        /// Top-left of the new class box on the canvas.
+        at: CanvasPoint,
+        /// The visible canvas size.
+        visible: CanvasSize,
+    },
+    /// Finish naming the placement with `name` (Enter or focus loss).
+    CommitNewClass {
+        /// The placement the name is for.
+        placement: PlacementId,
+        /// The typed name.
+        name: String,
+    },
+    /// Cancel the placement; nothing is created.
+    CancelNewClass(PlacementId),
 }
 
 impl UiIntent {

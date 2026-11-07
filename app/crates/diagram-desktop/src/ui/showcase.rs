@@ -1,9 +1,11 @@
 //! Component showcase (UI-01): every reusable control in each state, shown
 //! as a clearly labeled design fixture. Nothing here changes the project.
 
-use eframe::egui;
+use eframe::egui::{self, Id, ScrollArea};
 
 use super::components;
+use super::intents::UiIntent;
+use crate::shell::ShellState;
 
 /// Editable values used by the showcase's own controls.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -87,4 +89,30 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShowcaseState) {
     components::panel_title(ui, "Messages");
     components::warning_text(ui, "This needs attention but nothing failed.");
     components::error_text(ui, "This failed; the message says what to do next.");
+}
+
+/// The component showcase as a movable window with an explicit Close button.
+pub(crate) fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
+    let Some(mut fixture) = state.showcase.take() else {
+        return;
+    };
+    let mut close = false;
+    egui::Window::new("Component showcase")
+        .id(Id::unique("component-showcase"))
+        .collapsible(false)
+        .default_size([460.0, 640.0])
+        .default_pos([260.0, 60.0])
+        .max_height((ctx.content_rect().height() - 80.0).max(200.0))
+        .show(ctx, |ui| {
+            if components::action_button(ui, "Close showcase", None, Some("Escape")).clicked() {
+                close = true;
+            }
+            ui.separator();
+            ScrollArea::vertical().show(ui, |ui| show(ui, &mut fixture));
+        });
+    state.showcase = Some(fixture);
+    if close {
+        // Closing goes through the coordinator like every other change.
+        state.queue(UiIntent::CloseShowcase);
+    }
 }
