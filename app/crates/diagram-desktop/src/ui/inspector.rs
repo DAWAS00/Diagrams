@@ -123,6 +123,8 @@ pub enum DraftKey {
     ClassName(ElementId),
     /// A field of an association.
     Relation(RelationId, RelationField),
+    /// The name of the class being placed with the Class tool.
+    NewClassName,
 }
 
 /// What happened to a draft field this frame.

@@ -2,10 +2,14 @@
 
 use eframe::egui::{self, Align, Layout, ThemePreference};
 
+use super::class_tool::Tool;
 use super::components;
 use super::intents::UiIntent;
 use super::theme::TextRole;
 use crate::shell::ShellState;
+
+/// What to do next while the Class tool is active.
+pub const CLASS_TOOL_HINT: &str = "Class tool: click the canvas, or press Enter on it, to place a class. Escape returns to Select.";
 
 /// Status bar. `in_workspace` adds the selection, which entry screens do not have.
 pub(crate) fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace: bool) {
@@ -31,6 +35,10 @@ pub(crate) fn status_bar(ui: &mut egui::Ui, state: &mut ShellState, in_workspace
                 ui.separator();
                 let selection = state.selection_summary();
                 components::truncated_text(ui, &selection);
+                if state.active_tool() == Tool::Class {
+                    ui.separator();
+                    components::truncated_text(ui, CLASS_TOOL_HINT).on_hover_text(CLASS_TOOL_HINT);
+                }
                 if let Some(notice) = state.notice() {
                     ui.separator();
                     components::truncated_text(ui, notice).on_hover_text(notice);

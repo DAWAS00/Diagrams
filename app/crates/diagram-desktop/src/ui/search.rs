@@ -64,7 +64,8 @@ pub(crate) fn command_palette(ctx: &egui::Context, state: &mut ShellState) {
         if results.is_empty() {
             ui.label("No commands or objects match.");
         }
-        ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
+        let area = ScrollArea::vertical().max_height(280.0);
+        components::clipping_scroll(ui, area, "Search results", |ui| {
             for (index, entry) in results.iter().copied().enumerate() {
                 let availability = entry_availability(entry);
                 let mut row = Button::selectable(

@@ -98,7 +98,7 @@ pub fn contract(id: CommandId) -> ActionContract {
             "Makes Select the active tool",
             Editor,
             NotRecorded,
-            "visible_buttons_should_match_catalog_availability",
+            "escape_should_return_the_class_tool_to_select_and_keep_the_selection",
         ),
         CommandId::PanTool => c(
             "Canvas scrolling and zoom (UI-07)",
@@ -108,11 +108,11 @@ pub fn contract(id: CommandId) -> ActionContract {
             "visible_buttons_should_match_catalog_availability",
         ),
         CommandId::AddClass => c(
-            "The project model (M1)",
-            "Creates a class and its view on the current diagram",
-            ProjectModel,
-            OneStep,
-            "visible_buttons_should_match_catalog_availability",
+            "A diagram is open",
+            "Makes Class the active tool; a click on the canvas then places and names a new class as one undo step",
+            Editor,
+            NoProjectChange,
+            "clicking_the_canvas_should_place_and_name_a_class_in_one_step",
         ),
         CommandId::Connect => c(
             "The project model (M1)",

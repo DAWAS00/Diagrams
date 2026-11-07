@@ -41,12 +41,13 @@ fn catalog_should_list_each_command_once_in_id_order() {
 
 #[test]
 fn every_disabled_command_should_state_a_reason() {
-    for bits in 0..16_u8 {
+    for bits in 0..32_u8 {
         let context = CommandContext {
             has_selection: bits & 1 != 0,
             has_project: bits & 2 != 0,
             can_undo: bits & 4 != 0,
             can_redo: bits & 8 != 0,
+            has_diagram: bits & 16 != 0,
         };
         for id in CommandId::ALL {
             if let Availability::Disabled(reason) = commands::availability(id, context) {
@@ -157,7 +158,8 @@ fn visible_buttons_should_match_catalog_availability() {
         .into_iter()
         .flat_map(commands::placed);
     for spec in buttons {
-        let enabled = commands::availability(spec.id, CommandContext::default()).is_enabled();
+        let context = harness.state().command_context();
+        let enabled = commands::availability(spec.id, context).is_enabled();
         // A command may appear in several places (New diagram: tab row and
         // project panel); every copy must agree with the catalog.
         let mut copies = 0;
@@ -411,7 +413,7 @@ fn queued_unavailable_commands_should_do_nothing() {
     for id in [
         CommandId::Save,
         CommandId::Undo,
-        CommandId::AddClass,
+        CommandId::Connect,
         CommandId::NewDiagram,
     ] {
         harness.state_mut().queue(UiIntent::run(id));

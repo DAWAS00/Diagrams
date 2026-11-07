@@ -33,12 +33,13 @@ This is slice progress (which pull requests are merged), not task status; task s
 | S3 `feat/p1-session-binding` | Merged (PR #14) | [p1-session-binding](../ui/p1-session-binding/) |
 | S10 `feat/p5-storage-core` | Merged (PR #15); Codex approved in round 5 | `diagram-storage/tests/` |
 | B1 `fix/canvas-dark-ink` | Merged (PR #16) | [B1-CANVAS-DARK-INK.md](../ui/B1-CANVAS-DARK-INK.md) |
-| S4 `feat/p2-member-core` | Built on its branch: `member_text` parser and edit line, `AddMember` and `UpdateMember`; in review | [SLICE-p2-member-core.md](SLICE-p2-member-core.md) |
-| S5, S6, S7, S8, S9, S11, S12, S13 | Not started, in that order | — |
+| S4 `feat/p2-member-core` | Merged (PR #17): `member_text` parser and edit line, `AddMember` and `UpdateMember` | [SLICE-p2-member-core.md](SLICE-p2-member-core.md) |
+| S5 `feat/p2-class-tool` | Built on its branch: the Class tool places and names a class in one step; the duplicate-name dialog (D2); in review. R2-04 stays in progress (its members half is S6). | [SLICE-p2-class-tool.md](SLICE-p2-class-tool.md), [S5-CLASS-TOOL.md](../ui/S5-CLASS-TOOL.md) |
+| S6, S7, S8, S9, S11, S12, S13 | Not started, in that order | — |
 
 **What a user can do today** (on `main`): start a blank or sample project; select classes and relationships; rename a class; edit role names and multiplicities, with errors in words; Undo and Redo (Ctrl+Z, Ctrl+Shift+Z) with a status sentence; open several diagram tabs; search commands and objects (Ctrl+K); close a project, with a prompt when changes would be lost; and switch between light and dark.
 
-**Still to build before v0.1:** creating classes on the canvas (S5), editing members (S4, S6), dragging and connecting (S7, S8), reusing and deleting across diagrams (S9), Save, Open, recent projects and recovery in the window (S11, which uses S10), pan, zoom and SVG export (S12), and the keyboard journey with text, profile and distribution evidence (S13). Then the final hand test and `acceptance-2026-11-06.md`.
+**Still to build before v0.1:** editing members in the window (S6), dragging and connecting (S7, S8), reusing and deleting across diagrams (S9), Save, Open, recent projects and recovery in the window (S11, which uses S10), pan, zoom and SVG export (S12), and the keyboard journey with text, profile and distribution evidence (S13). Then the final hand test and `acceptance-2026-11-06.md`.
 
 ## Gates no slice closes
 

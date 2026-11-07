@@ -1,6 +1,7 @@
 //! Building blocks of the native UI, grown task by task from plan-rust-diagram-editor/UI-DESIGN-AND-INTEGRATION.md.
 
 pub(crate) mod canvas;
+pub mod class_tool;
 pub mod commands;
 pub mod components;
 pub mod contracts;

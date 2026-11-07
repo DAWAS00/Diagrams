@@ -218,3 +218,27 @@ pub fn state_with_generalization() -> ShellState {
     }
     state_with(session)
 }
+
+/// Clicks the canvas with the pointer at (`x`, `y`) points from the canvas
+/// node's top-left corner. The pointer stays there afterwards.
+pub fn click_canvas_at(harness: &mut Harness<'static, ShellState>, x: f32, y: f32) {
+    use egui_kittest::kittest::Queryable;
+    let pos = harness.get_by_label("Diagram canvas").rect().min + Vec2::new(x, y);
+    harness.hover_at(pos);
+    for pressed in [true, false] {
+        harness.event(eframe::egui::Event::PointerButton {
+            pos,
+            button: eframe::egui::PointerButton::Primary,
+            pressed,
+            modifiers: eframe::egui::Modifiers::NONE,
+        });
+    }
+    harness.run();
+}
+
+/// Chooses the Class tool from the tool row.
+pub fn choose_class_tool(harness: &mut Harness<'static, ShellState>) {
+    use egui_kittest::kittest::Queryable;
+    harness.get_by_label("Class").click();
+    harness.run();
+}

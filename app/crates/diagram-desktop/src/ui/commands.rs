@@ -360,6 +360,8 @@ pub struct CommandContext {
     pub can_undo: bool,
     /// The history has an action to redo.
     pub can_redo: bool,
+    /// A diagram is shown on the canvas.
+    pub has_diagram: bool,
 }
 
 /// Whether `id` can run in `context`, with the reason when it cannot.
@@ -377,8 +379,9 @@ pub fn availability(id: CommandId, context: CommandContext) -> Availability {
         CommandId::PanTool => {
             Disabled("Not available yet: panning arrives with canvas scrolling and zoom.")
         }
+        CommandId::AddClass if context.has_diagram => Enabled,
         CommandId::AddClass => {
-            Disabled("Not available yet: adding classes needs the project model.")
+            Disabled("Open a diagram first: a new class is placed on the diagram you are viewing.")
         }
         CommandId::Connect => Disabled("Not available yet: relationships need the project model."),
         CommandId::AddNote => Disabled("Not available yet: notes need the project model."),
