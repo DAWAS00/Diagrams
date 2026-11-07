@@ -7,7 +7,8 @@ use std::sync::Arc;
 
 use eframe::egui::text::{LayoutJob, TextWrapping};
 use eframe::egui::{
-    self, Button, Color32, FontId, Galley, Label, Response, RichText, TextEdit, Vec2,
+    self, Button, Color32, FontId, Galley, Label, Response, RichText, Role, ScrollArea, TextEdit,
+    Vec2,
 };
 
 use super::theme::{CONTROL_HEIGHT, ROW_HEIGHT, TextRole};
@@ -148,4 +149,34 @@ pub fn one_line_galley(
     let mut job = LayoutJob::simple_singleline(text.to_owned(), font, color);
     job.wrap = TextWrapping::truncate_at_width(max_width);
     painter.layout_job(job)
+}
+
+/// Wraps panel contents in a vertical scroll area that assistive technology
+/// (and the usability audit) sees as a named, clipping scroll region.
+pub(crate) fn scrolling(
+    ui: &mut egui::Ui,
+    id: &str,
+    label: &str,
+    add_contents: impl FnOnce(&mut egui::Ui),
+) {
+    ui.scope(|ui| {
+        let region = ui.unique_id();
+        let output = ScrollArea::vertical()
+            .id_salt(id)
+            .auto_shrink([false, false])
+            .show(ui, add_contents);
+        // Same point coordinates egui uses for widget bounds.
+        let visible = output.inner_rect;
+        ui.ctx().accesskit_node_builder(region, |node| {
+            node.set_role(Role::ScrollView);
+            node.set_label(label);
+            node.set_clips_children();
+            node.set_bounds(egui::accesskit::Rect {
+                x0: visible.min.x.into(),
+                y0: visible.min.y.into(),
+                x1: visible.max.x.into(),
+                y1: visible.max.y.into(),
+            });
+        });
+    });
 }

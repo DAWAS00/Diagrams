@@ -11,10 +11,7 @@ use std::sync::LazyLock;
 use diagram_core::command::Command;
 use diagram_core::ids::{DiagramId, ElementId, RelationId};
 use diagram_core::model::Document;
-use eframe::egui::{
-    self, Area, Frame, Id, Key, Modifiers, Order, Pos2, Rect, Role, ScrollArea, Stroke,
-    ThemePreference, Vec2,
-};
+use eframe::egui::{self, Frame, Id, ScrollArea, ThemePreference};
 
 use crate::session::ProjectSession;
 pub use crate::session::{FIRST_DIAGRAM, SAMPLE_PROJECT};
@@ -22,11 +19,13 @@ use crate::ui::canvas::canvas;
 use crate::ui::commands::{self, CommandContext, CommandId};
 use crate::ui::components;
 use crate::ui::dialogs::{self, DialogAnswer, DialogKind, DialogState};
+use crate::ui::drawer::drawer;
 use crate::ui::entry::entry_screens;
 use crate::ui::header::header;
 use crate::ui::inspector::{self as rules, DraftKey};
 use crate::ui::inspector_view::inspector;
 use crate::ui::intents::UiIntent;
+use crate::ui::keys::route_keys;
 use crate::ui::navigator::OpenTab;
 use crate::ui::notation::NotationId;
 use crate::ui::palette::PaletteState;
@@ -36,7 +35,7 @@ use crate::ui::search::command_palette;
 use crate::ui::showcase::{self, ShowcaseState};
 use crate::ui::status::status_bar;
 use crate::ui::tabs::tab_row;
-use crate::ui::theme::{self, Palette};
+use crate::ui::theme;
 use crate::ui::tool_row::tool_row;
 use crate::ui::welcome::{self, EntryState};
 use crate::ui::workspace::{self, Drawer, INSPECTOR, LayoutMode, NAVIGATOR, PanelPreferences};
@@ -862,30 +861,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
         state.drawer_return = None;
     }
 
-    // Shortcuts use the text focus of the previous frame: egui drops focus in
-    // the frame Escape is pressed, and Escape must first leave the field.
-    // An open drawer takes Escape before the canvas selection does.
-    let text_had_focus = state.text_had_focus;
-    if state.dialog.is_none()
-        && state.showcase.is_some()
-        && !text_had_focus
-        && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
-    {
-        state.queue(UiIntent::CloseShowcase);
-    }
-    if state.dialog.is_none()
-        && state.drawer.is_some()
-        && !text_had_focus
-        && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
-    {
-        state.queue(UiIntent::CloseDrawer);
-    }
-    // A dialog owns the keyboard: shortcuts do nothing behind it.
-    if state.dialog.is_none()
-        && let Some(id) = ui.input_mut(|input| commands::take_shortcut(input, text_had_focus))
-    {
-        state.queue(UiIntent::run(id));
-    }
+    route_keys(ui, state);
 
     let bar = Frame::side_top_panel(ui.style()).fill(palette.workspace);
     egui::Panel::top("header")
@@ -902,7 +878,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
                 .default_size(NAVIGATOR.default)
                 .size_range(NAVIGATOR.min..=NAVIGATOR.max)
                 .show(ui, |ui| {
-                    scrolling(ui, "navigator", "Project panel contents", |ui| {
+                    components::scrolling(ui, "navigator", "Project panel contents", |ui| {
                         sidebar(ui, state)
                     })
                 });
@@ -913,7 +889,7 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
                 .default_size(INSPECTOR.default)
                 .size_range(INSPECTOR.min..=INSPECTOR.max)
                 .show(ui, |ui| {
-                    scrolling(ui, "inspector", "Inspector contents", |ui| {
+                    components::scrolling(ui, "inspector", "Inspector contents", |ui| {
                         inspector(ui, state)
                     })
                 });
@@ -945,79 +921,6 @@ pub fn show(ui: &mut egui::Ui, state: &mut ShellState) {
     // Only a focused text field keeps editing keys; a focused button must not
     // swallow Escape (egui_wants_keyboard_input is true for any focus).
     state.text_had_focus = ui.ctx().text_edit_focused();
-}
-
-/// Wraps panel contents in a vertical scroll area that assistive technology
-/// (and the usability audit) sees as a named, clipping scroll region.
-fn scrolling(ui: &mut egui::Ui, id: &str, label: &str, add_contents: impl FnOnce(&mut egui::Ui)) {
-    ui.scope(|ui| {
-        let region = ui.unique_id();
-        let output = ScrollArea::vertical()
-            .id_salt(id)
-            .auto_shrink([false, false])
-            .show(ui, add_contents);
-        // Same point coordinates egui uses for widget bounds.
-        let visible = output.inner_rect;
-        ui.ctx().accesskit_node_builder(region, |node| {
-            node.set_role(Role::ScrollView);
-            node.set_label(label);
-            node.set_clips_children();
-            node.set_bounds(egui::accesskit::Rect {
-                x0: visible.min.x.into(),
-                y0: visible.min.y.into(),
-                x1: visible.max.x.into(),
-                y1: visible.max.y.into(),
-            });
-        });
-    });
-}
-
-/// The open drawer, over the canvas only, never over the header, rows or
-/// status bar.
-fn drawer(ctx: &egui::Context, state: &mut ShellState, canvas_rect: Rect, palette: &Palette) {
-    let Some(which) = state.drawer else {
-        return;
-    };
-    let width = which.width(canvas_rect.width());
-    let rect = match which {
-        Drawer::Navigator => {
-            Rect::from_min_size(canvas_rect.min, Vec2::new(width, canvas_rect.height()))
-        }
-        Drawer::Inspector => Rect::from_min_max(
-            Pos2::new(canvas_rect.max.x - width, canvas_rect.min.y),
-            canvas_rect.max,
-        ),
-    };
-    let close_label = match which {
-        Drawer::Navigator => "Close project panel",
-        Drawer::Inspector => "Close inspector",
-    };
-    let frame = Frame::new()
-        .fill(palette.panel)
-        .stroke(Stroke::new(1.0, palette.separator))
-        .inner_margin(theme::SPACING);
-    let inner_size = rect.size() - Vec2::splat(2.0 * (theme::SPACING + 1.0));
-    let mut close = false;
-    Area::new(Id::unique("drawer"))
-        .order(Order::Foreground)
-        .fixed_pos(rect.min)
-        .show(ctx, |ui| {
-            frame.show(ui, |ui| {
-                ui.set_min_size(inner_size);
-                ui.set_max_size(inner_size);
-                if components::action_button(ui, close_label, None, Some("Escape")).clicked() {
-                    close = true;
-                }
-                ui.separator();
-                scrolling(ui, "drawer", "Drawer contents", |ui| match which {
-                    Drawer::Navigator => sidebar(ui, state),
-                    Drawer::Inspector => inspector(ui, state),
-                });
-            });
-        });
-    if close {
-        state.queue(UiIntent::CloseDrawer);
-    }
 }
 
 /// The open dialog, if any. Its answer is queued as an intent.
