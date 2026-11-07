@@ -11,7 +11,7 @@ use std::sync::LazyLock;
 use diagram_core::command::Command;
 use diagram_core::ids::{DiagramId, ElementId, RelationId};
 use diagram_core::model::Document;
-use eframe::egui::{self, Frame, Id, ScrollArea, ThemePreference};
+use eframe::egui::{self, Frame, Id, ThemePreference};
 
 use crate::session::ProjectSession;
 pub use crate::session::{FIRST_DIAGRAM, SAMPLE_PROJECT};
@@ -32,7 +32,7 @@ use crate::ui::palette::PaletteState;
 use crate::ui::project_panel::sidebar;
 use crate::ui::read_model;
 use crate::ui::search::command_palette;
-use crate::ui::showcase::{self, ShowcaseState};
+use crate::ui::showcase::{ShowcaseState, showcase_window};
 use crate::ui::status::status_bar;
 use crate::ui::tabs::tab_row;
 use crate::ui::theme;
@@ -798,32 +798,6 @@ fn close_drawer(state: &mut ShellState) {
 fn close_showcase(state: &mut ShellState) {
     state.showcase = None;
     state.pending_focus = state.showcase_return.take();
-}
-
-/// The component showcase as a movable window with an explicit Close button.
-fn showcase_window(ctx: &egui::Context, state: &mut ShellState) {
-    let Some(mut fixture) = state.showcase.take() else {
-        return;
-    };
-    let mut close = false;
-    egui::Window::new("Component showcase")
-        .id(Id::unique("component-showcase"))
-        .collapsible(false)
-        .default_size([460.0, 640.0])
-        .default_pos([260.0, 60.0])
-        .max_height((ctx.content_rect().height() - 80.0).max(200.0))
-        .show(ctx, |ui| {
-            if components::action_button(ui, "Close showcase", None, Some("Escape")).clicked() {
-                close = true;
-            }
-            ui.separator();
-            ScrollArea::vertical().show(ui, |ui| showcase::show(ui, &mut fixture));
-        });
-    state.showcase = Some(fixture);
-    if close {
-        // Closing goes through the coordinator like every other change.
-        state.queue(UiIntent::CloseShowcase);
-    }
 }
 
 /// Draws the complete shell into `ui` and applies the user's interactions to `state`.
